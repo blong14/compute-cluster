@@ -8,3 +8,8 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 6. rcup
 7. cd Developer
 8. git clone compute-cluster
+
+
+
+kubectl proxy
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/.
