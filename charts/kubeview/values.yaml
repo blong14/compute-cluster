@@ -1,0 +1,17 @@
+#
+# If true install in single namespace mode
+#
+limitNamespace: false
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: kubeview.cluster
+      paths:
+        - /
+  # tls:
+  #  - secretName: my-cert
+  #    hosts:
+  #      - kubeview.example.net
