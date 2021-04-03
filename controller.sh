@@ -18,4 +18,5 @@ cp charts/repositories.lock ~/.config/helm
 # configure helm and kubectl
 sudo cp /etc/rancher/k3s/k3s.yaml etc/rancher/k3s/k3s.yaml
 sudo chown pi:pi etc/rancher/k3s/k3s.yaml
-export KUBECONFIG=~/Developer/compute-cluster/etc/rancher/k3s/k3s.yaml
+cp etc/.bash_profile ~/.bash_profile
+source ~/.bash_profile
