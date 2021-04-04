@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# sudo apt update && apt install -y openssh-server net-tools  
 
 # install k3s
 curl -sfL https://get.k3s.io | sh -
