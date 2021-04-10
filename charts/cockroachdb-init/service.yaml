@@ -84,17 +84,15 @@ spec:
         app: cockroachdb
     spec:
       affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - cockroachdb
-              topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: k3s.io/hostname
+                operator: In
+                values: 
+                - worker-01
+                - worker-02
       containers:
       - name: cockroachdb
         image: marceloglezer/cockroach:v20.1.7
@@ -112,8 +110,8 @@ spec:
             # See:
             #   https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#static-policy
             #   https://github.com/kubernetes/kubernetes/issues/51135
-              # cpu: "16"
-              memory: "1Gi" 
+            # cpu: "16"
+            memory: "1Gi" 
         ports:
         - containerPort: 26257
           name: grpc
@@ -160,7 +158,7 @@ spec:
             --insecure
             --advertise-host $(hostname -f)
             --http-addr 0.0.0.0
-            --join cockroachdb-0.cockroachdb,cockroachdb-1.cockroachdb,cockroachdb-2.cockroachdb
+            --join cockroachdb-0.cockroachdb,cockroachdb-1.cockroachdb
             --cache $(expr $MEMORY_LIMIT_MIB / 4)MiB
             --max-sql-memory $(expr $MEMORY_LIMIT_MIB / 4)MiB
       # No pre-stop hook is required, a SIGTERM plus some time is all that's

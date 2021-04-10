@@ -7,6 +7,15 @@ metadata:
 spec:
   template:
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: k3s.io/hostname
+                operator: In
+                values:
+                - worker-01
       containers:
       - name: cluster-init
         image: marceloglezer/cockroach:v20.1.7
@@ -15,5 +24,5 @@ spec:
           - "/cockroach/cockroach"
           - "init"
           - "--insecure"
-          - "--host=cockroachdb-0.cockroachdb"
+          - "--host=cockroachdb-1.cockroachdb.default.svc.cluster.local"
       restartPolicy: OnFailure
