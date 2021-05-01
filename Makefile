@@ -15,7 +15,7 @@ clean:
 	@rm -rf .deps/* || true
 
 .PHONY: build
-build: .deps/go
+build:
 	GOBIN=$(GOBIN) GOOS=linux go install cluster
 
 .PHONE: test-and-lint
@@ -23,10 +23,10 @@ build: .deps/go
 test-and-lint: test lint
 
 .PHONY: test
-test:
+test: .deps/go
 	go test -v -cover -race ./...
 
-cover:
+cover: .deps/go
 	@rm -rf cover-all.out
 	$(foreach pkg, $(PACKAGES), $(MAKE) cover-pkg PKG=$(pkg) || true;)
 	@grep mode: cover.out > coverage.out
@@ -34,11 +34,11 @@ cover:
 	go tool cover -html=coverage.out -o cover.html
 	@rm -rf cover.out cover-all.out coverage.out
 
-cover-pkg:
+cover-pkg: .deps/go
 	go test -coverprofile cover.out $(PKG)
 	@grep -v mode: cover.out >> cover-all.out
 
 .PHONY: lint
-lint:
+lint: .deps/go
 	go fmt ./...
 	go vet ./...
