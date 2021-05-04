@@ -11,3 +11,9 @@ var initDBCmd = &cobra.Command{
 	Short: "Initialize a cockroachdb cluster",
 	Run:   beam.InitDB,
 }
+
+var pingDBCmd = &cobra.Command{
+	Use:   "pingdb",
+	Short: "Ping a cockroachdb cluster",
+	Run:   beam.PingDB,
+}

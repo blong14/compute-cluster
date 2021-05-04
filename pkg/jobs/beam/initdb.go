@@ -5,14 +5,8 @@ import (
 	"strings"
 
 	"github.com/apache/beam/sdks/go/pkg/beam"
-	"github.com/apache/beam/sdks/go/pkg/beam/io/textio"
 	"github.com/apache/beam/sdks/go/pkg/beam/transforms/stats"
-	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
-
-	_ "github.com/apache/beam/sdks/go/pkg/beam/core/runtime/exec/optimized"
-	_ "github.com/apache/beam/sdks/go/pkg/beam/io/filesystem/local"
-	_ "github.com/apache/beam/sdks/go/pkg/beam/runners/direct"
 )
 
 func init() {
@@ -40,22 +34,4 @@ func Extract(s beam.Scope, lines beam.PCollection) beam.PCollection {
 	col := beam.ParDo(s, extractFn, lines)
 
 	return stats.Count(s, col)
-}
-
-func InitDB(_ *cobra.Command, _ []string) {
-	beam.Init()
-
-	ctx := context.Background()
-
-	p := beam.NewPipeline()
-	s := p.Root()
-
-	lines := textio.Read(s, "track_points.csv")
-	sts := Extract(s, lines)
-
-	if _, err := beam.Run(ctx, "direct", p); err != nil {
-		klog.Fatalf("Failed to execute job: %v", err)
-	}
-
-	klog.Info(sts)
 }
