@@ -16,5 +16,3 @@ COPY --from=go-build /go/src/bin/cluster /go/bin/cluster
 
 CMD /go/bin/cluster
 
-
-
