@@ -3,8 +3,7 @@
 
 ### Nodes
 
-
-
+![IMG_0164](https://user-images.githubusercontent.com/3110701/121784141-42172e80-cb80-11eb-94a8-372053343e88.jpg)
 
 
 ### Local controller setup (probably missing steps and not correct order)
