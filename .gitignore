@@ -6,6 +6,7 @@
 *.dylib
 *.idea
 .deps/*
+bin/cluster
 
 # Random data
 data/*
