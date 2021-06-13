@@ -10,7 +10,7 @@ func TestPing(t *testing.T) {
 	_, s := beam.NewPipelineWithRoot()
 
 	// when
-	actual := Ping(s)
+	actual := Ping(s, "host=__test__ port=: user=admin dbname=postgres sslmode=disable")
 
 	// then
 	if !actual.IsValid() {

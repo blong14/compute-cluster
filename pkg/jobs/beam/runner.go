@@ -2,6 +2,7 @@ package beam
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/apache/beam/sdks/go/pkg/beam"
@@ -32,19 +33,25 @@ func InitDB(_ *cobra.Command, _ []string) {
 	klog.Info(sts)
 }
 
-func PingDB(_ *cobra.Command, _ []string) {
+func PingDB(cmd *cobra.Command, args []string) {
 	beam.Init()
+
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s dbname=%s sslmode=disable",
+		cmd.Flag("host").Value.String(),
+		cmd.Flag("port").Value.String(),
+		cmd.Flag("user").Value.String(),
+		args[0],
+	)
+
+	p, s := beam.NewPipelineWithRoot()
+
+	Ping(s, dsn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 9*time.Second)
 	defer cancel()
 
-	p, s := beam.NewPipelineWithRoot()
-
-	sts := Ping(s)
-
 	if _, err := beam.Run(ctx, "direct", p); err != nil {
 		klog.Fatal(err)
 	}
-
-	klog.Info(sts)
 }

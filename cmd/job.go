@@ -15,5 +15,12 @@ var initDBCmd = &cobra.Command{
 var pingDBCmd = &cobra.Command{
 	Use:   "pingdb",
 	Short: "Ping a cockroachdb cluster",
+	Args:  cobra.MinimumNArgs(1),
 	Run:   beam.PingDB,
 }
+
+var (
+	pingHost string
+	pingPort int
+	pingUser string
+)
