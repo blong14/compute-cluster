@@ -5,21 +5,31 @@ metadata:
   labels:
     {{- include "ping-db.labels" . | nindent 4 }}
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "*/1 * * * *"
   successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: k3s.io/hostname
+                    operator: In
+                    values:
+                    - worker-01
           containers:
           - name: ping-db
-            image: blong14/cluster:latest
-            imagePullPolicy: Always
+            image: ping:latest
+            imagePullPolicy: IfNotPresent
             command:
             - "/go/bin/cluster"
             - "run"
             - "pingdb"
-            - "--host=cockroachdb-public"
+            - "--host=cockroachdb-1.cockroachdb.default.svc.cluster.local"
             - "--port=26257"
             - "--user=admin"
             - "postgres"

@@ -16,7 +16,7 @@ clean:
 
 .PHONY: build
 build:
-	GOBIN=$(GOBIN) GOOS=linux go install cluster
+	GOOS=linux GOARCH=arm64 go install cluster
 
 .PHONE: test-and-lint
 
