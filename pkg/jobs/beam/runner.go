@@ -48,7 +48,7 @@ func PingDB(cmd *cobra.Command, args []string) {
 
 	Ping(s, dsn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 9*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	if _, err := beam.Run(ctx, "direct", p); err != nil {
