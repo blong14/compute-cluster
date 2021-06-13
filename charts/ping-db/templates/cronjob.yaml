@@ -23,8 +23,8 @@ spec:
                     - worker-01
           containers:
           - name: ping-db
-            image: ping:latest
-            imagePullPolicy: IfNotPresent
+            image: blong14/cluster:latest
+            imagePullPolicy: Always
             command:
             - "/go/bin/cluster"
             - "run"

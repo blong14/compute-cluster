@@ -10,7 +10,7 @@ RUN make build
 
 FROM debian:buster-slim
 
-RUN apt update && apt install -y ca-certificates
+RUN apt update && apt install -y ca-certificates postgresql-client
 
 COPY --from=go-build /go/bin/linux_arm64/cluster /go/bin/cluster
 
