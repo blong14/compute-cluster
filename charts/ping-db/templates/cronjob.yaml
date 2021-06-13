@@ -14,12 +14,12 @@ spec:
           containers:
           - name: ping-db
             image: blong14/cluster:latest
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
             command:
             - "/go/bin/cluster"
             - "run"
             - "pingdb"
-            - "--host=cockroachdb-0"
+            - "--host=cockroachdb-public"
             - "--port=26257"
             - "--user=admin"
             - "postgres"
