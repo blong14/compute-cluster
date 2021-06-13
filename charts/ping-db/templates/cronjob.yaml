@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{- include "ping-db.name" . | nindent 4 }}
+  labels:
+    {{- include "ping-db.labels" . | nindent 4 }}
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ping-db
+            image: blong14/cluster:latest
+            imagePullPolicy: IfNotPresent
+            command:
+            - "/go/bin/cluster"
+            - "run"
+            - "pingdb"
+            - "--host=cockroachdb-0"
+            - "--port=26257"
+            - "--user=admin"
+            - "postgres"
+          restartPolicy: OnFailure
