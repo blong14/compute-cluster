@@ -38,6 +38,8 @@ func nowFn(ctx context.Context, r result, emit func(time.Time)) {
 func Ping(s beam.Scope, dsn string) beam.PCollection {
 	s.Scope("ping")
 
+	klog.Infof("pinging %s", dsn)
+
 	result := databaseio.Query(
 		s,
 		"postgres",
