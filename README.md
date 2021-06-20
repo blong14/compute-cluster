@@ -32,6 +32,9 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 ### Services
 
 1. kubectl dashboard: `kubectl proxy`
-2. cockroachdb dashboard: `kubectl port-forward svc/cockroachdb-public 8080`
-3. grafana: `kubectl port-forward svc/prometheus-grafana 3000:80`
+2. cockroachdb dashboard: `./cluster run proxy -r "svc/cockroachdb-public" -p "8080"`
+3. grafana proxy: `./cluster run proxy -p "3000:80" -r "svc/prometheus-grafana"`
 
+### Tools
+1. cockroach db client connection: `./cluster run connect -d postgres`
+2. cockroachdb client proxy: `./cluster run proxy -p "9000:26257" -r "pod/cockroachdb-0"`

@@ -28,6 +28,7 @@ func nowFn(ctx context.Context, r result, emit func(time.Time)) {
 		return
 	default:
 		if r.Now.Valid {
+			klog.Info(r.Now.Time.String())
 			emit(r.Now.Time)
 		}
 	}

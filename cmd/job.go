@@ -25,4 +25,7 @@ var (
 	pingUser string
 
 	connectDB string
+
+	proxyResource string
+	proxyPort string
 )

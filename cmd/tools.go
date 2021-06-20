@@ -3,17 +3,18 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
+	"cluster/pkg/tools"
 	"cluster/pkg/tools/database"
 )
 
-var proxyDB = &cobra.Command{
-	Use: "proxydb",
-	Short: "create proxy from localhost to cluster database",
-	Run: database.ProxyDB,
+var proxy = &cobra.Command{
+	Use: "proxy",
+	Short: "Create proxy from localhost to cluster",
+	Run: tools.Proxy,
 }
 
 var clientDB = &cobra.Command{
 	Use: "connect",
-	Short: "create sql connection to cluster database",
+	Short: "Create sql connection to cluster database",
 	Run: database.Connect,
 }

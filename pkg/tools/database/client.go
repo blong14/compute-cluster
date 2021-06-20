@@ -9,6 +9,7 @@ import (
 )
 
 func Connect(cmd *cobra.Command, _ []string) {
+	// TODO: add more flags to remove the hard coding
 	c := exec.Command(
 		"kubectl",
 		"run",

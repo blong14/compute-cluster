@@ -14,6 +14,9 @@ func init() {
 
 	clientDB.Flags().StringVarP(&connectDB, "database", "d", "postgres", "database")
 
+	proxy.Flags().StringVarP(&proxyResource, "resource", "r", "svc/cockroachdb-public", "proxy cluster resource")
+	proxy.Flags().StringVarP(&proxyPort, "port", "p", "8080", "port to proxy cluster")
+
 	rootCmd.AddCommand(runCmd)
-	runCmd.AddCommand(initDBCmd, pingDBCmd, proxyDB, clientDB)
+	runCmd.AddCommand(initDBCmd, pingDBCmd, proxy, clientDB)
 }
