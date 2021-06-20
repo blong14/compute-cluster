@@ -23,4 +23,6 @@ var (
 	pingHost string
 	pingPort int
 	pingUser string
+
+	connectDB string
 )
