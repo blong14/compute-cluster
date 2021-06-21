@@ -144,7 +144,7 @@ func Rides(cmd *cobra.Command, args []string) {
 		klog.Infof("total riders %d", i)
 	}, stats.CountElms(s, beam.AddFixedKey(s, riders)))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	if _, err := beam.Run(ctx, cmd.Flag("runner").Value.String(), p); err != nil {
