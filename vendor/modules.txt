@@ -16,6 +16,10 @@ github.com/apache/beam/sdks/go/pkg/beam/core/runtime/genx
 github.com/apache/beam/sdks/go/pkg/beam/core/runtime/graphx
 github.com/apache/beam/sdks/go/pkg/beam/core/runtime/graphx/schema
 github.com/apache/beam/sdks/go/pkg/beam/core/runtime/graphx/v1
+github.com/apache/beam/sdks/go/pkg/beam/core/runtime/harness
+github.com/apache/beam/sdks/go/pkg/beam/core/runtime/harness/init
+github.com/apache/beam/sdks/go/pkg/beam/core/runtime/harness/session
+github.com/apache/beam/sdks/go/pkg/beam/core/runtime/metricsx
 github.com/apache/beam/sdks/go/pkg/beam/core/runtime/pipelinex
 github.com/apache/beam/sdks/go/pkg/beam/core/runtime/xlangx
 github.com/apache/beam/sdks/go/pkg/beam/core/sdf
@@ -31,14 +35,17 @@ github.com/apache/beam/sdks/go/pkg/beam/internal/errors
 github.com/apache/beam/sdks/go/pkg/beam/io/databaseio
 github.com/apache/beam/sdks/go/pkg/beam/io/filesystem
 github.com/apache/beam/sdks/go/pkg/beam/io/filesystem/local
-github.com/apache/beam/sdks/go/pkg/beam/io/rtrackers/offsetrange
-github.com/apache/beam/sdks/go/pkg/beam/io/textio
 github.com/apache/beam/sdks/go/pkg/beam/log
 github.com/apache/beam/sdks/go/pkg/beam/model/fnexecution_v1
 github.com/apache/beam/sdks/go/pkg/beam/model/jobmanagement_v1
 github.com/apache/beam/sdks/go/pkg/beam/model/pipeline_v1
 github.com/apache/beam/sdks/go/pkg/beam/options/jobopts
+github.com/apache/beam/sdks/go/pkg/beam/provision
 github.com/apache/beam/sdks/go/pkg/beam/runners/direct
+github.com/apache/beam/sdks/go/pkg/beam/runners/flink
+github.com/apache/beam/sdks/go/pkg/beam/runners/universal
+github.com/apache/beam/sdks/go/pkg/beam/runners/universal/extworker
+github.com/apache/beam/sdks/go/pkg/beam/runners/universal/runnerlib
 github.com/apache/beam/sdks/go/pkg/beam/runners/vet
 github.com/apache/beam/sdks/go/pkg/beam/transforms/stats
 github.com/apache/beam/sdks/go/pkg/beam/util/errorx
@@ -47,6 +54,7 @@ github.com/apache/beam/sdks/go/pkg/beam/util/shimx
 # github.com/go-logr/logr v0.4.0
 github.com/go-logr/logr
 # github.com/golang/protobuf v1.5.2
+github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes
@@ -69,7 +77,7 @@ github.com/lib/pq/scram
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# golang.org/x/net v0.0.0-20210610132358-84b48f89b13b
+# golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -78,7 +86,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20210611083646-a4fc73990273
+# golang.org/x/sys v0.0.0-20210616094352-59db8d763f22
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -87,7 +95,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/genproto v0.0.0-20210611144927-798beca9d670
+# google.golang.org/genproto v0.0.0-20210617175327-b9e0b3197ced
 ## explicit
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.38.0
