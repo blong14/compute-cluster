@@ -6,12 +6,6 @@ import (
 	"cluster/pkg/jobs/beam"
 )
 
-var initDBCmd = &cobra.Command{
-	Use:   "initdb",
-	Short: "Initialize a cockroachdb cluster",
-	Run:   beam.InitDB,
-}
-
 var pingDBCmd = &cobra.Command{
 	Use:   "pingdb",
 	Short: "Ping a cockroachdb cluster",
@@ -19,13 +13,22 @@ var pingDBCmd = &cobra.Command{
 	Run:   beam.PingDB,
 }
 
+var ridesScanCmd = &cobra.Command{
+	Use:   "ridesscan",
+	Short: "Scan the movr.rides table",
+	Args:  cobra.MinimumNArgs(1),
+	Run:   beam.Rides,
+}
+
 var (
-	pingHost string
-	pingPort int
-	pingUser string
+	host     string
+	port     int
+	user     string
+	runner   string
+	flinkDSN string
 
 	connectDB string
 
 	proxyResource string
-	proxyPort string
+	proxyPort     string
 )

@@ -8,13 +8,13 @@ import (
 )
 
 var proxy = &cobra.Command{
-	Use: "proxy",
+	Use:   "proxy",
 	Short: "Create proxy from localhost to cluster",
-	Run: tools.Proxy,
+	Run:   tools.Proxy,
 }
 
 var clientDB = &cobra.Command{
-	Use: "connect",
+	Use:   "connect",
 	Short: "Create sql connection to cluster database",
-	Run: database.Connect,
+	Run:   database.Connect,
 }

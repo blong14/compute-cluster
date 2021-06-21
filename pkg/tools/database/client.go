@@ -23,7 +23,7 @@ func Connect(cmd *cobra.Command, _ []string) {
 		"/cockroach/cockroach",
 		"sql",
 		"--insecure",
-		"--host=cockroachdb-1.cockroachdb.default.svc.cluster.local",
+		"--host=cockroachdb-public",
 		fmt.Sprintf("--database=%s", cmd.Flag("database").Value.String()),
 	)
 	c.Stdin = os.Stdin
