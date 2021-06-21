@@ -21,6 +21,8 @@ spec:
                     operator: In
                     values:
                     - worker-01
+                    - worker-02
+                    - worker-03
           containers:
           - name: ping-db
             image: blong14/cluster:latest
