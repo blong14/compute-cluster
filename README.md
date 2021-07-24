@@ -29,6 +29,8 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 ### Node setup
 1. `./bin/worker.sh`
 
+Also, see [Advanced Setup](https://rancher.com/docs/k3s/latest/en/advanced/)
+
 ### Services
 
 1. kubectl dashboard: `kubectl proxy`
