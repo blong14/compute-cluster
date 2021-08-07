@@ -24,6 +24,7 @@ var (
 	host     string
 	port     int
 	user     string
+	password string
 	runner   string
 	flinkDSN string
 

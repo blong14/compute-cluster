@@ -23,10 +23,11 @@ import (
 
 func PingDB(cmd *cobra.Command, args []string) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s",
 		cmd.Flag("host").Value.String(),
 		cmd.Flag("port").Value.String(),
 		cmd.Flag("user").Value.String(),
+		cmd.Flag("password").Value.String(),
 		args[0],
 	)
 

@@ -14,6 +14,7 @@ func init() {
 	pingDBCmd.Flags().StringVar(&host, "host", "127.0.0.1", "db host")
 	pingDBCmd.Flags().IntVarP(&port, "port", "p", 9000, "db port")
 	pingDBCmd.Flags().StringVarP(&user, "user", "u", "admin", "db user")
+	pingDBCmd.Flags().StringVar(&password, "password", "", "db user password")
 
 	ridesScanCmd.Flags().StringVar(&host, "host", "127.0.0.1", "db host")
 	ridesScanCmd.Flags().IntVarP(&port, "port", "p", 9000, "db port")
@@ -24,6 +25,8 @@ func init() {
 	proxy.Flags().StringVarP(&proxyResource, "resource", "r", "svc/cockroachdb-public", "proxy cluster resource")
 	proxy.Flags().StringVarP(&proxyPort, "port", "p", "8080", "port to proxy cluster")
 
+	nsLookUp.Flags().StringVar(&hostname, "host", "kubernetes.local", "lookup internet names within the cluster")
+
 	rootCmd.AddCommand(runCmd)
-	runCmd.AddCommand(pingDBCmd, proxy, clientDB, ridesScanCmd)
+	runCmd.AddCommand(pingDBCmd, proxy, clientDB, ridesScanCmd, nsLookUp)
 }

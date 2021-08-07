@@ -12,17 +12,14 @@ func Connect(cmd *cobra.Command, _ []string) {
 	// TODO: add more flags to remove the hard coding
 	c := exec.Command(
 		"kubectl",
-		"run",
-		"--rm",
+		"exec",
 		"-it",
-		"cockroachdb-client",
-		"--image=marceloglezer/cockroach:v20.1.7",
-		"--overrides={\"apiVersion\":\"v1\",\"spec\":{\"affinity\":{\"nodeAffinity\":{\"requiredDuringSchedulingIgnoredDuringExecution\":{\"nodeSelectorTerms\":[{\"matchFields\":[{\"key\":\"metadata.name\",\"operator\":\"In\",\"values\":[\"worker-01\"]}]}]}}}}}",
-		"--command",
+		"cockroachdb-client-secure",
 		"--",
-		"/cockroach/cockroach",
+		"./cockroach",
 		"sql",
-		"--insecure",
+		"--certs-dir",
+		"/cockroach/cockroach-certs",
 		"--host=cockroachdb-public",
 		fmt.Sprintf("--database=%s", cmd.Flag("database").Value.String()),
 	)
