@@ -280,12 +280,11 @@ spec:
           # uncomment the feature-gates argument to enable the feature
           command:
             - "/go/bin/cockroach-operator"
-            - "feature-gates"
+            - "-feature-gates"
             - "AutoPrunePVC=true,AffinityRules=true"
             # the below log level accepts "info" "debug" "warn" or "error"
             - "-zap-log-level"
-           #- info
-            - "debug"
+            - "info"
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
