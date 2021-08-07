@@ -11,7 +11,7 @@ An attempt at a personal multi-node computing environment. Built on top of k3s a
 
 ![IMG_0164](https://user-images.githubusercontent.com/3110701/121784141-42172e80-cb80-11eb-94a8-372053343e88.jpg)
 
-### Local controller setup (probably missing steps and not correct order)
+### Local controller setup (probably missing steps and not correct order; also specific to my setup Pop!_OS 21.04)
 1. Add ssh keys to github.com
 https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 2. `mkdir Developer`
@@ -24,10 +24,17 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 9. `cd compute-cluster`
 10. `./bin/controller.sh`
 11. `./bin/k3s.sh`
-12. `helm upgrade --install init-db charts/init-db`
+12. `kubectl apply -f charts/dnsutil`
+13. `kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/master/config/crd/bases/crdb.cockroachlabs.com_crdbclusters.yaml`
+14. `kubectl apply -f charts/cockroachdb-operator/operator.yaml`
+15. `kubectl apply -f charts/cockroachdb-operator/cluster.yaml`
+16. `kubectl apply -f charts/cockroachdb-operator/client.yaml`
+17. `helm install ping-db charts/ping-db`
 
-### Node setup
-1. `./bin/worker.sh`
+### Node setup (Ubuntu 21.04)
+1. `sudo ufw disable`
+2. `sudo cp etc/10-flannel.link /etc/systemd/network/`
+3. `./bin/worker.sh`
 
 Also, see [Advanced Setup](https://rancher.com/docs/k3s/latest/en/advanced/)
 
