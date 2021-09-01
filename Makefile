@@ -42,3 +42,13 @@ cover-pkg: .deps/go
 lint: .deps/go
 	go fmt ./...
 	go vet ./...
+
+# ANSIBLE ---
+server-ping:
+	ansible all -m ping -u pi --inventory=etc/ansible/hosts
+
+reboot:
+	ansible all -a "/sbin/reboot" -f 1 -u pi --become -K --inventory=etc/ansible/hosts
+
+build-graphapp:
+	ansible-playbook playbooks/graftapp/graphapp_build.yml -f 1 -u pi -vv
