@@ -7,7 +7,12 @@
 *.idea
 .deps/*
 .venv
+
+# binaries
 bin/cluster
+bin/ncluster
+cluster
+ncluster
 
 # Random data
 data/*
@@ -21,5 +26,6 @@ cover.html
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+nimbledeps
 etc/rancher
 get_helm.sh

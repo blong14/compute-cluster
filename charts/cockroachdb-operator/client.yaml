@@ -43,3 +43,4 @@ spec:
                 - key: tls.key
                   path: client.root.key
         defaultMode: 256
+

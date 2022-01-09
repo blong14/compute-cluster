@@ -33,6 +33,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: client-certs
+              mountPath: /code/etc/
           command:
             - "waitress-serve"
             - "--threads=10"
@@ -42,7 +45,7 @@ spec:
             - name: PGPASSWORD
               value: app
             - name: DATABASE_URL
-              value: cockroachdb://roach:Q7gc8rEdS@cockroachdb-public:26257/app
+              value: cockroachdb://root@cockroachdb-public:26257/app?sslcert=/code/etc/client.root.crt&sslrootcert=/code/etc/ca.crt&sslkey=/code/etc/client.root.key&sslmode=verify-full
           ports:
             - name: http
               containerPort: 8080
@@ -60,6 +63,23 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: client-certs
+          projected:
+            sources:
+              - secret:
+                  name: cockroachdb-node
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - secret:
+                  name: cockroachdb-root
+                  items:
+                    - key: tls.crt
+                      path: client.root.crt
+                    - key: tls.key
+                      path: client.root.key
+            defaultMode: 256
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

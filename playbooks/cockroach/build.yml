@@ -1,0 +1,21 @@
+---
+- name: Build CockroachDB
+  hosts: worker01.cluster
+  tasks:
+    - name: Ensure git
+      ansible.builtin.apt:
+        name: git
+        state: latest
+    - name: Copy src
+      ansible.builtin.synchronize:
+        src: /home/blong14/Developer/compute-cluster
+        dest: /home/pi
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=.venv"
+          - "--exclude=vendor"
+          - "--exclude=nimbledeps"
+    - name: Build cockroachdb
+      command: "docker build -t blong14/cockroachdb:latest -f compute-cluster/docker/Dockerfile-Cockroachdb compute-cluster/docker"
+    - name: Push image
+      command: "docker push blong14/cockroachdb"

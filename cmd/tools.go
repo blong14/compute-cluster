@@ -23,7 +23,7 @@ var clientDB = &cobra.Command{
 }
 
 var nsLookUp = &cobra.Command{
-	Use: "nslookup",
+	Use:   "nslookup",
 	Short: "Query internet server names",
-	Run: network.NsLookUp,
+	Run:   network.NsLookUp,
 }

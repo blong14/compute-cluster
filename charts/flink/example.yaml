@@ -1,0 +1,59 @@
+apiVersion: flink.k8s.io/v1beta1
+kind: FlinkApplication
+metadata:
+  name: beam-go
+  namespace: flink-operator
+  annotations:
+  labels:
+    environment: development
+spec:
+  image: blong14/flink-runner
+  imagePullPolicy: Always
+  flinkConfig:
+    taskmanager.memory.flink.size: 1g
+    taskmanager.network.memory.fraction: 0.1
+    taskmanager.network.memory.min: 10m
+    state.backend.fs.checkpointdir: file:///checkpoints/flink/checkpoints
+    state.checkpoints.dir: file:///checkpoints/flink/externalized-checkpoints
+    state.savepoints.dir: file:///checkpoints/flink/savepoints
+  jobManagerConfig:
+    resources:
+      requests:
+        memory: "1G"
+        cpu: "0.1"
+    replicas: 1
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - worker-01
+                    - worker-02
+                    - worker-03
+  taskManagerConfig:
+    taskSlots: 2
+    resources:
+      requests:
+        memory: "1G"
+        cpu: "0.1"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - worker-01
+                    - worker-02
+                    - worker-03
+  flinkVersion: "1.8"
+  jarName: "beam-runner.jar"
+  parallelism: 1
+  entryClass: "org.apache.beam.runners.flink.FlinkPortableClientEntryPoint"
+  programArgs: "--driver-cmd \"exec /usr/local/bin/cluster run pingdb --host=cockroachdb-public --port=26257 --user=roach --password=Q7gc8rEdS --runner=flink postgres\""
+  deleteMode: None
+

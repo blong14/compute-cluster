@@ -30,6 +30,7 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 15. `kubectl apply -f charts/cockroachdb-operator/cluster.yaml`
 16. `kubectl apply -f charts/cockroachdb-operator/client.yaml`
 17. `helm install ping-db charts/ping-db`
+18. `helm install prometheus prometheus-community/kube-prometheus-stack` (u admin p prom-operator)
 
 ### Node setup (Ubuntu 21.04)
 1. `sudo ufw disable`

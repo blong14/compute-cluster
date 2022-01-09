@@ -5,6 +5,11 @@ GOBIN    := $(PWD)/bin
 
 $(shell mkdir -p .deps)
 
+.deps/nim: compute_cluster.nimble
+	nimble install
+	nimble develop
+	@touch $@
+
 .deps/go: go.mod go.sum vendor/modules.txt
 	go mod vendor
 	@touch $@
@@ -14,17 +19,33 @@ clean:
 	go clean
 	@rm -rf .deps/* || true
 
-.PHONY: build
-build:
+build-go: .deps/go
+	@echo "[build] building go code..."
 	GOOS=linux GOARCH=arm64 go install cluster
+
+build-nim: .deps/nim
+	@echo "[build] building nim code..."
+	nimble c -d:release --threads:on -o:ncluster --path:./pkg cmd/compute_cluster.nim
+
+.PHONY: build
+build: build-go build-nim
+	@echo "[build] complete..."
 
 .PHONE: test-and-lint
 
 test-and-lint: test lint
 
-.PHONY: test
-test: .deps/go
+test-go: .deps/go
+	@echo "[test] testing go code..."
 	go test -v -cover -race ./...
+
+test-nim: .deps/nim
+	@echo "[test] testing nim code..."
+	nimble test --threads:on --path:./pkg
+
+.PHONY: test
+test: test-go test-nim
+	@echo "[test] complete..."
 
 cover: .deps/go
 	@rm -rf cover-all.out
@@ -38,17 +59,16 @@ cover-pkg: .deps/go
 	go test -coverprofile cover.out $(PKG)
 	@grep -v mode: cover.out >> cover-all.out
 
-.PHONY: lint
-lint: .deps/go
+lint-go: .deps/go
+	@echo "[lint] linting go code..."
 	go fmt ./...
 	go vet ./...
 
-# ANSIBLE ---
-server-ping:
-	ansible all -m ping -u pi --inventory=etc/ansible/hosts
+lint-nim: .deps/nim
+	@echo "[lint] linting nim project..."
+	nimble check
 
-reboot:
-	ansible all -a "/sbin/reboot" -f 1 -u pi --become -K --inventory=etc/ansible/hosts
-
-build-graphapp:
-	ansible-playbook playbooks/graftapp/graphapp_build.yml -f 1 -u pi -vv
+.PHONY: lint
+lint: lint-go lint-nim
+	@echo "[lint] complete..."
+	

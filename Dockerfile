@@ -1,18 +1,18 @@
-FROM golang:1.14-buster AS go-build
+FROM golang:1.16-bullseye AS go-build
 
 RUN apt-get update
 
-COPY . /go/src
-
 WORKDIR /go/src
 
-RUN make build
+COPY . /go/src
+RUN make build-go
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
-RUN apt update && apt install -y ca-certificates postgresql-client
+RUN apt update && \
+    apt install -y ca-certificates postgresql-client
 
-COPY --from=go-build /go/bin/linux_arm64/cluster /go/bin/cluster
+COPY --from=go-build /go/bin/cluster /go/bin/cluster
 
 CMD /go/bin/cluster
 

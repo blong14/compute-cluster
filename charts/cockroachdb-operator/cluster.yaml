@@ -32,11 +32,11 @@ spec:
         volumeMode: Filesystem
   resources:
     requests:
-      #cpu: "2"
+      # cpu: "2"
       memory: "1Gi"
     limits:
-      #cpu: "2"
-      memory: "1Gi"
+      # cpu: "3"
+      memory: "2Gi"
   tlsEnabled: true
 # You can set either a version of the db or a specific image name
 # cockroachDBVersion: v21.1.5

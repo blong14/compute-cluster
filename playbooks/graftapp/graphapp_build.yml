@@ -16,6 +16,6 @@
     - name: Build graft-api
       command: "docker build -t blong14/graphapp:latest graft-api"
     - name: Ping container
-      command: "docker run --rm blong14/graphapp:latest echo ping"
+      command: "docker run --rm blong14/graphapp:latest waitress-serve --help"
     - name: Push image
       command: "docker push blong14/graphapp"
