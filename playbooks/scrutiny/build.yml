@@ -1,0 +1,25 @@
+---
+- name: Build Scrutiny
+  hosts: worker01.cluster
+  tasks:
+    - name: Ensure git
+      ansible.builtin.apt:
+        name: git
+        state: latest
+    - name: Copy src
+      ansible.builtin.synchronize:
+        src: /home/blong14/Developer/git/scrutiny
+        dest: /home/pi
+        rsync_opts:
+          - "--exclude=.deps"
+          - "--exclude=.git"
+          - "--exclude=.idea"
+          - "--exclude=.pytest_cache"
+          - "--exclude=__pycache__"
+          - "--exclude=venv"
+    - name: Build scrutiny
+      command: "docker build -t blong14/scrutiny:arm-latest -f scrutiny/Dockerfile scrutiny"
+    - name: Ping container
+      command: "docker run --rm blong14/scrutiny:arm-latest waitress-serve --help"
+    - name: Push image
+      command: "docker push blong14/scrutiny:arm-latest"

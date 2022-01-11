@@ -19,6 +19,25 @@ build-cluster:
 build-ncluster:
 	ansible-playbook playbooks/ncluster/build.yml -f 1 -u pi -vv
 
+build-scrutiny:
+	ansible-playbook playbooks/scrutiny/build.yml -f 1 -u pi -vv
+
+build-scrutiny-caddy:
+	ansible-playbook playbooks/scrutiny/build-caddy.yml -f 1 -u pi -vv
+
+build-scrutiny-varnish:
+	ansible-playbook playbooks/scrutiny/build-varnish.yml -f 1 -u pi -vv
+
 deploy-graphapp: build-graphapp
 	helm upgrade --install graphapp charts/graphapp
+
+deploy-scrutiny: build-scrutiny
+	helm upgrade --install scrutiny charts/scrutiny
+
+deploy-scrutiny-caddy: build-scrutiny-caddy
+	helm upgrade --install scrutiny-caddy charts/caddy
+
+deploy-scrutiny-varnish: build-scrutiny-varnish
+	helm upgrade --install scrutiny-varnish charts/varnish
+
 

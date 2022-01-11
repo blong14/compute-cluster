@@ -1,0 +1,23 @@
+---
+- name: Build Caddy
+  hosts: worker01.cluster
+  tasks:
+    - name: Ensure docker
+      command: docker version
+    - name: Copy src
+      ansible.builtin.synchronize:
+        src: /home/blong14/Developer/git/scrutiny
+        dest: /home/pi
+        rsync_opts:
+          - "--exclude=.deps"
+          - "--exclude=.git"
+          - "--exclude=.idea"
+          - "--exclude=.pytest_cache"
+          - "--exclude=__pycache__"
+          - "--exclude=venv"
+    - name: Build scrutiny
+      command: "docker build -t blong14/caddy:arm-latest -f scrutiny/docker/DockerfileCaddy scrutiny/docker"
+    - name: Ping container
+      command: "docker run --rm blong14/caddy:arm-latest caddy version"
+    - name: Push image
+      command: "docker push blong14/caddy:arm-latest"
