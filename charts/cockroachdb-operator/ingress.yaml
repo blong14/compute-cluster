@@ -11,6 +11,10 @@ metadata:
     app.kubernetes.io/name: cockroachdb-public
     app.kubernetes.io/version: 0.1.0
 spec:
+  tls:
+    - hosts:
+        - cockroachdb-public.local
+      secretName: cockroachdb-root
   rules:
   - host: cockroachdb-public.local
     http:

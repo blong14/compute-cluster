@@ -28,6 +28,12 @@ build-scrutiny-caddy:
 build-scrutiny-varnish:
 	ansible-playbook playbooks/scrutiny/build-varnish.yml -f 1 -u pi -vv
 
+build-scrutiny-nginx:
+	ansible-playbook playbooks/scrutiny/build-nginx.yml -f 1 -u pi -vv
+
+build-scrutiny-scrape:
+	ansible-playbook playbooks/scrutiny/build-scrape.yml -f 1 -u pi -vv
+
 deploy-graphapp: build-graphapp
 	helm upgrade --install graphapp charts/graphapp
 
@@ -40,4 +46,8 @@ deploy-scrutiny-caddy: build-scrutiny-caddy
 deploy-scrutiny-varnish: build-scrutiny-varnish
 	helm upgrade --install scrutiny-varnish charts/varnish
 
+deploy-scrutiny-nginx: build-scrutiny-nginx
+	helm upgrade --install scrutiny-nginx charts/nginx
 
+deploy-scrutiny-scrape: build-scrutiny-scrape
+	helm upgrade --install scrutiny-scrape charts/scrape

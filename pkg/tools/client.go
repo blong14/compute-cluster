@@ -11,6 +11,8 @@ func Proxy(cmd *cobra.Command, _ []string) {
 	c := exec.Command(
 		"kubectl",
 		"port-forward",
+			"--address",
+			"0.0.0.0",
 		cmd.Flag("resource").Value.String(),
 		cmd.Flag("port").Value.String(),
 	)

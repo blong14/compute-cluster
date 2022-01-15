@@ -2,10 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+replicaCount: 2
 
 image:
-  repository: blong14/caddy
+  repository: blong14/scrutiny
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "arm-latest"
@@ -23,10 +23,11 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations:
-  prometheus.io/scrape: 'true'
-  prometheus.io/path: '/metrics'
-  prometheus.io/port: '5099'
+podAnnotations: {}
+#  prometheus.io/scrape: 'true'
+#  prometheus.io/path: '/metrics'
+#  prometheus.io/port: '9131'
+
 
 podSecurityContext: {}
 # fsGroup: 2000
@@ -36,33 +37,23 @@ securityContext: {}
   #   drop:
   #   - ALL
   # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
+# runAsNonRoot: true
 # runAsUser: 1000
 
 service:
   type: ClusterIP
-  port: 8443
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/path: '/metrics'
-    prometheus.io/port: 5099
+  port: 8080
+  annotations: {}
+#    prometheus.io/scrape: 'true'
+#    prometheus.io/path: '/metrics'
+#    prometheus.io/port: 9131
 
 ingress:
-  enabled: true
+  enabled: false
   annotations: {}
   # kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: scrutiny.local
-      paths:
-        - path: /
-          backend:
-            serviceName: scrutiny-caddy.default.svc.cluster.local
-            servicePort: 8443
-  tls:
-    - secretName: scrutiny-tls
-      hosts:
-        - scrutiny.local
+  hosts: {}
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -70,11 +61,11 @@ resources: {}
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   #limits:
-  #  cpu: 1
-  #  memory: 128Mi
+    #  cpu: 1
+  #     memory: 128Mi
   #requests:
-  #  cpu: 500m
-  #  memory: 128Mi
+    #cpu: 500m
+#     memory: 128Mi
 
 autoscaling:
   enabled: false

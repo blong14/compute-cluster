@@ -48,6 +48,7 @@ func PingDB(cmd *cobra.Command, args []string) {
 		reflect.TypeOf(result{}),
 	)
 
+	done := make(chan struct{})
 	beam.ParDo0(s, func(ctx context.Context, n result) {
 		select {
 		case <-ctx.Done():
@@ -57,11 +58,20 @@ func PingDB(cmd *cobra.Command, args []string) {
 				klog.Info(n.Now.Time.String())
 			}
 		}
-
+		close(done)
 	}, ping)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	start := time.Now()
+	go func(ctx context.Context) {
+		select {
+		case <-ctx.Done():
+		case <-done:
+		}
+		klog.Infof("finished in %s", time.Since(start))
+	}(ctx)
 
 	if _, err := beam.Run(ctx, cmd.Flag("runner").Value.String(), p); err != nil {
 		klog.Fatal(err)

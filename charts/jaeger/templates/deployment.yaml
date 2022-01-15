@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "varnish.fullname" . }}
+  name: {{ include "jaeger.fullname" . }}
   labels:
-    {{- include "varnish.labels" . | nindent 4 }}
+    {{- include "jaeger.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "varnish.selectorLabels" . | nindent 6 }}
+      {{- include "jaeger.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "varnish.selectorLabels" . | nindent 8 }}
+        {{- include "jaeger.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "varnish.serviceAccountName" . }}
+      serviceAccountName: {{ include "jaeger.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -33,22 +33,27 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+           - --admin.http.host-port=0.0.0.0:14269
+           - --processor.jaeger-compact.server-host-port=0.0.0.0:6831
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 16686
+              protocol: TCP
+            - name: collector
+              containerPort: 6831
+              protocol: UDP
+            - name: admin
+              containerPort: 14269
+              protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /metrics
+              port: admin
           readinessProbe:
             httpGet:
-              path: /
-              port: http
-          args:
-            - -p
-            - debug=+req_state
-            - -p
-            - thread_pool_min=10
+              path: /metrics
+              port: admin
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

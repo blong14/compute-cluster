@@ -18,7 +18,7 @@
           - "--exclude=__pycache__"
           - "--exclude=venv"
     - name: Build scrutiny
-      command: "docker build -t blong14/scrutiny:arm-latest -f scrutiny/Dockerfile scrutiny"
+      command: "docker build -t blong14/scrutiny:arm-latest -f scrutiny/DockerfilePython scrutiny"
     - name: Ping container
       command: "docker run --rm blong14/scrutiny:arm-latest waitress-serve --help"
     - name: Push image

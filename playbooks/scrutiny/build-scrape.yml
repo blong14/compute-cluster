@@ -1,0 +1,21 @@
+---
+- name: Build Scrape
+  hosts: worker01.cluster
+  tasks:
+    - name: Ensure docker
+      command: docker version
+    - name: Copy src
+      ansible.builtin.synchronize:
+        src: /home/blong14/Developer/git/scrutiny
+        dest: /home/pi
+        rsync_opts:
+          - "--exclude=.deps"
+          - "--exclude=.git"
+          - "--exclude=.idea"
+          - "--exclude=.pytest_cache"
+          - "--exclude=__pycache__"
+          - "--exclude=venv"
+    - name: Build scrape
+      command: "docker build -t blong14/scrape:arm-latest -f scrutiny/docker/DockerfileScrape scrutiny"
+    - name: Push image
+      command: "docker push blong14/scrape:arm-latest"
