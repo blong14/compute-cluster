@@ -37,6 +37,10 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 2. `sudo cp etc/10-flannel.link /etc/systemd/network/`
 3. `./bin/worker.sh`
 
+### Node setup (Ubuntu 21.10)
+1. `sudo apt install linux-modules-extra-raspi`
+2. `reboot`
+
 Also, see [Advanced Setup](https://rancher.com/docs/k3s/latest/en/advanced/)
 
 ### Services
