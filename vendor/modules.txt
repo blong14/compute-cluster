@@ -67,7 +67,7 @@ github.com/golang/protobuf/ptypes/wrappers
 ## explicit
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/lib/pq v1.10.2
+# github.com/lib/pq v1.10.4
 ## explicit
 github.com/lib/pq
 github.com/lib/pq/oid
