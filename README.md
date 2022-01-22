@@ -1,17 +1,6 @@
-## Compute Cluster (WIP)
-An attempt at a personal multi-node computing environment. Built on top of k3s and raspberry-pi.
-
-### Features (so far)
-1. prometheus monitoring stack
-2. cockroachdb cluster
-3. apache beam
-4. cli tool to manage cluster workloads (jobs, services, etc)
-
 ### Nodes
 
-![IMG_0164](https://user-images.githubusercontent.com/3110701/121784141-42172e80-cb80-11eb-94a8-372053343e88.jpg)
-
-### Local controller setup (probably missing steps and not correct order; also specific to my setup Pop!_OS 21.04)
+### Local controller setup
 1. Add ssh keys to github.com
 https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 2. `mkdir Developer`
