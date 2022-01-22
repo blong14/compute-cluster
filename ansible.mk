@@ -13,9 +13,6 @@ update:
 build-cockroachdb:
 	ansible-playbook playbooks/cockroach/build.yml -f 1 -u pi -vv
 
-build-graphapp:
-	ansible-playbook playbooks/graftapp/graphapp_build.yml -f 1 -u pi -vv
-
 build-cluster:
 	ansible-playbook playbooks/cluster/build.yml -f 1 -u pi -vv
 
@@ -37,20 +34,17 @@ build-scrutiny-nginx:
 build-scrutiny-scrape:
 	ansible-playbook playbooks/scrutiny/build-scrape.yml -f 1 -u pi -vv
 
-deploy-graphapp: build-graphapp
-	helm upgrade --install graphapp charts/graphapp
-
 deploy-scrutiny: build-scrutiny
-	helm upgrade --install scrutiny charts/scrutiny
+	helm upgrade --install scrutiny charts/scrutiny/scrutiny
 
 deploy-scrutiny-caddy: build-scrutiny-caddy
-	helm upgrade --install scrutiny-caddy charts/caddy
+	helm upgrade --install scrutiny-caddy charts/scrutiny/caddy
 
 deploy-scrutiny-varnish: build-scrutiny-varnish
-	helm upgrade --install scrutiny-varnish charts/varnish
+	helm upgrade --install scrutiny-varnish charts/scrutiny/varnish
 
 deploy-scrutiny-nginx: build-scrutiny-nginx
-	helm upgrade --install scrutiny-nginx charts/nginx
+	helm upgrade --install scrutiny-nginx charts/scrutiny/nginx
 
 deploy-scrutiny-scrape: build-scrutiny-scrape
-	helm upgrade --install scrutiny-scrape charts/scrape
+	helm upgrade --install scrutiny-scrape charts/scrutiny/scrape
