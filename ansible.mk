@@ -4,6 +4,9 @@ server-ping:
 reboot:
 	ansible all -a "/sbin/reboot" -f 1 -u pi --become -K --inventory=etc/ansible/hosts
 
+update:
+	ansible-playbook playbooks/cluster/update.yml -f 1 -u pi --become -K -vv --inventory=etc/ansible/hosts
+
 # TODO(Ben): probably could do some ansible magic here to reduce the number
 # "build-*" commands; I don't currently know how to do that and its easier
 # at this point to just copy/paste!

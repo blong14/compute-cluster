@@ -25,7 +25,7 @@ https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-
 10. `./bin/controller.sh`
 11. `./bin/k3s.sh`
 12. `kubectl apply -f charts/dnsutil`
-13. `kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/master/config/crd/bases/crdb.cockroachlabs.com_crdbclusters.yaml`
+13. `
 14. `kubectl apply -f charts/cockroachdb-operator/operator.yaml`
 15. `kubectl apply -f charts/cockroachdb-operator/cluster.yaml`
 16. `kubectl apply -f charts/cockroachdb-operator/client.yaml`
