@@ -56,9 +56,7 @@ ingress:
     - host: scrutiny.local
       paths:
         - path: /
-          backend:
-            serviceName: scrutiny-caddy.default.svc.cluster.local
-            servicePort: 8443
+          pathType: ImplementationSpecific
   tls:
     - secretName: scrutiny-tls
       hosts:
