@@ -14,18 +14,14 @@ logger = logging.getLogger(__name__)
 class HttpRequest:
     session: Any
     token: str = ''
-    base_url: str = 'https://graphapp.local'
+    base_url: str = 'https://api.graftapp.co'
     read_timeout: float = 10.0
-    user: str = 'admin@graft.com'
-    password: str = 'password'
+    user: str = ''
+    password: str = ''
 
     def header(self) -> dict:
         return {'Authorization': f'Bearer {self.token}'}
 
-
-@dataclass(frozen=True)
-class Healthz:
-    message: str
 
 
 @dataclass(frozen=True)
@@ -95,11 +91,6 @@ async def user(req: HttpRequest) -> User:
     )
 
 
-async def healthz(req: HttpRequest) -> Healthz:
-    resp = await _request(req, aiohttp.hdrs.METH_GET, f'{req.base_url}/v1/health/')
-    return Healthz(message=resp.data['message'] if resp.success else 'not ok')
-
-
 async def notes(req: HttpRequest, project: Project) -> Project:
     resp = await _request(
         req, aiohttp.hdrs.METH_GET, f'{req.base_url}/v1/projects/{project.id}/notes/')
@@ -128,11 +119,6 @@ async def projects(req: HttpRequest) -> List[Project]:
     return [project for project in await asyncio.gather(*future_projects)]
 
 
-async def metrics(req: HttpRequest) -> None:
-    resp = await _request(req, aiohttp.hdrs.METH_GET, f'{req.base_url}/metrics/')
-    logger.info(resp)
-
-
 async def main():
     async with aiohttp.ClientSession(
         trust_env=False,
@@ -141,13 +127,12 @@ async def main():
     ) as session:
         logger.info('starting requests...')
         usr = await user(HttpRequest(session=session, token=''))
-        while True:
-            logger.info('requesting data...')
-            tasks = [
-                asyncio.ensure_future(
-                    fn(HttpRequest(session=session, token=usr.token))
-                ) for fn in (healthz, metrics,)
-            ]
-            logger.info([data for data in await asyncio.gather(*tasks)])
-            logger.info('finished')
+        logger.info('requesting data...')
+        tasks = [
+            asyncio.ensure_future(
+                fn(HttpRequest(session=session, token=usr.token))
+            ) for fn in (projects,)
+        ]
+        logger.info([data for data in await asyncio.gather(*tasks)])
+        logger.info('finished')
 
