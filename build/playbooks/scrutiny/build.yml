@@ -1,11 +1,9 @@
 ---
 - name: Build Scrutiny
-  hosts: worker01.cluster
+  hosts: arm-build
   tasks:
-    - name: Ensure git
-      ansible.builtin.apt:
-        name: git
-        state: latest
+    - name: Ensure docker
+      command: docker version
     - name: Copy src
       ansible.builtin.synchronize:
         src: /home/blong14/Developer/git/scrutiny

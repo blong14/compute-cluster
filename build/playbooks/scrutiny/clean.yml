@@ -1,0 +1,6 @@
+---
+- name: Clean Scrutiny
+  hosts: arm-build
+  tasks:
+    - name: Clean build directory
+      command: "rm -rf scrutiny"

@@ -1,4 +1,19 @@
+[all]
+worker01.cluster
+worker02.cluster
+worker03.cluster
+worker04.cluster
+
+[rasppi]
 worker01.cluster
 worker02.cluster
 worker03.cluster
 
+[macos]
+worker04.cluster
+
+[armbuild]
+worker01.cluster
+
+[amdbuild]
+compute.cluster

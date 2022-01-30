@@ -5,7 +5,7 @@
 *.so
 *.dylib
 *.idea
-.deps/*
+src/.deps/*
 .venv
 
 # binaries

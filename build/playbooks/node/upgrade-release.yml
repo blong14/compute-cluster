@@ -1,0 +1,7 @@
+---
+- name: Update OS on ARM Based Nodes
+  hosts: rasppi
+  tasks:
+    - name: Release Upgrade
+      command: do-release-upgrade
+

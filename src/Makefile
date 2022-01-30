@@ -21,11 +21,11 @@ clean:
 
 build-go: .deps/go
 	@echo "[build] building go code..."
-	GOOS=linux GOARCH=arm64 go install cluster
+	go install cluster
 
 build-nim: .deps/nim
 	@echo "[build] building nim code..."
-	nimble c -d:release --threads:on -o:ncluster --path:./pkg cmd/compute_cluster.nim
+	nimble c -d:release --threads:on -o:/nim/bin/ncluster --path:./pkg cmd/compute_cluster.nim
 
 .PHONY: build
 build: build-go build-nim

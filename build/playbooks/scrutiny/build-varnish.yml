@@ -1,6 +1,6 @@
 ---
 - name: Build Varnish
-  hosts: worker01.cluster
+  hosts: arm-build
   tasks:
     - name: Ensure docker
       command: docker version

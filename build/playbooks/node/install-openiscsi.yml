@@ -1,0 +1,14 @@
+- name: Install Open-ISCSI
+  become: yes
+  become_method: sudo
+  apt:
+    name: 'open-iscsi'
+    state: latest
+    update_cache: yes
+- name: Install NFSv4 Client
+  become: yes
+  become_method: sudo
+  apt:
+    name: 'nfs-common'
+    state: latest
+    update_cache: yes
