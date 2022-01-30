@@ -34,25 +34,28 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-           - --admin.http.host-port=0.0.0.0:14269
-           - --processor.jaeger-compact.server-host-port=0.0.0.0:6831
+           - "--admin.http.host-port=0.0.0.0:{{ .Values.service.adminPort }}"
+           - "--collector.http-server.host-port=0.0.0.0:{{ .Values.service.collectorPort }}"
           ports:
             - name: http
-              containerPort: 16686
+              containerPort: {{ .Values.service.httpPort }}
               protocol: TCP
             - name: collector
-              containerPort: 6831
+              containerPort: {{ .Values.service.collectorPort }}
+              protocol: TCP
+            - name: agent
+              containerPort: {{ .Values.service.udpPort }}
               protocol: UDP
             - name: admin
-              containerPort: 14269
+              containerPort: {{ .Values.service.adminPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /metrics
+              path: /
               port: admin
           readinessProbe:
             httpGet:
-              path: /metrics
+              path: /
               port: admin
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

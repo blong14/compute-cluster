@@ -7,6 +7,12 @@ reboot:
 update:
 	ansible-playbook playbooks/cluster/update.yml -f 1 -u pi --become -K -vv --inventory=etc/ansible/hosts
 
+setup-block-storage:
+	ansible-playbook playbooks/cluster/install-openiscsi.yml -f 1 -u pi --become -K -vv --inventory=etc/ansible/hosts
+
+clean:
+	ansible-playbook playbooks/cluster/uninstall_k3s.yml -f 1 -u pi --become -K -vv --inventory=etc/ansible/hosts
+
 # TODO(Ben): probably could do some ansible magic here to reduce the number
 # "build-*" commands; I don't currently know how to do that and its easier
 # at this point to just copy/paste!

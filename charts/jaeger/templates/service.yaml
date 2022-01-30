@@ -11,8 +11,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: {{ .Values.service.udpPort }}
+    - port: {{ .Values.service.collectorPort }}
       targetPort: collector
+      protocol: TCP
+      name: collector
+    - port: {{ .Values.service.udpPort }}
+      targetPort: agent
       protocol: UDP
       name: udp
     - port: {{ .Values.service.adminPort }}

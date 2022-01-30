@@ -1,0 +1,19 @@
+helm install rancher rancher-latest/rancher \
+  --namespace cattle-system \
+  --set hostname=compute.cluster \
+  --set replicas=1
+
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --version v1.1.0 \
+  --set installCRDs=true
+
+~/.linkerd2/bin/linkerd jaeger install \
+  --set collector.nodeSelector."beta\.kubernetes\.io\/arch"=amd64 \
+  --values jaeger-linkerd.yaml \
+  | kv apply -f -
+
+kubectl --namespace minio-operator port-forward --address 0.0.0.0 svc/console 9090:9090
+
+kubectl get secret $(kubectl get serviceaccount console-sa --namespace minio-operator -o jsonpath="{.secrets[0].name}") --namespace minio-operator -o jsonpath="{.data.token}" | base64 --decode

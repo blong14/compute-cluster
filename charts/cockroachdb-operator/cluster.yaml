@@ -30,6 +30,7 @@ spec:
           requests:
             storage: "60Gi"
         volumeMode: Filesystem
+        storageClassName: local-path
   # resources:
   #   requests:
   #     cpu: "2"

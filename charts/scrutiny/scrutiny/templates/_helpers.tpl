@@ -34,6 +34,8 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "scrutiny.labels" -}}
+app: {{ include "scrutiny.name" . }}
+version: {{ .Chart.AppVersion | quote }}
 helm.sh/chart: {{ include "scrutiny.chart" . }}
 {{ include "scrutiny.selectorLabels" . }}
 {{- if .Chart.AppVersion }}

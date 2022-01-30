@@ -40,21 +40,21 @@ service:
   type: ClusterIP
   port: 16686
   httpPort: 16686
+  collectorPort: 14268
   udpPort: 6831
-  adminPort: 14268
+  adminPort: 14269
 
 ingress:
   enabled: true
+  className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: jaeger.cluster
       paths:
-      - path: /
-        backend:
-          serviceName: jaeger
-          servicePort: 16686
+        - path: /
+          pathType: ImplementationSpecific
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

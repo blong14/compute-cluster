@@ -1,10 +1,11 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cockroachdb-public
   annotations:
     meta.helm.sh/release-name: cockroachdb-public
     meta.helm.sh/release-namespace: default
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   labels:
     app.kubernetes.io/instance: cockroachdb-public
     app.kubernetes.io/managed-by: Helm
@@ -20,6 +21,11 @@ spec:
     http:
       paths:
         - path: /
+          pathType: Prefix
+          pathType: ImplementationSpecific
           backend:
-            serviceName: cockroachdb-public
-            servicePort: 8080
+            service:
+              name: cockroachdb-public
+              port: 
+                number: 8080
+
