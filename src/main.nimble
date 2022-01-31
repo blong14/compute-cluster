@@ -4,7 +4,7 @@ version       = "0.1.0"
 author        = "Anonymous"
 description   = "compute cluster package"
 license       = "MIT"
-srcDir        = "cmd"
+srcDir        = "src"
 installExt    = @["nim"]
 
 

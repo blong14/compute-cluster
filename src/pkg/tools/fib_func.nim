@@ -5,4 +5,3 @@ proc fib*(n: int): int {.exportpy.} =
         return 1
     else:
         return fib(n - 1) + fib(n - 2)
-

@@ -1,7 +1,5 @@
 import pkg/tools/fib_func
 import pkg/tools/actor
 
-
-when isMainModule:
+proc run*(): void =
   echo(fib(50))
-

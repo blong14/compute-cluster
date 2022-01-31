@@ -1,11 +1,11 @@
 PACKAGES := . ./cmd/... ./pkg/...
-GOBIN    := $(PWD)/bin
+GOBIN    := $(PWD)/../bin
 
 .DEFAULT_GOAL := test-and-lint
 
 $(shell mkdir -p .deps)
 
-.deps/nim: compute_cluster.nimble
+.deps/nim: main.nimble
 	nimble install
 	nimble develop
 	@touch $@
@@ -25,7 +25,7 @@ build-go: .deps/go
 
 build-nim: .deps/nim
 	@echo "[build] building nim code..."
-	nimble c -d:release --threads:on -o:/nim/bin/ncluster --path:./pkg cmd/compute_cluster.nim
+	nimble c -d:release --threads:on -o:$(GOBIN)/ncluster --path:./pkg main.nim
 
 .PHONY: build
 build: build-go build-nim
