@@ -9,6 +9,8 @@ on:
 jobs:
 
   build:
+    env:
+      GOMOD: ${{ github.workspace }}/src/go.mod
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
