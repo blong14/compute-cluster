@@ -7,9 +7,14 @@ version: 2
 updates:
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "./src" # Location of package manifests
+    vendor: true
     schedule:
       interval: "daily"
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "./src" # Location of package manifests
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker" # See documentation for possible values
+    directory: "./docker" # Location of package manifests
     schedule:
       interval: "daily"
