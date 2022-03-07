@@ -27,5 +27,5 @@ cover.html
 # Dependency directories (remove the comment below to include it)
 # vendor/
 nimbledeps
-etc/rancher
+build/etc/rancher/k3s/k3s.yaml
 get_helm.sh
