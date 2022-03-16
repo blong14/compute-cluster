@@ -6,7 +6,7 @@ require (
 	github.com/apache/beam v2.30.0+incompatible
 	github.com/lib/pq v1.10.4
 	github.com/spf13/cobra v1.3.0
-	k8s.io/klog/v2 v2.40.1
+	k8s.io/klog/v2 v2.50.0
 )
 
 require (
@@ -20,4 +20,5 @@ require (
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	google.golang.org/grpc v1.42.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
 )
