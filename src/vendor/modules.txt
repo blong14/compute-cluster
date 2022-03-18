@@ -184,6 +184,12 @@ google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/structpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
-# k8s.io/klog/v2 v2.40.1
+# k8s.io/klog/v2 v2.60.0
 ## explicit; go 1.13
 k8s.io/klog/v2
+k8s.io/klog/v2/internal/buffer
+k8s.io/klog/v2/internal/serialize
+k8s.io/klog/v2/internal/severity
+# k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
+## explicit; go 1.12
+k8s.io/utils/clock
