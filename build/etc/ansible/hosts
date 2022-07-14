@@ -1,19 +1,16 @@
 [all]
-worker01.cluster
-worker02.cluster
-worker03.cluster
-worker04.cluster
+compute.cluster
+worker-01.cluster
+worker-02.cluster
+worker-03.cluster
 
 [rasppi]
-worker01.cluster
-worker02.cluster
-worker03.cluster
-
-[macos]
-worker04.cluster
+worker-01.cluster
+worker-02.cluster
+worker-03.cluster
 
 [armbuild]
-worker01.cluster
+worker-01.cluster
 
 [amdbuild]
 compute.cluster
