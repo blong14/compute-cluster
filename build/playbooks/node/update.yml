@@ -1,6 +1,6 @@
 ---
 - name: Update Cluster ARM Based Nodes
-  hosts: rasppi
+  hosts: all
   tasks:
     - name: Update all installed packages
       apt:

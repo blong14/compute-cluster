@@ -6,6 +6,7 @@
 *.dylib
 *.idea
 src/.deps/*
+src/venv
 .venv
 
 # binaries

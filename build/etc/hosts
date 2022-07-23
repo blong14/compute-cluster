@@ -1,5 +1,15 @@
-100.91.72.78  compute.cluster
-100.84.62.57  worker01.cluster
-100.114.36.48 worker02.cluster
-100.84.225.44 worker03.cluster
-100.81.14.24  worker04.cluster
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+
+100.91.72.78    controller-02.cluster
+100.91.72.78    compute.cluster
+100.116.127.52  worker-01.cluster
+100.87.132.48   worker-02.cluster
+100.91.208.123  worker-03.cluster

@@ -13,8 +13,10 @@
         only_upgrade: yes
     - include: install-extra-raspi.yml
     - include: install-openiscsi.yml
+    - include: install-docker.yml
 - name: Configure Play for ARM Based Nodes
   hosts: rasppi
   remote_user: pi
   tasks:
     - include: configure-network.yml
+    - include: configure-k8s.yml

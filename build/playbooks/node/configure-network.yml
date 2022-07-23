@@ -2,9 +2,15 @@
   become: yes
   become_method: sudo
   command: 'ufw disable'
-- name: Copy
+- name: Copy flannel.link
   become: yes
   become_method: sudo
   ansible.builtin.copy:
-    src: /home/blong14/Developer/compute-cluster/build/etc/10-flannel.link
+    src: /home/blong14/Developer/git/compute-cluster/build/etc/10-flannel.link
     dest: /etc/systemd/network
+- name: Copy hosts
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    src: /home/blong14/Developer/git/compute-cluster/build/etc/hosts
+    dest: /etc/hosts

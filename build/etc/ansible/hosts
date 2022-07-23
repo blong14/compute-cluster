@@ -1,5 +1,5 @@
 [all]
-compute.cluster
+controller-02.cluster
 worker-01.cluster
 worker-02.cluster
 worker-03.cluster
@@ -13,4 +13,4 @@ worker-03.cluster
 worker-01.cluster
 
 [amdbuild]
-compute.cluster
+controller-02.cluster
