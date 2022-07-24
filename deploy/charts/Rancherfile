@@ -1,13 +1,18 @@
-helm install rancher rancher-latest/rancher \
-  --namespace cattle-system \
-  --set hostname=compute.cluster \
-  --set replicas=1
+kubectl create namespace cattle-system
+
+kubectl create namespace cert-manager
 
 helm install \
   cert-manager jetstack/cert-manager \
   --namespace cert-manager \
-  --version v1.1.0 \
+  --version v1.9.0 \
   --set installCRDs=true
+
+helm install rancher rancher-latest/rancher \
+  --namespace cattle-system \
+  --set hostname=compute.cluster \
+  --set replicas=1
+  --version
 
 ~/.linkerd2/bin/linkerd jaeger install \
   --set collector.nodeSelector."beta\.kubernetes\.io\/arch"=amd64 \

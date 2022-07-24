@@ -20,3 +20,8 @@
   tasks:
     - include: configure-network.yml
     - include: configure-k8s.yml
+- name: Configure Play for Controller Based Nodes
+  hosts: controller
+  remote_user: pi
+  tasks:
+    - include: configure-k8s.yml

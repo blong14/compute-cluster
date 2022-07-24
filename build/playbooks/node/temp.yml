@@ -1,0 +1,5 @@
+- name: Debug task
+  hosts: all
+  remote_user: pi
+  tasks:
+    - include: configure-k8s.yml

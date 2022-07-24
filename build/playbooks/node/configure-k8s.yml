@@ -4,3 +4,25 @@
   ansible.builtin.copy:
     src: /home/blong14/Developer/git/compute-cluster/node-token
     dest: /etc/node-token
+- name: Copy install scripts
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    src: /home/blong14/Developer/git/compute-cluster/{{item}}
+    dest: /usr/local/bin/{{item}}
+  loop:
+    - controller-02.sh
+    - worker.sh
+    - get_helm.sh
+    - rancher.sh
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /usr/local/bin/{{item}}
+    owner: pi
+    group: pi
+    mode: '0755'
+  loop:
+    - controller-02.sh
+    - worker.sh
+    - get_helm.sh
+    - rancher.sh

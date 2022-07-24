@@ -29,4 +29,3 @@ cover.html
 # vendor/
 nimbledeps
 build/etc/rancher/k3s/k3s.yaml
-get_helm.sh

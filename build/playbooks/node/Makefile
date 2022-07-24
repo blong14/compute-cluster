@@ -8,3 +8,7 @@ clean:
 
 update:
 	ansible-playbook build/playbooks/node/update.yml -u pi --become -K -vv
+
+debug:
+	ansible-playbook build/playbooks/node/temp.yml -u pi --become -K -vv
+
