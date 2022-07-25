@@ -1,21 +1,12 @@
 ---
 - name: Build CockroachDB
-  hosts: worker01.cluster
+  hosts: worker-01.cluster
   tasks:
     - name: Ensure git
       ansible.builtin.apt:
         name: git
         state: latest
-    - name: Copy src
-      ansible.builtin.synchronize:
-        src: /home/blong14/Developer/compute-cluster
-        dest: /home/pi
-        rsync_opts:
-          - "--exclude=.git"
-          - "--exclude=.venv"
-          - "--exclude=vendor"
-          - "--exclude=nimbledeps"
+    - name: Copy build repo
+      command: git clone https://github.com/jrcichra/cockroachdb-multiarch-bazel.git
     - name: Build cockroachdb
-      command: "docker build -t blong14/cockroachdb:latest -f compute-cluster/docker/Dockerfile-Cockroachdb compute-cluster/docker"
-    - name: Push image
-      command: "docker push blong14/cockroachdb"
+      command: bash cockroachdb-multiarch-bazel/build.sh linuxarm

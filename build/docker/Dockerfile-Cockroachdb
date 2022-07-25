@@ -1,9 +1,12 @@
-FROM marceloglezer/cockroach:v20.2.0
+FROM ubuntu:22.04
 
-COPY cockroach.sh cockroach.sh
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y libc6 ca-certificates tzdata hostname tar && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN addgroup --gid 1000581000 cockroach-group
+WORKDIR /cockroach/
 
-RUN chown :1000581000 /cockroach && chmod -R 755 /cockroach && chmod g+s /cockroach
+COPY cockroach/artifacts/cockroach /cockroach/cockroach
 
-
+ENTRYPOINT [ "/cockroach/cockroach" ]
