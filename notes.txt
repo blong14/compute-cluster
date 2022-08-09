@@ -1,0 +1,11 @@
+clone repo
+
+copy Dockerfile to build machine
+
+push blong14/cockroachdb
+
+docker run --rm -it --entrypoint=/bin/bash cockroachdb/bazel:20220328-163955 
+
+bazel build pkg/cmd/cockroach
+
+_bazel/bin/pkg/cmd/cockroach/cockroach_/cockroach
