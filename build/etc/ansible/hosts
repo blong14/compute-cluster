@@ -12,8 +12,8 @@ worker-01.cluster
 worker-02.cluster
 worker-03.cluster
 
-[armbuild]
-worker-01.cluster
+[arm-build]
+worker-02.cluster
 
-[amdbuild]
+[amd-build]
 controller-02.cluster

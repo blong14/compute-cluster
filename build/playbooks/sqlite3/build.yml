@@ -1,0 +1,25 @@
+---
+- name: Build sqlite3
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Ensure git
+      command: git version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+    - name: Ensure docker
+      become: yes
+      become_method: sudo
+      command: docker version
+    - name: Build image
+      become: yes
+      become_method: sudo
+      command: "docker build -t blong14/sqlite3:arm-latest -f compute-cluster/build/docker/sqlite3/Dockerfile compute-cluster"
+    - name: Push image
+      become: yes
+      become_method: sudo
+      command: "docker push blong14/sqlite3:arm-latest"
