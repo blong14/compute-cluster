@@ -16,6 +16,6 @@
           - "--exclude=__pycache__"
           - "--exclude=venv"
     - name: Build scrape
-      command: "docker build -t blong14/scrape:arm-latest -f scrutiny/docker/DockerfileScrape scrutiny"
+      command: "docker build -t blong14/scrape:arm-latest -f scrutiny/docker/Dockerfile scrutiny"
     - name: Push image
       command: "docker push blong14/scrape:arm-latest"
