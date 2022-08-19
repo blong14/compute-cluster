@@ -1,21 +1,23 @@
 ---
 - name: Build Varnish
   hosts: arm-build
+  remote_user: pi
   tasks:
     - name: Ensure docker
+      become: yes
+      become_method: sudo
       command: docker version
     - name: Copy src
-      ansible.builtin.synchronize:
-        src: /home/blong14/Developer/git/scrutiny
-        dest: /home/pi
-        rsync_opts:
-          - "--exclude=.deps"
-          - "--exclude=.git"
-          - "--exclude=.idea"
-          - "--exclude=.pytest_cache"
-          - "--exclude=__pycache__"
-          - "--exclude=venv"
+      ansible.builtin.git:
+        repo: https://github.com/blong14/scrutiny.git
+        dest: /home/pi/scrutiny
+        single_branch: yes
+        version: main
     - name: Build scrutiny
-      command: "docker build -t blong14/varnish:arm-latest -f scrutiny/docker/DockerfileVarnish scrutiny/docker"
+      become: yes
+      become_method: sudo
+      command: "docker build -t blong14/varnish:arm-latest -f scrutiny/docker/varnish/Dockerfile scrutiny"
     - name: Push image
+      become: yes
+      become_method: sudo
       command: "docker push blong14/varnish:arm-latest"
