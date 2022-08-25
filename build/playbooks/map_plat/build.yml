@@ -1,0 +1,39 @@
+---
+- name: Build map_plat
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Ensure git
+      command: git version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/map_plat.git
+        dest: /home/pi/map_plat
+        single_branch: yes
+        version: master
+    - name: Copy files
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/etc/{{item}}
+        dest: /home/pi/map_plat/{{item}}
+      loop:
+        - localhost.cert.pem
+        - localhost.key.pem
+        - prod
+    - name: Ensure docker
+      become: yes
+      become_method: sudo
+      command: docker version
+    - name: Build image
+      become: yes
+      become_method: sudo
+      command: "docker build -t blong14/map_plat:arm-latest -f map_plat/Dockerfile map_plat"
+    - name: Push image
+      become: yes
+      become_method: sudo
+      command: "docker push blong14/map_plat:arm-latest"
+    - name: Remove env
+      become: yes
+      become_method: sudo
+      command: "git -C map_plat checkout ."

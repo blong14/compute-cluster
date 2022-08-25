@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.idea
+*.pem
 src/.deps/*
 src/venv
 .venv

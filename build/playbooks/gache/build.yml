@@ -1,0 +1,25 @@
+---
+- name: Build gache
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Ensure git
+      command: git version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/gache.git
+        dest: /home/pi/gache
+        single_branch: yes
+        version: master
+    - name: Ensure docker
+      become: yes
+      become_method: sudo
+      command: docker version
+    - name: Build image
+      become: yes
+      become_method: sudo
+      command: "docker build -t blong14/gache:arm-latest -f gache/Dockerfile gache"
+    - name: Push image
+      become: yes
+      become_method: sudo
+      command: "docker push blong14/gache:arm-latest"
