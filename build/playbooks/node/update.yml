@@ -12,6 +12,10 @@
     - name: Remove packages not needed anymore
       apt:
         autoremove: yes
+    - name: Clean images
+      become: yes
+      become_method: sudo
+      command: "docker system prune -f"
     - name: Reboot when packages were updated
       reboot:
         post_reboot_delay: 60
