@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/apache/beam v2.30.0+incompatible
-	github.com/lib/pq v1.10.6
+	github.com/lib/pq v1.10.7
 	github.com/spf13/cobra v1.5.0
 	k8s.io/klog/v2 v2.70.1
 )
