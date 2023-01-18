@@ -1,0 +1,13 @@
+---
+- name: Build resource autoscaling
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Copy autoscaling config
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/autoscaling/vertical-pod-autoscaling.yml
+        dest: /home/pi/autoscaling/vertical-pod-autoscaling.yml
+    - name: Apply vertical pod autoscaling to k8s cluster
+      command: "kubectl apply -f /home/pi/autoscaling/vertical-pod-autoscaling.yml"
