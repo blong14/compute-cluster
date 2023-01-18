@@ -6,6 +6,7 @@
 *.dylib
 *.idea
 *.pem
+__pycache__
 src/.deps/*
 src/venv
 .venv
