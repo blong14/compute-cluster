@@ -18,7 +18,7 @@
     - name: Build image
       become: yes
       become_method: sudo
-      command: "docker build -t blong14/gache:arm-latest -f gache/Dockerfile gache"
+      command: "docker build -t blong14/gache:arm-latest -f gache/docker/Dockerfile gache"
     - name: Push image
       become: yes
       become_method: sudo
