@@ -3,6 +3,8 @@
   hosts: amd-build
   remote_user: pi
   tasks:
+    - name: Ensure Kubectl
+      command: kubectl version
     - name: Copy autoscaling config
       become: yes
       become_method: sudo
