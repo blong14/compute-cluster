@@ -6,7 +6,7 @@ require (
 	github.com/apache/beam v2.30.0+incompatible
 	github.com/lib/pq v1.10.7
 	github.com/spf13/cobra v1.6.1
-	k8s.io/klog/v2 v2.90.0
+	k8s.io/klog/v2 v2.90.1
 )
 
 require (
