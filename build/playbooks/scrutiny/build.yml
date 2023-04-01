@@ -13,11 +13,21 @@
         dest: /home/pi/scrutiny
         single_branch: yes
         version: main
-    - name: Build scrutiny
+      register: clone_status
+    - name: Build and Push scrutiny
       become: yes
       become_method: sudo
-      command: "docker build -t blong14/scrutiny:arm-latest -f scrutiny/docker/Dockerfile scrutiny"
-    - name: Push image
-      become: yes
-      become_method: sudo
-      command: "docker push blong14/scrutiny:arm-latest"
+      ansible.builtin.docker_image:
+        build:
+          dockerfile: docker/Dockerfile
+          path: scrutiny
+        name: blong14/scrutiny
+        push: true
+        source: build
+        tag: "{{ item }}"
+        force_tag: yes
+        force_source: yes
+      when: clone_status.changed
+      with_items:
+        - arm-{{ clone_status.after }}
+        - arm-latest
