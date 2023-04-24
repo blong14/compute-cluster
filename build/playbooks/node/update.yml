@@ -1,4 +1,22 @@
 ---
+- name: Update Control plane
+  hosts: controller
+  tasks:
+    - include: install-apt-packages.yml
+    - name: Reboot when packages were updated
+      reboot:
+        post_reboot_delay: 60
+      when: apt_update_status.changed
+    - name: Stop k3s
+      become: yes
+      become_method: sudo
+      command: /usr/local/bin/k3s-killall.sh
+      when: apt_update_status.changed
+    - name: Restart k3s
+      become: yes
+      become_method: sudo
+      command: systemctl start k3s.service
+      when: apt_update_status.changed
 - name: Update Cluster ARM Based Nodes
   hosts: rasppi
   serial: 1
@@ -6,27 +24,15 @@
     - name: Setting node
       shell: echo "{{ inventory_hostname }}" | cut -d "." -f 1
       register: current_worker
+    - include: install-apt-packages.yml
     - name: Drain node
       become: yes
       become_method: sudo
-      command: kubectl drain {{ current_worker.stdout_lines[0] }} --delete-emptydir-data --ignore-daemonsets
+      command: kubectl drain {{ current_worker.stdout_lines[0] }} --delete-emptydir-data --ignore-daemonsets --timeout=300s --disable-eviction --force
       delegate_facts: True
       delegate_to: "{{ item }}"
       loop: "{{ groups['controller'] }}"
-    - name: Update all installed packages
-      apt:
-        name: '*'
-        state: latest
-        update_cache: yes
-        only_upgrade: yes
-      register: apt_update_status
-    - name: Remove packages not needed anymore
-      apt:
-        autoremove: yes
-    - name: Clean images
-      become: yes
-      become_method: sudo
-      command: "docker system prune -f"
+      when: apt_update_status.changed
     - name: Reboot when packages were updated
       reboot:
         post_reboot_delay: 60
@@ -38,3 +44,4 @@
       delegate_facts: True
       delegate_to: "{{ item }}"
       loop: "{{ groups['controller'] }}"
+      when: apt_update_status.changed

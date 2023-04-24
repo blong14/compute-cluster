@@ -18,7 +18,7 @@
     - name: Build image
       become: yes
       become_method: sudo
-      command: "docker build -t blong14/sqlite3:arm-latest -f compute-cluster/build/docker/sqlite3/Dockerfile compute-cluster"
+      command: "docker build -t blong14/sqlite3:arm-latest -f compute-cluster/docker/sqlite3/Dockerfile compute-cluster"
     - name: Push image
       become: yes
       become_method: sudo

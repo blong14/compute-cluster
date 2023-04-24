@@ -14,7 +14,7 @@
   remote_user: pi
   tasks:
     - name: apply yaml to k8s cluster
-      command: "kubectl apply -f /home/pi/rabbitmq-operator/operator.yml"
+      command: "kubectl apply -f 'https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml'"
 - name: Build rabbitmq cluster
   hosts: amd-build
   remote_user: pi
