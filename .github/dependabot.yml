@@ -29,6 +29,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/update-kuma"
+    directory: "./docker/uptime-kuma"
     schedule:
       interval: "daily"
