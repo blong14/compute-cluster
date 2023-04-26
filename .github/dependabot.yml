@@ -13,7 +13,22 @@ updates:
     directory: "./src" # Location of package manifests
     schedule:
       interval: "daily"
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "./docker" # Location of package manifests
+
+  # Not sure how to have dependabot track a top level
+  # directory, so adding each individual image here:
+  - package-ecosystem: "docker"
+    directory: "./docker/rabbitmq-operator"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "./docker/signal-cli"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "./docker/sqlite3"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "./docker/update-kuma"
     schedule:
       interval: "daily"
