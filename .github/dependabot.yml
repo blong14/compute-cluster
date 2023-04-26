@@ -21,7 +21,15 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
+    directory: "./docker/k3s-upgrade"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
     directory: "./docker/rabbitmq-operator"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "./docker/rancher"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
