@@ -2,7 +2,7 @@
 - name: Update Control plane
   hosts: controller
   tasks:
-    - include: install-apt-packages.yml
+    - include_tasks: install-apt-packages.yml
     - name: Reboot when packages were updated
       reboot:
         post_reboot_delay: 60
@@ -24,7 +24,7 @@
     - name: Setting node
       shell: echo "{{ inventory_hostname }}" | cut -d "." -f 1
       register: current_worker
-    - include: install-apt-packages.yml
+    - include_tasks: install-apt-packages.yml
     - name: Drain node
       become: yes
       become_method: sudo
