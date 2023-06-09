@@ -1,1 +1,1 @@
-FROM rabbitmqoperator/cluster-operator:2.2.0
+FROM rabbitmqoperator/cluster-operator:2.3.0
