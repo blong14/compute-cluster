@@ -1,0 +1,7 @@
+---
+- name: Build pg-operator
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Apply pg-operator to k8s cluster
+      command: "kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.20/releases/cnpg-1.20.2.yaml"
