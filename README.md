@@ -3,8 +3,6 @@
 ### Local controller setup
 1. Add ssh keys to github.com
 https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-10. `./bin/controller.sh`
-11. `./bin/k3s.sh`
 
 Also, see [Advanced Setup](https://rancher.com/docs/k3s/latest/en/advanced/)
 

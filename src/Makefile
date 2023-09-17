@@ -5,11 +5,6 @@ GOBIN    := $(PWD)/../bin
 
 $(shell mkdir -p .deps)
 
-.deps/nim: main.nimble
-	nimble install
-	nimble develop
-	@touch $@
-
 .deps/go: go.mod go.sum vendor/modules.txt
 	go mod vendor
 	@touch $@
@@ -23,12 +18,8 @@ build-go: .deps/go
 	@echo "[build] building go code..."
 	go install cluster
 
-build-nim: .deps/nim
-	@echo "[build] building nim code..."
-	nimble c -d:release --threads:on -o:$(GOBIN)/ncluster --path:./pkg main.nim
-
 .PHONY: build
-build: build-go build-nim
+build: build-go
 	@echo "[build] complete..."
 
 .PHONE: test-and-lint
@@ -39,12 +30,8 @@ test-go: .deps/go
 	@echo "[test] testing go code..."
 	go test -v -cover -race ./...
 
-test-nim: .deps/nim
-	@echo "[test] testing nim code..."
-	nimble test --threads:on --path:./pkg
-
 .PHONY: test
-test: test-go test-nim
+test: test-go
 	@echo "[test] complete..."
 
 cover: .deps/go
@@ -64,11 +51,7 @@ lint-go: .deps/go
 	go fmt ./...
 	go vet ./...
 
-lint-nim: .deps/nim
-	@echo "[lint] linting nim project..."
-	nimble check
-
 .PHONY: lint
-lint: lint-go lint-nim
+lint: lint-go
 	@echo "[lint] complete..."
 	

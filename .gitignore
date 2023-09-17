@@ -10,6 +10,7 @@ __pycache__
 src/.deps/*
 src/venv
 .venv
+venv
 
 # binaries
 bin/cluster
