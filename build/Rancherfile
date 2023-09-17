@@ -2,17 +2,17 @@ kubectl create namespace cattle-system
 
 kubectl create namespace cert-manager
 
-helm install \
-  cert-manager jetstack/cert-manager \
-  --namespace cert-manager \
-  --version v1.9.0 \
-  --set installCRDs=true
+helm repo add appscode https://charts.appscode.com/stable/
 
-helm install rancher rancher-latest/rancher \
-  --namespace cattle-system \
-  --set hostname=compute.cluster \
-  --set replicas=1
-  --version
+helm install cert-manager-crds appscode/cert-manager-crds --version 1.9.1
+
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.9.1
+
+helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=compute.cluster --set replicas=1 --version
+
+# post rancher install
+echo https://compute.cluster/dashboard/?setup=$(kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}')
+kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{ "\n" }}'
 
 ~/.linkerd2/bin/linkerd jaeger install \
   --set collector.nodeSelector."beta\.kubernetes\.io\/arch"=amd64 \

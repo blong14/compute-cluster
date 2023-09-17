@@ -8,10 +8,10 @@
   become: yes
   become_method: sudo
   ansible.builtin.copy:
-    src: /home/blong14/Developer/git/compute-cluster/{{item}}
+    src: /home/blong14/Developer/git/compute-cluster/build/bin/{{item}}
     dest: /usr/local/bin/{{item}}
   loop:
-    - controller-02.sh
+    - controller.sh
     - worker.sh
     - get_helm.sh
     - rancher.sh
@@ -22,7 +22,7 @@
     group: pi
     mode: '0755'
   loop:
-    - controller-02.sh
+    - controller.sh
     - worker.sh
     - get_helm.sh
     - rancher.sh

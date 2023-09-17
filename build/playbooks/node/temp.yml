@@ -2,4 +2,6 @@
   hosts: all
   remote_user: pi
   tasks:
-    - include: configure-k8s.yml
+    - include_tasks: install-apt-packages.yml
+    - include_tasks: configure-k8s.yml
+
