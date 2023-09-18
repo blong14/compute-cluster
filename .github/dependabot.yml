@@ -9,10 +9,6 @@ updates:
     directory: "./src" # Location of package manifests
     schedule:
       interval: "daily"
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "./src" # Location of package manifests
-    schedule:
-      interval: "daily"
 
   # Not sure how to have dependabot track a top level
   # directory, so adding each individual image here:
