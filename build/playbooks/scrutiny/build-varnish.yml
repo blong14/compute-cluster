@@ -21,3 +21,24 @@
       become: yes
       become_method: sudo
       command: "docker push blong14/varnish:arm-latest"
+- name: Deploy scrutiny-varnish
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/scrutiny.git
+        dest: /home/pi/scrutiny
+        single_branch: yes
+        version: main
+    - name: Install scrutiny-varnish
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i scrutiny-varnish scrutiny/charts/varnish \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set image.tag=arm-latest

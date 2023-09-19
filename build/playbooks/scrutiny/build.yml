@@ -31,3 +31,31 @@
       with_items:
         - arm-{{ clone_status.after }}
         - arm-latest
+- name: Deploy Scrutiny
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/scrutiny.git
+        dest: /home/pi/scrutiny
+        single_branch: yes
+        version: main
+      register: clone_status
+    - name: Install scrutiny
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i scrutiny scrutiny/charts/scrutiny \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set image.tag=arm-{{ clone_status.after }} \
+        --set env.PG_HOST=postgres-cluster-rw.default \
+        --set env.PG_PORT=5432 \
+        --set env.PG_USER={{ pg_user }} \
+        --set env.PG_PASSWORD={{ pg_password }} \
+        --set env.PG_DATABASE=scrutiny
+      when: clone_status.changed
