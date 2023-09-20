@@ -1,0 +1,17 @@
+---
+- name: Copy rabbitmq config
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Copy config
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/rabbitmq
+        dest: /home/pi
+- name: Build rabbitmq cluster
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Apply yaml to k8s cluster
+      command: "kubectl apply -f /home/pi/rabbitmq/cluster.yaml"
