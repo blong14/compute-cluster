@@ -4,7 +4,7 @@ metadata:
   name: postgres-cluster
 spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:15.0
-  instances: 1
+  instances: 2
   startDelay: 300
   stopDelay: 300
   primaryUpdateStrategy: unsupervised

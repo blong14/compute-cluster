@@ -13,14 +13,24 @@
         dest: /home/pi/scrutiny
         single_branch: yes
         version: main
-    - name: Build scrutiny nginx
+      register: clone_status
+    - name: Build and Push scrutiny-nginx
       become: yes
       become_method: sudo
-      command: "docker build -t blong14/nginx:arm-latest -f scrutiny/docker/nginx/Dockerfile scrutiny"
-    - name: Push image
-      become: yes
-      become_method: sudo
-      command: "docker push blong14/nginx:arm-latest"
+      ansible.builtin.docker_image:
+        build:
+          dockerfile: docker/nginx/Dockerfile
+          path: scrutiny
+        name: blong14/nginx
+        push: true
+        source: build
+        tag: "{{ item }}"
+        force_tag: yes
+        force_source: yes
+      when: clone_status.changed
+      with_items:
+        - arm-{{ clone_status.after }}
+        - arm-latest
 - name: Deploy scrutiny-nginx
   hosts: amd-build
   remote_user: pi
@@ -35,10 +45,11 @@
         dest: /home/pi/scrutiny
         single_branch: yes
         version: main
+      register: clone_status
     - name: Install scrutiny-nginx
       become: yes
       become_method: sudo
       command: |
         helm upgrade -i scrutiny-nginx scrutiny/charts/nginx \
         --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
-        --set image.tag=arm-latest
+        --set image.tag=arm-{{ clone_status.after }}
