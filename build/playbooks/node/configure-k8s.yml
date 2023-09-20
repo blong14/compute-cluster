@@ -14,7 +14,6 @@
     - controller.sh
     - worker.sh
     - get_helm.sh
-    - rancher.sh
 - name: Change file ownership, group and permissions
   ansible.builtin.file:
     path: /usr/local/bin/{{item}}
@@ -25,4 +24,3 @@
     - controller.sh
     - worker.sh
     - get_helm.sh
-    - rancher.sh
