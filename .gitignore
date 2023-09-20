@@ -14,9 +14,7 @@ venv
 
 # binaries
 bin/cluster
-bin/ncluster
 cluster
-ncluster
 
 # Random data
 data/*
@@ -30,5 +28,7 @@ cover.html
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-nimbledeps
 build/etc/rancher/k3s/k3s.yaml
+
+# Cluster configuration
+config.yml
