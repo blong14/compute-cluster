@@ -53,6 +53,7 @@ github.com/apache/beam/sdks/go/pkg/beam/util/grpcx
 github.com/apache/beam/sdks/go/pkg/beam/util/shimx
 # github.com/apenella/go-ansible v1.2.0
 ## explicit; go 1.19
+github.com/apenella/go-ansible/pkg/adhoc
 github.com/apenella/go-ansible/pkg/execute
 github.com/apenella/go-ansible/pkg/options
 github.com/apenella/go-ansible/pkg/playbook

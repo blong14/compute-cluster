@@ -31,6 +31,48 @@
       with_items:
         - arm-{{ clone_status.after }}
         - arm-latest
+- name: Build Nginx
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Build and Push scrutiny-nginx
+      become: yes
+      become_method: sudo
+      ansible.builtin.docker_image:
+        build:
+          dockerfile: docker/nginx/Dockerfile
+          path: scrutiny
+        name: blong14/nginx
+        push: true
+        source: build
+        tag: "{{ item }}"
+        force_tag: yes
+        force_source: yes
+      when: clone_status.changed
+      with_items:
+        - arm-{{ clone_status.after }}
+        - arm-latest
+- name: Build Varnish
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Build and Push scrutiny-varnish
+      become: yes
+      become_method: sudo
+      ansible.builtin.docker_image:
+        build:
+          dockerfile: docker/varnish/Dockerfile
+          path: scrutiny
+        name: blong14/varnish
+        push: true
+        source: build
+        tag: "{{ item }}"
+        force_tag: yes
+        force_source: yes
+      when: clone_status.changed
+      with_items:
+        - arm-{{ clone_status.after }}
+        - arm-latest
 - name: Deploy Scrutiny
   hosts: amd-build
   remote_user: pi
@@ -58,4 +100,20 @@
         --set env.PG_USER={{ pg_user }} \
         --set env.PG_PASSWORD={{ pg_password }} \
         --set env.PG_DATABASE=scrutiny
+      when: clone_status.changed
+    - name: Install scrutiny-nginx
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i scrutiny-nginx scrutiny/charts/nginx \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set image.tag=arm-{{ clone_status.after }}
+      when: clone_status.changed
+    - name: Install scrutiny-varnish
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i scrutiny-varnish scrutiny/charts/varnish \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set image.tag=arm-{{ clone_status.after }}
       when: clone_status.changed

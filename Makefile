@@ -9,6 +9,3 @@ build:
 
 clean:
 	ansible-playbook build/playbooks/${SRC}/clean.yml -f 1 -u pi --become -K -vv
-
-ping:
-	ansible all -m ansible.builtin.ping -f 1 -u pi --become -K -vv

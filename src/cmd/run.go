@@ -28,5 +28,5 @@ func init() {
 	nsLookUp.Flags().StringVar(&hostname, "host", "kubernetes.local", "lookup internet names within the cluster")
 
 	rootCmd.AddCommand(runCmd)
-	runCmd.AddCommand(pingDBCmd, proxy, clientDB, ridesScanCmd, nsLookUp)
+	runCmd.AddCommand(pingDBCmd, proxy, clientDB, ridesScanCmd, nsLookUp, ping)
 }

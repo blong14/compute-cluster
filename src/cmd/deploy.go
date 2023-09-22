@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"cluster/pkg/deploy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
+
+	"cluster/pkg/deploy"
 )
 
 var deployCmd = &cobra.Command{
@@ -24,21 +25,7 @@ var scrutiny = &cobra.Command{
 	Run:   deploy.Scrutiny,
 }
 
-var scrutinyNgxin = &cobra.Command{
-	Use:   "scrutiny-nginx",
-	Short: "Build and Deploy scrutiny-nginx",
-	Run:   deploy.ScrutinyNginx,
-}
-
-var scrutinyVarnish = &cobra.Command{
-	Use:   "scrutiny-varnish",
-	Short: "Build and Deploy scrutiny-varnish",
-	Run:   deploy.ScrutinyVarnish,
-}
-
 func init() {
 	deployCmd.AddCommand(scrutiny)
-	deployCmd.AddCommand(scrutinyNgxin)
-	deployCmd.AddCommand(scrutinyVarnish)
 	rootCmd.AddCommand(deployCmd)
 }
