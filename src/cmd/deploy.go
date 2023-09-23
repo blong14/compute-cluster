@@ -25,7 +25,16 @@ var scrutiny = &cobra.Command{
 	Run:   deploy.Scrutiny,
 }
 
+var jupyterhub = &cobra.Command{
+	Use:   "jupyterhub",
+	Short: "Build and Deploy jupyterhub",
+	Run:   deploy.Jupyterhub,
+}
+
 func init() {
-	deployCmd.AddCommand(scrutiny)
+	deployCmd.AddCommand(
+		jupyterhub,
+		scrutiny,
+	)
 	rootCmd.AddCommand(deployCmd)
 }

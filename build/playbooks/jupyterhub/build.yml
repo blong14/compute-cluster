@@ -1,0 +1,22 @@
+---
+- name: Deploy Jupyterhub
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+      register: clone_status
+    - name: Install jupyterhub
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i jupyterhub compute-cluster/build/charts/jupyterhub \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
