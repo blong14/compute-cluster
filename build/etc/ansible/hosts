@@ -3,6 +3,7 @@ controller-02.cluster
 worker-01.cluster
 worker-02.cluster
 worker-03.cluster
+127.0.0.1
 
 [controller]
 controller-02.cluster
