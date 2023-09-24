@@ -1,13 +1,7 @@
-.PHONY: debug-node update-node upgrade-node
+.PHONY: debug-node upgrade-node
 
 debug-node:
 	ansible-playbook build/playbooks/node/temp.yml -u pi --become -K -vv
 
-update-node:
-	ansible-playbook build/playbooks/node/update.yml -u pi --become -K -vv
-
 upgrade-node:
 	ansible-playbook build/playbooks/node/upgrade-release.yml -f 1 -u pi --become -K -vv
-
-ping-nodes:
-	ansible all -m ansible.builtin.ping -u pi --become -K -vv

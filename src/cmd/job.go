@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
+	"cluster/pkg/jobs"
 	"cluster/pkg/jobs/beam"
 )
 
@@ -18,6 +19,12 @@ var ridesScanCmd = &cobra.Command{
 	Short: "Scan the movr.rides table",
 	Args:  cobra.MinimumNArgs(1),
 	Run:   beam.Rides,
+}
+
+var updateNodeCmd = &cobra.Command{
+	Use:   "update-node",
+	Short: "Update OS pkgs for each node in the cluster",
+	Run:   jobs.UpdateNode,
 }
 
 var (

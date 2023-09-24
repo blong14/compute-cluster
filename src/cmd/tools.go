@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"k8s.io/klog/v2"
-
 	"cluster/pkg/network"
 	"cluster/pkg/tools"
 	"cluster/pkg/tools/database"
+	"github.com/spf13/cobra"
 )
 
 var hostname string
@@ -34,10 +31,4 @@ var ping = &cobra.Command{
 	Use:   "ping",
 	Short: "Ping the cluster",
 	Run:   network.Ping,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		viper.SetConfigFile("config.yml") // file name
-		if err := viper.ReadInConfig(); err != nil {
-			klog.Fatal(err)
-		}
-	},
 }
