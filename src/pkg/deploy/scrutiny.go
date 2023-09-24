@@ -14,6 +14,13 @@ import (
 func Scrutiny(cmd *cobra.Command, _ []string) {
 	v := viper.GetViper()
 	opts := ansible.NewAnsibleOpts(v)
+	opts.PlaybookOpts.AskVaultPassword = true
+	opts.PlaybookOpts.ExtraVarsFile = []string{
+		fmt.Sprintf(
+			"@%s/playbooks/scrutiny/cfg.enc",
+			opts.BuildOpts.BuildDir,
+		),
+	}
 	play := &playbook.AnsiblePlaybookCmd{
 		Playbooks: []string{
 			fmt.Sprintf(
