@@ -1,16 +1,17 @@
-### Nodes
+```bash
+CLI for the compute cluster...
 
-### Local controller setup
-1. Add ssh keys to github.com
-https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+Usage:
+  cluster [command]
 
-Also, see [Advanced Setup](https://rancher.com/docs/k3s/latest/en/advanced/)
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  deploy      Deploy a service to the cluster
+  help        Help about any command
+  run         Run a job in the cluster
 
-### Services
+Flags:
+  -h, --help   help for cluster
 
-1. kubectl dashboard: `kubectl proxy`
-2. cockroachdb dashboard: `./cluster run proxy -r "svc/cockroachdb-public" -p "8080"`
-
-### Tools
-1. cockroach db client connection: `./cluster run connect -d postgres`
-2. cockroachdb client proxy: `./cluster run proxy -p "9000:26257" -r "pod/cockroachdb-0"`
+Use "cluster [command] --help" for more information about a command.
+```
