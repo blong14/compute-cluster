@@ -13,30 +13,30 @@ updates:
   # Not sure how to have dependabot track a top level
   # directory, so adding each individual image here:
   - package-ecosystem: "docker"
-    directory: "./docker/excalidraw"
+    directory: "./build/docker/excalidraw"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/k3s-upgrade"
+    directory: "./build/docker/k3s-upgrade"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/rabbitmq-operator"
+    directory: "./build/docker/rabbitmq-operator"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/rancher"
+    directory: "./build/docker/rancher"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/signal-cli"
+    directory: "./build/docker/signal-cli"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/sqlite3"
+    directory: "./build/docker/sqlite3"
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "./docker/uptime-kuma"
+    directory: "./build/docker/uptime-kuma"
     schedule:
       interval: "daily"

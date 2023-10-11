@@ -1,0 +1,22 @@
+---
+- name: Build slurm cluster
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Install slurm
+      become: yes
+      become_method: sudo
+      apt:
+        name: 'slurm-wlm'
+        state: latest
+        update_cache: yes
+    - name: Start slurm
+      become: yes
+      become_method: sudo
+      command: |
+        systemctl enable munge
+        systemctl start munge
+        systemctl enable slurmd
+        systemctl start slurmd
+        systemctl enable slurmctld
+        systemctl start slurmctld

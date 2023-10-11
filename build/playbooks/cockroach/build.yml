@@ -16,6 +16,6 @@
           - "--exclude=vendor"
           - "--exclude=nimbledeps"
     - name: Build cockroachdb
-      command: "docker build -t blong14/cockroachdb:latest -f compute-cluster/docker/Dockerfile-Cockroachdb compute-cluster/docker"
+      command: "docker build -t blong14/cockroachdb:latest -f compute-cluster/build/docker/Dockerfile-Cockroachdb compute-cluster/build/docker"
     - name: Push image
       command: "docker push blong14/cockroachdb"
