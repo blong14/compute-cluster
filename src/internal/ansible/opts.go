@@ -8,10 +8,11 @@ import (
 )
 
 type BuildOptions struct {
-	BuildDir string
+	BuildDir    string
+	PlaybookDir string
 }
 
-type AnsibleOpts struct {
+type PlayOpts struct {
 	AdhocOpts               *adhoc.AnsibleAdhocOptions
 	ConnOpts                *options.AnsibleConnectionOptions
 	BuildOpts               *BuildOptions
@@ -19,14 +20,15 @@ type AnsibleOpts struct {
 	PlaybookOpts            *playbook.AnsiblePlaybookOptions
 }
 
-func NewAnsibleOpts(v *viper.Viper) AnsibleOpts {
-	return AnsibleOpts{
+func NewAnsibleOpts(v *viper.Viper) PlayOpts {
+	return PlayOpts{
 		ConnOpts: &options.AnsibleConnectionOptions{
 			AskPass: false,
 			User:    v.GetString("deploy.deploy-user"),
 		},
 		BuildOpts: &BuildOptions{
-			BuildDir: v.GetString("deploy.build-dir"),
+			BuildDir:    v.GetString("deploy.build-dir"),
+			PlaybookDir: v.GetString("deploy.playbook-dir"),
 		},
 		PlaybookOpts: &playbook.AnsiblePlaybookOptions{
 			Inventory:        v.GetString("deploy.inventory-file"),

@@ -12,12 +12,12 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	viper.SetConfigFile("config.yml")
-	if err := viper.ReadInConfig(); err != nil {
-		klog.Fatal(err)
-	}
 	cobra.OnInitialize(func() {
 		klog.Info("executing cmd")
+		viper.SetConfigFile("config.yml")
+		if err := viper.ReadInConfig(); err != nil {
+			klog.Fatal(err)
+		}
 	})
 }
 

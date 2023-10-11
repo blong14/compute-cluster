@@ -1,6 +1,0 @@
----
-- name: Uninstall k3s agent
-  hosts: rasppi
-  tasks:
-    - name: Uninstall k3s agent
-      command: /usr/local/bin/k3s-agent-uninstall.sh
