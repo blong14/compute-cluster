@@ -13,6 +13,10 @@ updates:
   # Not sure how to have dependabot track a top level
   # directory, so adding each individual image here:
   - package-ecosystem: "docker"
+    directory: "./build/docker/dnsutils"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
     directory: "./build/docker/excalidraw"
     schedule:
       interval: "daily"
