@@ -1,2 +1,2 @@
-FROM jupyter/minimal-notebook:python-3.11.5
+FROM jupyter/minimal-notebook:python-3.11.6
 
