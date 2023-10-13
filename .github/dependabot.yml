@@ -17,6 +17,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
+    directory: "./build/docker/jupyterhub"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
     directory: "./build/docker/k3s-upgrade"
     schedule:
       interval: "daily"
