@@ -8,7 +8,7 @@ image:
   repository: jupyter/minimal-notebook
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: python-3.11.5
+  tag: python-3.11.6
 
 imagePullSecrets: []
 nameOverride: ""
