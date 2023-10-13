@@ -1,0 +1,15 @@
+---
+- name: Build postgres
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Apply system-upgrade-controller to k8s cluster
+      command: "kubectl apply -f https://raw.githubusercontent.com/rancher/system-upgrade-controller/master/manifests/system-upgrade-controller.yaml"
+    - name: Copy upgrade plan
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/k3s-upgrade/plan.yml
+        dest: /home/pi/k3s-upgrade/plan.yml
+    - name: Apply plan to k8s cluster
+      command: "kubectl apply -f /home/pi/k3s-upgrade/plan.yml"
