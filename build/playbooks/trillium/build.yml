@@ -1,0 +1,21 @@
+---
+- name: Deploy trillium
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+    - name: Install trillium
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i trillium-notes -n trillium compute-cluster/build/charts/trillium \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
