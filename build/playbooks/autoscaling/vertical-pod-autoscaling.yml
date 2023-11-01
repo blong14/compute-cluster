@@ -8,23 +8,3 @@ spec:
     apiVersion: "apps/v1"
     kind: Deployment
     name: scrutiny
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: scrutiny-nginx-vpa
-spec:
-  targetRef:
-    apiVersion: "apps/v1"
-    kind: Deployment
-    name: scrutiny-nginx
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: scrutiny-varnish-vpa
-spec:
-  targetRef:
-    apiVersion: "apps/v1"
-    kind: Deployment
-    name: scrutiny-varnish
