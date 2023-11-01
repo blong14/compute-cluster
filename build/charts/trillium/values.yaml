@@ -90,7 +90,7 @@ affinity:
                 - arm64
 
 volumeMounts:
-  - mountPath: /home/node/trillium-data
+  - mountPath: /home/node/trilium-data
     name: trillium
 
 volumes:
