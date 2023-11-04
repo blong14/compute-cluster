@@ -34,7 +34,6 @@ var ping = &cobra.Command{
 			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
 			StdoutCallback:             "oneline",
 		}
-		klog.Info(play.String())
 		if err := play.Run(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
@@ -58,7 +57,6 @@ var updateNodeCmd = &cobra.Command{
 			Options:                    opts.PlaybookOpts,
 			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
 		}
-		klog.Info(play.String())
 		if err := play.Run(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
@@ -82,7 +80,6 @@ var releaseUpgrade = &cobra.Command{
 			Options:                    opts.PlaybookOpts,
 			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
 		}
-		klog.Info(play.String())
 		if err := play.Run(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}

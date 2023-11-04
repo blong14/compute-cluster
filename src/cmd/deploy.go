@@ -49,7 +49,6 @@ var deployCmd = &cobra.Command{
 			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
 			StdoutCallback:             "yaml",
 		}
-		klog.Info(play.String())
 		if err := play.Run(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
