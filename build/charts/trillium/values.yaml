@@ -8,7 +8,7 @@ image:
   repository: zadam/trilium
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 0.61-latest
+  tag: 0.62-latest
 
 imagePullSecrets: []
 nameOverride: ""
