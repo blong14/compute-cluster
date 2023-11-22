@@ -12,11 +12,11 @@ image:
 
 env:
   - name: SERVER_NAME
-    value: ":80"
+    value: ""
   - name: MERCURE_PUBLISHER_JWT_KEY
-    value: "!ChangeThisMercureHubJWTSecretKey!"
+    value: ""
   - name: MERCURE_SUBSCRIBER_JWT_KEY
-    value: "!ChangeThisMercureHubJWTSecretKey!"
+    value: ""
 
 imagePullSecrets: []
 nameOverride: ""
