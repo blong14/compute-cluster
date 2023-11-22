@@ -17,8 +17,8 @@ env:
     value: ""
   - name: MERCURE_SUBSCRIBER_JWT_KEY
     value: ""
-  - name: EXTRA_DIRECTIVES
-    values: "cors_origins http://scrutiny.cluster"
+  - name: GLOBAL_OPTIONS
+    values: ""
 
 imagePullSecrets: []
 nameOverride: ""
