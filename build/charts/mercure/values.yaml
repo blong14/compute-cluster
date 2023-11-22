@@ -12,7 +12,7 @@ image:
 
 env:
   - name: SERVER_NAME
-    value: :80
+    value: ':80'
   - name: MERCURE_PUBLISHER_JWT_KEY
     value: !ChangeThisMercureHubJWTSecretKey!
   - name: MERCURE_SUBSCRIBER_JWT_KEY
