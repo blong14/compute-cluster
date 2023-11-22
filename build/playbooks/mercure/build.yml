@@ -22,5 +22,6 @@
         --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
         --set env.SERVER_NAME=:80 \
         --set env.MERCURE_PUBLISHER_JWT_KEY={{ pub_key }} \
-        --set env.MERCURE_SUBSCRIBER_JWT_KEY={{ sub_key }}
+        --set env.MERCURE_SUBSCRIBER_JWT_KEY={{ sub_key }} \
+        --set env.EXTRA_DIRECTIVES="cors_origins http://scrutiny.cluster"
       when: clone_status.changed
