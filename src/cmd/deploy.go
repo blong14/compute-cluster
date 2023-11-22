@@ -25,13 +25,14 @@ var deployCmd = &cobra.Command{
 		v := viper.GetViper()
 		opts := ansible.NewAnsibleOpts(v)
 		switch srvc {
-		case "scrutiny":
+		case "scrutiny", "mercure":
 			opts.PlaybookOpts.AskVaultPassword = true
 			opts.PlaybookOpts.ExtraVarsFile = []string{
 				fmt.Sprintf(
-					"@%s/%s/scrutiny/cfg.enc",
+					"@%s/%s/%s/cfg.enc",
 					opts.BuildOpts.BuildDir,
 					opts.BuildOpts.PlaybookDir,
+					srvc,
 				),
 			}
 		}
