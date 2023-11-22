@@ -12,11 +12,11 @@ image:
 
 env:
   - name: SERVER_NAME
-    value: ':80'
+    value: ":80"
   - name: MERCURE_PUBLISHER_JWT_KEY
-    value: !ChangeThisMercureHubJWTSecretKey!
+    value: "!ChangeThisMercureHubJWTSecretKey!"
   - name: MERCURE_SUBSCRIBER_JWT_KEY
-    value: !ChangeThisMercureHubJWTSecretKey!
+    value: "!ChangeThisMercureHubJWTSecretKey!"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -49,7 +49,7 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
   className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
