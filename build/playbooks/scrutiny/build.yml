@@ -99,5 +99,6 @@
         --set env.PG_PORT=5432 \
         --set env.PG_USER={{ pg_user }} \
         --set env.PG_PASSWORD={{ pg_password }} \
-        --set env.PG_DATABASE=scrutiny
+        --set env.PG_DATABASE=scrutiny \
+        --set env.JWT_KEY={{ jwt_key }}
       when: clone_status.changed
