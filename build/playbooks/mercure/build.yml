@@ -1,0 +1,21 @@
+---
+- name: Deploy mercure
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+    - name: Install mercure
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i mercure compute-cluster/build/charts/mercure \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
