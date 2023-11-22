@@ -37,7 +37,7 @@ spec:
           command: [{{ .Values.command.value }}]
         {{- end }}
           args:
-        {{- range $value := .Values.args }}
+        {{- range $value := .Values.command.args }}
             - {{ $value }}
         {{- end}}
           ports:
