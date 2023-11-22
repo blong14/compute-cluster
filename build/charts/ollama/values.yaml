@@ -18,8 +18,7 @@ command:
   enabled: true
   value: ollama
   args:
-    - run
-    - orca-mini
+    - serve
 
 serviceAccount:
   # Specifies whether a service account should be created
