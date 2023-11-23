@@ -17,8 +17,6 @@ env:
     value: ""
   - name: MERCURE_SUBSCRIBER_JWT_KEY
     value: ""
-  - name: GLOBAL_OPTIONS
-    values: ""
 
 imagePullSecrets: []
 nameOverride: ""
