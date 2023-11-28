@@ -101,6 +101,6 @@
         --set env.PG_PASSWORD={{ pg_password }} \
         --set env.PG_DATABASE=scrutiny \
         --set env.RMQ_USER={{ rmq_user }} \
-        --set env.RMQ_PASSWORD={{ rmp_password }} \
+        --set env.RMQ_PASSWORD={{ rmq_password }} \
         --set env.JWT_KEY={{ jwt_key }}
       when: clone_status.changed
