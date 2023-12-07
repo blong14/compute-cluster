@@ -1,0 +1,58 @@
+---
+- name: Build logconsumer
+  hosts: arm-build
+  remote_user: pi
+  tasks:
+    - name: Ensure docker
+      become: yes
+      become_method: sudo
+      command: docker version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+      register: clone_status
+    - name: Build and Push logconsumer
+      become: yes
+      become_method: sudo
+      ansible.builtin.docker_image:
+        build:
+          dockerfile: src/internal/c/logconsumer/Dockerfile
+          path: compute-cluster
+        name: blong14/logconsumer
+        push: true
+        source: build
+        tag: "{{ item }}"
+        force_tag: yes
+        force_source: yes
+      when: clone_status.changed
+      with_items:
+        - arm-{{ clone_status.after }}
+        - arm-latest
+- name: Deploy logconsumer
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+      register: clone_status
+    - name: Install logconsumer
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i logconsumer compute-cluster/charts/logconsumer \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set image.tag=arm-{{ clone_status.after }} \
+        --set env.RMQ_USER={{ rmq_user }} \
+        --set env.RMQ_PASSWORD={{ rmq_password }}
+      when: clone_status.changed

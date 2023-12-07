@@ -9,6 +9,8 @@
 __pycache__
 src/.deps/*
 src/venv
+src/internal/c/logconsumer/vendor
+src/internal/c/logconsumer/.deps
 .venv
 venv
 
