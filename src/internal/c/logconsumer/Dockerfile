@@ -16,6 +16,7 @@ WORKDIR app
 COPY Makefile /app/Makefile
 COPY main.c /app/main.c
 
+ENV VCPKG_FORCE_SYSTEM_BINARIES true
 RUN make all
 
 FROM debian:bookworm-slim
