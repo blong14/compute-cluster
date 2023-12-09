@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR app
 
-COPY Makefile /app/Makefile
-COPY main.c /app/main.c
-
 ENV VCPKG_FORCE_SYSTEM_BINARIES true
-RUN make all
+COPY Makefile /app/Makefile
+RUN make .deps
+
+COPY main.c /app/main.c
+RUN make logconsumer
 
 FROM debian:bookworm-slim
 
