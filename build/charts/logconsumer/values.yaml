@@ -91,7 +91,7 @@ affinity:
 
 env:
   - name: RMQ_HOST
-    value: rabbitmq.default.svc.cluster.local
+    value: ""
   - name: RMQ_USER
     value: ""
   - name: RMQ_PASSWORD
