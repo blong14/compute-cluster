@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall
-LDFLAGS = -Lvendor/vcpkg/installed/x64-linux/lib -lrabbitmq
-INCLUDES = -Ivendor/vcpkg/installed/x64-linux/include
+LDFLAGS = -Lvendor/vcpkg/installed/arm64-linux/lib -lrabbitmq
+INCLUDES = -Ivendor/vcpkg/installed/arm64-linux/include
 
 .deps/setup:
 	@mkdir .deps
