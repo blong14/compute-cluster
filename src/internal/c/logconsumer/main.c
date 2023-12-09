@@ -156,9 +156,8 @@ void consume(amqp_connection_state_t conn)
 			amqp_bytes_t body = envelope.message.body;
 			if(!amqp_basic_ack(conn, envelope.channel, envelope.delivery_tag, 0)) {
 				fprintf(stderr, "basic ack failed %s\n", (const char *)body.bytes);
-				puts("basic ack failed");
 			}
-			fprintf(stdout, "message received %s", (const char *)body.bytes);
+			fprintf(stdout, "message received %s\n", (const char *)body.bytes);
 			amqp_destroy_envelope(&envelope);
 		}
 	}
