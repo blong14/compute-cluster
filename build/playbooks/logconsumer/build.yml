@@ -50,7 +50,7 @@
       become: yes
       become_method: sudo
       command: |
-        helm upgrade -i logconsumer compute-cluster/charts/logconsumer \
+        helm upgrade -i logconsumer compute-cluster/build/charts/logconsumer \
         --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
         --set image.tag=arm-{{ clone_status.after }} \
         --set env.RMQ_USER={{ rmq_user }} \
