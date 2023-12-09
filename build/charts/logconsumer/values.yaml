@@ -88,3 +88,11 @@ affinity:
               operator: In
               values:
                 - arm64
+
+env:
+  - name: RMQ_HOST
+    value: rabbitmq.default.svc.cluster.local
+  - name: RMQ_USER
+    value: ""
+  - name: RMQ_PASSWORD
+    value: ""
