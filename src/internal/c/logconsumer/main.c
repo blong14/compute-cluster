@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include "amqp.h"
 #include "amqp_tcp_socket.h"
@@ -16,26 +18,37 @@ typedef struct {
 
 amqp_connection_state_t rmq_connect(rmq_env);
 
-amqp_bytes_t rmq_declare(amqp_connection_state_t, const char* queue);
+amqp_bytes_t rmq_declare(const char* queue);
 
-void rmq_consume(amqp_connection_state_t, amqp_bytes_t);
+void rmq_consume();
 
-void rmq_close(amqp_connection_state_t, amqp_bytes_t);
+void rmq_close();
 
 bool rmq_check_reply(const amqp_rpc_reply_t*);
 
 rmq_env new_rmq_env(void);
 
+void sig_handler(int);
+
+amqp_connection_state_t conn;
+amqp_bytes_t queuename;
+
 int main(void) {
+    struct sigaction const sa = {.sa_handler = sig_handler, .sa_flags = 0, .sa_mask = 0};
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("signal handling error");
+        exit(EXIT_FAILURE);
+    }
+
     const rmq_env env = new_rmq_env();
 
-    const amqp_connection_state_t conn = rmq_connect(env);
+    conn = rmq_connect(env);
 
-    const amqp_bytes_t queuename = rmq_declare(conn, env.queue);
+    queuename = rmq_declare(env.queue);
 
-    rmq_consume(conn, queuename);
+    rmq_consume();
 
-    rmq_close(conn, queuename);
+    rmq_close();
 
     return EXIT_SUCCESS;
 }
@@ -80,7 +93,7 @@ amqp_connection_state_t rmq_connect(const rmq_env env) {
     return conn;
 }
 
-amqp_bytes_t rmq_declare(const amqp_connection_state_t conn, const char* queue) {
+amqp_bytes_t rmq_declare(const char* queue) {
     const amqp_queue_declare_ok_t* queue_declare_ok = amqp_queue_declare(
         conn, 1, amqp_cstring_bytes(queue), 0, 0, 0, 1, amqp_empty_table);
     const amqp_rpc_reply_t reply = amqp_get_rpc_reply(conn);
@@ -98,7 +111,7 @@ amqp_bytes_t rmq_declare(const amqp_connection_state_t conn, const char* queue) 
     return queuename;
 }
 
-void rmq_consume(amqp_connection_state_t conn, amqp_bytes_t queuename) {
+void rmq_consume() {
     fprintf(stdout, "consuming on %s\n", (const char *) queuename.bytes);
 
     amqp_basic_consume(conn, 1, queuename, amqp_empty_bytes, 0, 1, 0,
@@ -153,16 +166,13 @@ void rmq_consume(amqp_connection_state_t conn, amqp_bytes_t queuename) {
             }
         } else {
             amqp_bytes_t body = envelope.message.body;
-            if (!amqp_basic_ack(conn, envelope.channel, envelope.delivery_tag, 0)) {
-                fprintf(stderr, "basic ack failed %s\n", (const char *) body.bytes);
-            }
             fprintf(stdout, "message received %s\n", (const char *) body.bytes);
             amqp_destroy_envelope(&envelope);
         }
     }
 }
 
-void rmq_close(amqp_connection_state_t conn, amqp_bytes_t queuename) {
+void rmq_close() {
     amqp_bytes_free(queuename);
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
@@ -210,5 +220,27 @@ bool rmq_check_reply(const amqp_rpc_reply_t* reply) {
         default:
             fprintf(stderr, "AMQP unknown exception\n");
             return false;
+    }
+}
+
+void sig_handler(int sig) {
+    /**
+     * NB: can only use "async" safe calls here.
+     * write instead of printf, for example.
+     * See https://beej.us/guide/bgipc/html/#signals
+     */
+    switch (sig) {
+        case SIGINT:
+        case SIGHUP:
+        case SIGTERM:
+        case SIGQUIT:
+            const char msg[] = "signal handled\n";
+            write(0, msg, sizeof(msg));
+            rmq_close();
+            exit(EXIT_SUCCESS);
+        default:
+            const char errmsg[] = "unknown signal handled\n";
+            write(0, errmsg, sizeof(errmsg));
+            exit(EXIT_FAILURE);
     }
 }
