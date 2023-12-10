@@ -62,7 +62,7 @@ amqp_connection_state_t rmq_connect(const rmq_env env) {
     amqp_connection_state_t conn;
     amqp_socket_t* socket;
 
-    printf("opening socket @ amqp://%s:%s\n", env.host, env.port);
+    fprintf(stderr, "opening socket @ amqp://%s:%s\n", env.host, env.port);
 
     if ((conn = amqp_new_connection()) == NULL) {
         perror("error creating connection");
@@ -170,7 +170,7 @@ void rmq_consume() {
             }
         } else {
             amqp_bytes_t body = envelope.message.body;
-            fprintf(stdout, "message received %s\n", (const char *) body.bytes);
+            fprintf(stderr, "message received %s\n", (const char *) body.bytes);
             amqp_destroy_envelope(&envelope);
         }
     }
