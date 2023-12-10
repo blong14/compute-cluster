@@ -19,8 +19,11 @@
       become_method: sudo
       ansible.builtin.docker_image:
         build:
+          args:
+            ARCH: arm64
+            SRVC: logconsumer
           dockerfile: Dockerfile
-          path: compute-cluster/src/internal/c/logconsumer
+          path: compute-cluster/src/internal/c
         name: blong14/logconsumer
         push: true
         source: build

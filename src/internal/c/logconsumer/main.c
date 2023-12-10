@@ -34,10 +34,15 @@ amqp_connection_state_t conn;
 amqp_bytes_t queuename;
 
 int main(void) {
-    struct sigaction const sa = {.sa_handler = sig_handler, .sa_flags = 0, .sa_mask = 0};
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
-        perror("signal handling error");
-        exit(EXIT_FAILURE);
+    struct sigaction sa;
+    sa.sa_handler = sig_handler;
+
+    int const signals[4] = {SIGHUP, SIGINT, SIGTERM, SIGQUIT};
+    for (int i = 0; i < 4; i++) {
+        if (sigaction(signals[i], &sa, NULL) == -1) {
+            perror("signal handling error");
+            exit(EXIT_FAILURE);
+        }
     }
 
     const rmq_env env = new_rmq_env();
@@ -72,7 +77,6 @@ amqp_connection_state_t rmq_connect(const rmq_env env) {
     const int status = amqp_socket_open(socket, env.host, atoi(env.port));
     if (status != AMQP_STATUS_OK) {
         perror("error opening TCP socket");
-        printf("%d/n", status);
         exit(status);
     }
 
@@ -112,7 +116,7 @@ amqp_bytes_t rmq_declare(const char* queue) {
 }
 
 void rmq_consume() {
-    fprintf(stdout, "consuming on %s\n", (const char *) queuename.bytes);
+    fprintf(stderr, "consuming on %s\n", (const char *) queuename.bytes);
 
     amqp_basic_consume(conn, 1, queuename, amqp_empty_bytes, 0, 1, 0,
                        amqp_empty_table);

@@ -13,17 +13,21 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR app
 
+ARG SRVC=logconsumer
+ARG ARCH=x64
+
 ENV VCPKG_FORCE_SYSTEM_BINARIES true
-COPY Makefile /app/Makefile
+
+COPY Makefile /app
 RUN make .deps
 
-COPY main.c /app/main.c
-RUN make logconsumer
+COPY . /app
+RUN ARCH=${ARCH} make ${SRVC}
 
 FROM debian:bookworm-slim
 
 WORKDIR app
 
-COPY --from=build /app/logconsumer /app/logconsumer
+COPY --from=build /app/.bin/${SRVC} /app/${SRVC}
 
-CMD ["/app/logconsumer"]
+CMD ["ls"]
