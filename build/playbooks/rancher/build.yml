@@ -20,4 +20,4 @@
         --namespace cattle-system \
         --set hostname=compute.cluster \
         --set replicas=1 \
-        --set rancherImageTag=v2.8.0
+        --set rancherImageTag=v2.7.8
