@@ -5,6 +5,6 @@ TARGET = logconsumer
 	./vendor/vcpkg/vcpkg install librabbitmq
 	@touch $@
 
-$(TARGET): $(SRCS) $(TARGET)/main.c
+$(TARGET): .deps/$(TARGET) $(SRCS) $(TARGET)/main.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o .bin/$@ $^ $(LDFLAGS)
 
