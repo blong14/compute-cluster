@@ -2,7 +2,8 @@ ARCH ?= x64
 CC = gcc
 CFLAGS = -Wall -Wextra
 LDFLAGS = -Lvendor/vcpkg/installed/$(ARCH)-linux/lib
-INCLUDES = -Ivendor/vcpkg/installed/$(ARCH)-linux/include
+INCLUDES = -I$(PWD) -Ivendor/vcpkg/installed/$(ARCH)-linux/include
+SRCS = *.c
 
 .deps/setup:
 	@mkdir .deps

@@ -8,6 +8,8 @@
 #include "amqp.h"
 #include "amqp_tcp_socket.h"
 
+#include "../log.h"
+
 typedef struct {
     const char* host;
     const char* port;
@@ -45,6 +47,8 @@ int main(void) {
         }
     }
 
+    logger("logconsumer", "started...");
+
     const rmq_env env = new_rmq_env();
 
     conn = rmq_connect(env);
@@ -62,7 +66,7 @@ amqp_connection_state_t rmq_connect(const rmq_env env) {
     amqp_connection_state_t conn;
     amqp_socket_t* socket;
 
-    fprintf(stderr, "opening socket @ amqp://%s:%s\n", env.host, env.port);
+    logger("rmq_connect", "connected...");
 
     if ((conn = amqp_new_connection()) == NULL) {
         perror("error creating connection");
@@ -116,7 +120,12 @@ amqp_bytes_t rmq_declare(const char* queue) {
 }
 
 void rmq_consume() {
-    fprintf(stderr, "consuming on %s\n", (const char *) queuename.bytes);
+    size_t msg_len = 14+queuename.len;
+    char* msg = malloc(msg_len * sizeof(char));
+
+    snprintf(msg, msg_len, "consuming on %s\n", (const char *) queuename.bytes);
+    logger("rmq_consume", msg);
+    free(msg);
 
     amqp_basic_consume(conn, 1, queuename, amqp_empty_bytes, 0, 1, 0,
                        amqp_empty_table);
@@ -170,8 +179,13 @@ void rmq_consume() {
             }
         } else {
             amqp_bytes_t body = envelope.message.body;
-            fprintf(stderr, "message received %s\n", (const char *) body.bytes);
+            char* payload = malloc(body.len * sizeof(char) + 1);
+
+            snprintf(payload, body.len + 1, "%s\n", (const char *) body.bytes);
+            logger("rmq_consume: recv", payload);
+
             amqp_destroy_envelope(&envelope);
+            free(payload);
         }
     }
 }
