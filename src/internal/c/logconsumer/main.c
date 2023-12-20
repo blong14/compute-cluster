@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "amqp.h"
+#include "cjson/cJSON.h"
 
 #include "../log.h"
 #include "../rmq.h"
@@ -103,13 +104,12 @@ void rmq_consume() {
             }
         } else {
             amqp_bytes_t body = envelope.message.body;
-            char* payload = malloc(body.len * sizeof(char) + 1);
+            cJSON* data = cJSON_ParseWithLength(body.bytes, body.len);
 
-            snprintf(payload, body.len + 1, "%s\n", (const char *) body.bytes);
-            logger("rmq_consume: recv", payload);
+            logger("rmq_consume: recv", data->string);
 
             amqp_destroy_envelope(&envelope);
-            free(payload);
+            cJSON_free(data);
         }
     }
 }
