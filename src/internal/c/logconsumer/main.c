@@ -106,7 +106,7 @@ void rmq_consume() {
             amqp_bytes_t body = envelope.message.body;
             cJSON* data = cJSON_ParseWithLength(body.bytes, body.len);
 
-            logger("rmq_consume: recv", data->string);
+            logger("rmq_consume: recv", cJSON_Print(data));
 
             amqp_destroy_envelope(&envelope);
             cJSON_free(data);
