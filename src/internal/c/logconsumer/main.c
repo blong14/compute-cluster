@@ -114,7 +114,7 @@ void rmq_consume() {
     }
 }
 
-void sig_handler(int sig) {
+void sig_handler(const int sig) {
     /**
      * NB: can only use "async" safe calls here.
      * write instead of printf, for example.

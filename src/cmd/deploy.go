@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"cluster/internal/ansible"
 	"errors"
 	"fmt"
 
@@ -9,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
+
+	"cluster/internal/ansible"
 )
 
 var deployCmd = &cobra.Command{
