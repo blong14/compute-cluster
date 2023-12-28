@@ -51,7 +51,7 @@ func (l *LogService) Last(ctx context.Context, req *ReadReq) (*LogRow, error) {
 		ctx,
 		"select host, created_at from logs where host = $1 and created_at > (current_timestamp - interval '10 minutes') order by created_at desc",
 		req.Host,
-	).Scan(&logRow)
+	).Scan(&logRow.Host, &logRow.CreatedAT)
 	return &logRow, err
 }
 
