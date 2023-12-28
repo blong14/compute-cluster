@@ -1,0 +1,43 @@
+---
+- name: Build agent
+  hosts: rasppi
+  remote_user: pi
+  tasks:
+    - name: Ensure git
+      become: yes
+      become_method: sudo
+      command: git --version
+    - name: Ensure zig
+      become: yes
+      become_method: sudo
+      command: zig version
+    - name: Ensure make
+      become: yes
+      become_method: sudo
+      command: make --version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+      register: clone_status
+    - name: Build agent
+      become: yes
+      become_method: sudo
+      when: clone_status.changed
+      command: make -C compute-cluster/src build-zig
+    - name: Copy agent
+      become: yes
+      become_method: sudo
+      when: clone_status.changed
+      command: mv compute-cluster/bin/zagent /usr/local/bin
+- name: Deploy agent
+  hosts: rasppi
+  remote_user: pi
+  tasks:
+    - name: Create agent cron
+      ansible.builtin.cron:
+        name: "node agent"
+        minute: "*/5"
+        job: "HOST=http://collector.cluster zagent > /dev/null"

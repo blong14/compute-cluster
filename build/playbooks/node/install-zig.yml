@@ -1,0 +1,9 @@
+- name: Install zig
+  become: yes
+  become_method: sudo
+  ansible.builtin.shell: |
+    ARCH=aarch64
+    ZIG_VERSION=0.11.0
+    ZIG_URL=https://ziglang.org/download/${ZIG_VERSION}/zig-linux-${ARCH}-${ZIG_VERSION}.tar.xz
+    curl -o zig.tar.xz "$ZIG_URL" &&
+    tar -xf zig.tar.xz -C /usr/local/bin --strip-components 1

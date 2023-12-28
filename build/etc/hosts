@@ -10,6 +10,7 @@ ff02::3 ip6-allhosts
 
 100.91.72.78    controller-02.cluster
 100.91.72.78    compute.cluster
+100.91.72.78    collector.cluster
 100.116.127.52  worker-01.cluster
 100.87.132.48   worker-02.cluster
 100.91.208.123  worker-03.cluster
