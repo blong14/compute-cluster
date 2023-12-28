@@ -133,7 +133,7 @@ func MustConnectDB() *sql.DB {
 func MigrateDB(db *sql.DB) {
 	log.Println("migrating database")
 	if _, err := db.Exec(
-		"create table if not exists logs (id integer not null primary key autoincrement, host varchar)",
+		"create table if not exists logs (id serial not null primary key, host varchar(255) not null, created_at timestamp not null)",
 	); err != nil {
 		log.Fatalf("not able to migrate database %s\n", err)
 	}
