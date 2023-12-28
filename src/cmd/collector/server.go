@@ -18,6 +18,7 @@ type ErrorResponse struct {
 
 type HealthzResponse struct {
 	Status string
+	Error  string
 }
 
 func HealthzRead(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +30,44 @@ func HealthzRead(w http.ResponseWriter, r *http.Request) {
 		MustWriteJSON(w, r, http.StatusMethodNotAllowed, ErrorResponse{Error: "not allowed"})
 	}
 	klog.Infof("GET %s in %s\n", r.URL, time.Since(start))
+}
+
+func LogRead(srvc *LogService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			errResp := ErrorResponse{Error: "method not allowed"}
+			MustWriteJSON(w, r, http.StatusMethodNotAllowed, errResp)
+			return
+		}
+		start := time.Now()
+		urlQuery := r.URL.Query()
+		if !urlQuery.Has("host") {
+			err := ErrorResponse{Error: "missing host"}
+			MustWriteJSON(w, r, http.StatusBadRequest, err)
+			return
+		}
+		host := urlQuery.Get("host")
+		ctx, cancel := context.WithCancel(r.Context())
+		defer cancel()
+		last, err := srvc.Last(ctx, &ReadReq{Host: host})
+		var (
+			status int
+			resp   HealthzResponse
+		)
+		switch {
+		case err == sql.ErrNoRows:
+			status = http.StatusNotFound
+			resp = HealthzResponse{Status: "not ok", Error: "rows not found"}
+		case last == nil, err != nil:
+			status = http.StatusInternalServerError
+			resp = HealthzResponse{Status: "not ok", Error: "internal error"}
+		default:
+			status = http.StatusOK
+			resp = HealthzResponse{Status: "ok"}
+		}
+		MustWriteJSON(w, r, status, resp)
+		klog.Infof("GET (%d) %s for %s in %s\n", status, r.URL, host, time.Since(start))
+	}
 }
 
 type LogCreateRequest struct {
@@ -74,8 +113,9 @@ type Handler map[string]http.HandlerFunc
 func HTTPHandlers(db *sql.DB) Handler {
 	srvc := LogService{db: db}
 	return map[string]http.HandlerFunc{
-		"/healthz": HealthzRead,
-		"/log":     LogCreate(&srvc),
+		"/healthz":  HealthzRead,
+		"/log":      LogCreate(&srvc),
+		"/log/last": LogRead(&srvc),
 	}
 }
 
