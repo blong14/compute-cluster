@@ -4,10 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"k8s.io/klog/v2"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -17,8 +15,9 @@ type ErrorResponse struct {
 }
 
 type HealthzResponse struct {
-	Status string
 	Error  string
+	Host   string
+	Status string
 }
 
 func HealthzRead(w http.ResponseWriter, r *http.Request) {
@@ -56,14 +55,16 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 		)
 		switch {
 		case err == sql.ErrNoRows:
+			klog.Error(err)
 			status = http.StatusNotFound
 			resp = HealthzResponse{Status: "not ok", Error: "rows not found"}
-		case last == nil, err != nil:
+		case err != nil:
+			klog.Error(err)
 			status = http.StatusInternalServerError
-			resp = HealthzResponse{Status: "not ok", Error: "internal error"}
+			resp = HealthzResponse{Status: "not ok", Error: err.Error()}
 		default:
 			status = http.StatusOK
-			resp = HealthzResponse{Status: "ok"}
+			resp = HealthzResponse{Status: "ok", Host: last.Host}
 		}
 		MustWriteJSON(w, r, status, resp)
 		klog.Infof("GET (%d) %s for %s in %s\n", status, r.URL, host, time.Since(start))
@@ -154,38 +155,5 @@ func MustWriteJSON(w http.ResponseWriter, _ *http.Request, status int, resp inte
 	}
 	if _, err := w.Write(jsonResp); err != nil {
 		klog.Fatalf("Error happened in writing JSON. Err: %s", err)
-	}
-}
-
-func MustConnectDB() *sql.DB {
-	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		host = "localhost"
-	}
-	database := os.Getenv("POSTGRES_DATABASE")
-	if database == "" {
-		database = "logs"
-	}
-	user := os.Getenv("POSTGRES_USER")
-	if user == "" {
-		user = "postgres"
-	}
-	password := os.Getenv("POSTGRES_PASSWORD")
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable",
-		user, password, host, database,
-	)
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		klog.Fatal(err)
-	}
-	return db
-}
-
-func MigrateDB(db *sql.DB) {
-	klog.Info("migrating database")
-	if _, err := db.Exec(
-		"create table if not exists logs (id serial not null primary key, host varchar(255) not null, created_at timestamp not null)",
-	); err != nil {
-		klog.Fatalf("not able to migrate database %s\n", err)
 	}
 }
