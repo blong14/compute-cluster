@@ -121,7 +121,7 @@ func MustConnectDB() *sql.DB {
 	}
 	password := os.Getenv("POSTGRES_PASSWORD")
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable",
-		host, database, user, password,
+		user, password, host, database,
 	)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
