@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -18,7 +19,7 @@ type AppendReq struct {
 
 func (l *LogService) Append(ctx context.Context, req *AppendReq) error {
 	result, err := l.db.ExecContext(
-		ctx, "insert into logs(host) values(?)", req.Host)
+		ctx, "insert into logs(host, created_at) values($1, $2)", req.Host, time.Now().UTC())
 	if err != nil {
 		return err
 	}
