@@ -12,12 +12,12 @@ src/venv
 src/internal/c/vendor
 src/internal/c/.bin
 src/internal/c/.deps
+src/zig-cache
 .venv
 venv
 
 # binaries
-bin/cluster
-cluster
+bin/z*
 
 # Random data
 data/*

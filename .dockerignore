@@ -1,4 +1,8 @@
 .git/*
+.deps/*
 
 bin/*
 etc/*
+
+src/zig-cache
+src/internal/c

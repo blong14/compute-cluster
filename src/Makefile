@@ -1,5 +1,5 @@
+BIN      := $(PWD)/../bin
 PACKAGES := . ./cmd/... ./internal/...
-GOBIN    := $(PWD)/../bin
 
 .DEFAULT_GOAL := test-and-lint
 
@@ -18,8 +18,12 @@ build-go: .deps/go
 	@echo "[build] building go code..."
 	go install cluster
 
+build-zig:
+	@echo "[build] building zig code..."
+	zig build -p ..
+
 .PHONY: build
-build: build-go
+build: build-go build-zig
 	@echo "[build] complete..."
 
 .PHONE: test-and-lint
@@ -30,8 +34,12 @@ test-go: .deps/go
 	@echo "[test] testing go code..."
 	go test -v -cover -race ./...
 
+test-zig:
+	@echo "[test] testing zig code..."
+	zig build test
+
 .PHONY: test
-test: test-go
+test: test-go test-zig
 	@echo "[test] complete..."
 
 cover: .deps/go
@@ -54,4 +62,3 @@ lint-go: .deps/go
 .PHONY: lint
 lint: lint-go
 	@echo "[lint] complete..."
-	
