@@ -26,28 +26,36 @@ type HealthzResponse struct {
 
 func HealthzService(ctx context.Context, srvc *LogService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body := r.Body
-		if body == nil {
-			resp := ErrorResponse{Error: "server error", Status: http.StatusBadRequest}
-			MustWriteJSON(w, r, http.StatusBadRequest, resp)
-			return
-		}
-		defer func() { _ = body.Close() }()
-		decoder := json.NewDecoder(body)
-		var req HealthzRequest
-		if err := decoder.Decode(&req); err != nil {
-			resp := ErrorResponse{Error: err.Error()}
-			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
-			return
+		switch r.Method {
+		case http.MethodGet:
+			MustWriteJSON(w, r, http.StatusOK, HealthzResponse{Status: "ok"})
+		case http.MethodPost:
+			body := r.Body
+			if body == nil {
+				resp := ErrorResponse{Error: "server error", Status: http.StatusBadRequest}
+				MustWriteJSON(w, r, http.StatusBadRequest, resp)
+				return
+			}
+			defer func() { _ = body.Close() }()
+			decoder := json.NewDecoder(body)
+			var req HealthzRequest
+			if err := decoder.Decode(&req); err != nil {
+				resp := ErrorResponse{Error: err.Error()}
+				MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+				return
 
+			}
+			log.Printf("received heart beat from %s\n", req.Host)
+			if err := srvc.Append(ctx, &AppendReq{Host: req.Host}); err != nil {
+				resp := ErrorResponse{Error: err.Error()}
+				MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+				return
+			}
+			MustWriteJSON(w, r, http.StatusCreated, HealthzResponse{Status: "ok"})
+		default:
+			errResp := ErrorResponse{Error: "method not allowed"}
+			MustWriteJSON(w, r, http.StatusMethodNotAllowed, errResp)
 		}
-		log.Printf("received heart beat from %s\n", req.Host)
-		if err := srvc.Append(ctx, &AppendReq{Host: req.Host}); err != nil {
-			resp := ErrorResponse{Error: err.Error()}
-			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
-			return
-		}
-		MustWriteJSON(w, r, http.StatusCreated, HealthzResponse{Status: "ok"})
 	}
 }
 
