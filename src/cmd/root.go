@@ -16,7 +16,7 @@ func init() {
 		klog.Info("executing cmd")
 		viper.SetConfigFile("config.yml")
 		if err := viper.ReadInConfig(); err != nil {
-			klog.Fatal(err)
+			klog.Error(err)
 		}
 	})
 }
