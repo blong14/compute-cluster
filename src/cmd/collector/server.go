@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
+	"k8s.io/klog/v2"
 	"net/http"
 	"os"
 	"time"
@@ -16,55 +16,66 @@ type ErrorResponse struct {
 	Error  string
 }
 
-type HealthzRequest struct {
-	Host string
-}
-
 type HealthzResponse struct {
 	Status string
 }
 
-func HealthzService(ctx context.Context, srvc *LogService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			MustWriteJSON(w, r, http.StatusOK, HealthzResponse{Status: "ok"})
-		case http.MethodPost:
-			body := r.Body
-			if body == nil {
-				resp := ErrorResponse{Error: "server error", Status: http.StatusBadRequest}
-				MustWriteJSON(w, r, http.StatusBadRequest, resp)
-				return
-			}
-			defer func() { _ = body.Close() }()
-			decoder := json.NewDecoder(body)
-			var req HealthzRequest
-			if err := decoder.Decode(&req); err != nil {
-				resp := ErrorResponse{Error: err.Error()}
-				MustWriteJSON(w, r, http.StatusInternalServerError, resp)
-				return
+func HealthzRead(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	switch r.Method {
+	case http.MethodGet, http.MethodHead:
+		MustWriteJSON(w, r, http.StatusOK, HealthzResponse{Status: "ok"})
+	default:
+		MustWriteJSON(w, r, http.StatusMethodNotAllowed, ErrorResponse{Error: "not allowed"})
+	}
+	klog.Infof("GET %s in %s\n", r.URL, time.Since(start))
+}
 
-			}
-			log.Printf("received heart beat from %s\n", req.Host)
-			if err := srvc.Append(ctx, &AppendReq{Host: req.Host}); err != nil {
-				resp := ErrorResponse{Error: err.Error()}
-				MustWriteJSON(w, r, http.StatusInternalServerError, resp)
-				return
-			}
-			MustWriteJSON(w, r, http.StatusCreated, HealthzResponse{Status: "ok"})
-		default:
+type LogCreateRequest struct {
+	Host string
+}
+
+func LogCreate(srvc *LogService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
 			errResp := ErrorResponse{Error: "method not allowed"}
 			MustWriteJSON(w, r, http.StatusMethodNotAllowed, errResp)
+			return
 		}
+		start := time.Now()
+		body := r.Body
+		if body == nil {
+			resp := ErrorResponse{Error: "server error", Status: http.StatusBadRequest}
+			MustWriteJSON(w, r, http.StatusBadRequest, resp)
+			return
+		}
+		defer func() { _ = body.Close() }()
+		decoder := json.NewDecoder(body)
+		var req LogCreateRequest
+		if err := decoder.Decode(&req); err != nil {
+			resp := ErrorResponse{Error: err.Error()}
+			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+			return
+		}
+		ctx, cancel := context.WithCancel(r.Context())
+		defer cancel()
+		if err := srvc.Append(ctx, &AppendReq{Host: req.Host}); err != nil {
+			resp := ErrorResponse{Error: err.Error()}
+			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+			return
+		}
+		MustWriteJSON(w, r, http.StatusCreated, HealthzResponse{Status: "ok"})
+		klog.Infof("POST %s from %s in %s\n", r.URL, req.Host, time.Since(start))
 	}
 }
 
 type Handler map[string]http.HandlerFunc
 
-func HTTPHandlers(ctx context.Context, db *sql.DB) Handler {
+func HTTPHandlers(db *sql.DB) Handler {
 	srvc := LogService{db: db}
 	return map[string]http.HandlerFunc{
-		"/healthz": HealthzService(ctx, &srvc),
+		"/healthz": HealthzRead,
+		"/log":     LogCreate(&srvc),
 	}
 }
 
@@ -76,9 +87,9 @@ func Start(srv *http.Server, routes Handler) {
 	for pattern, handler := range routes {
 		http.HandleFunc(pattern, handler)
 	}
-	log.Printf("listening on %s\n", srv.Addr)
+	klog.Infof("listening on %s\n", srv.Addr)
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-		log.Println(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -87,7 +98,7 @@ func Stop(ctx context.Context, srvs ...*http.Server) {
 	defer cancel()
 	for _, srv := range srvs {
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Printf("HTTP server Shutdown: %v", err)
+			klog.Warningf("HTTP server Shutdown: %v\n", err)
 		}
 	}
 }
@@ -99,10 +110,10 @@ func MustWriteJSON(w http.ResponseWriter, _ *http.Request, status int, resp inte
 	}
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		klog.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
 	if _, err := w.Write(jsonResp); err != nil {
-		log.Fatalf("Error happened in writing JSON. Err: %s", err)
+		klog.Fatalf("Error happened in writing JSON. Err: %s", err)
 	}
 }
 
@@ -125,16 +136,16 @@ func MustConnectDB() *sql.DB {
 	)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	return db
 }
 
 func MigrateDB(db *sql.DB) {
-	log.Println("migrating database")
+	klog.Info("migrating database")
 	if _, err := db.Exec(
 		"create table if not exists logs (id serial not null primary key, host varchar(255) not null, created_at timestamp not null)",
 	); err != nil {
-		log.Fatalf("not able to migrate database %s\n", err)
+		klog.Fatalf("not able to migrate database %s\n", err)
 	}
 }

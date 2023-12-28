@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,7 +26,7 @@ var runCmd = &cobra.Command{
 var collector = &cobra.Command{
 	Use:   "collector",
 	Short: "Run the collection server",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -36,11 +35,16 @@ var collector = &cobra.Command{
 		db := cserver.MustConnectDB()
 		cserver.MigrateDB(db)
 
-		srv := cserver.Server(":8081")
-		go cserver.Start(srv, cserver.HTTPHandlers(ctx, db))
+		port := "8080"
+		if len(args) == 1 {
+			port = args[0]
+		}
+
+		srv := cserver.Server(fmt.Sprintf(":%s", port))
+		go cserver.Start(srv, cserver.HTTPHandlers(db))
 
 		s := <-sigint
-		log.Printf("received %s signal\n", s)
+		klog.Infof("received %s signal\n", s)
 		cserver.Stop(ctx, srv)
 		cancel()
 		time.Sleep(500 * time.Millisecond)
