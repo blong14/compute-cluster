@@ -87,7 +87,7 @@ affinity:
             - key: kubernetes.io/arch
               operator: In
               values:
-                - arm64
+                - amd64
 
 volumeMounts:
   - mountPath: /home/root/.local/share/signal-cli
