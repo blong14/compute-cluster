@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"k8s.io/klog/v2"
 	"os"
 	"time"
+
+	"k8s.io/klog/v2"
 
 	_ "github.com/lib/pq"
 )
