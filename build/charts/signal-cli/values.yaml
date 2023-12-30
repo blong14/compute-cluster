@@ -8,7 +8,7 @@ image:
   repository: bbernhard/signal-cli-rest-api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 0.80
+  tag: "0.80"
 
 imagePullSecrets: []
 nameOverride: ""
