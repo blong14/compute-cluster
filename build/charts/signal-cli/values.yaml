@@ -90,7 +90,7 @@ affinity:
                 - amd64
 
 volumeMounts:
-  - mountPath: /home/root/.local/share/signal-cli
+  - mountPath: /home/.local/share/signal-cli
     name: signal-cli
 
 volumes:
