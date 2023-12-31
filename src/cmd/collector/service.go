@@ -5,30 +5,40 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"k8s.io/klog/v2"
 	"os"
 	"time"
-
-	"k8s.io/klog/v2"
 
 	_ "github.com/lib/pq"
 )
 
 type LogRow struct {
-	Host      string    `db:"host"`
-	CreatedAT time.Time `db:"created_at"`
+	Arch          string    `db:"arch"`
+	Host          string    `db:"host"`
+	KernalVersion string    `db:"kernal_version"`
+	CreatedAT     time.Time `db:"created_at"`
 }
 
 type LogService struct {
 	db *sql.DB
 }
 
-type AppendReq struct {
-	Host string
+type LogAppendRequest struct {
+	Arch          string
+	Host          string
+	KernalVersion string
 }
 
-func (l *LogService) Append(ctx context.Context, req *AppendReq) error {
+func (l *LogService) Append(ctx context.Context, req *LogAppendRequest) error {
+	const appendSql = `
+insert into logs(
+  arch, host, kernal_version, created_at
+) 
+values 
+  ($1, $2, $3, $4);
+`
 	result, err := l.db.ExecContext(
-		ctx, "insert into logs(host, created_at) values($1, $2)", req.Host, time.Now().UTC())
+		ctx, appendSql, req.Arch, req.Host, req.KernalVersion, time.Now().UTC())
 	if err != nil {
 		return err
 	}
@@ -42,17 +52,29 @@ func (l *LogService) Append(ctx context.Context, req *AppendReq) error {
 	return nil
 }
 
-type ReadReq struct {
-	Host string
-}
-
-func (l *LogService) Last(ctx context.Context, req *ReadReq) (*LogRow, error) {
+func (l *LogService) Last(ctx context.Context, host string) (*LogRow, error) {
+	const lastSql = `
+select 
+  arch,
+  host,
+  kernal_version,
+  created_at 
+from
+  logs
+where 
+  host = $1
+order by 
+  created_at desc
+limit
+  1;
+`
 	var logRow LogRow
-	err := l.db.QueryRowContext(
-		ctx,
-		"select host, created_at from logs where host = $1 and created_at > (current_timestamp - interval '10 minutes') order by created_at desc",
-		req.Host,
-	).Scan(&logRow.Host, &logRow.CreatedAT)
+	err := l.db.QueryRowContext(ctx, lastSql, host).Scan(
+		&logRow.Arch,
+		&logRow.Host,
+		&logRow.KernalVersion,
+		&logRow.CreatedAT,
+	)
 	return &logRow, err
 }
 
@@ -82,9 +104,16 @@ func MustConnectDB() *sql.DB {
 
 func MigrateDB(db *sql.DB) {
 	klog.Info("migrating database")
-	if _, err := db.Exec(
-		"create table if not exists logs (id serial not null primary key, host varchar(255) not null, created_at timestamp not null)",
-	); err != nil {
+	const migrationSql = `
+create table if not exists logs (
+	id serial not null primary key,
+	arch varchar(32) not null,
+	host varchar(255) not null,
+	kernal_version varchar(255) not null,
+	created_at timestamp not null
+);
+`
+	if _, err := db.Exec(migrationSql); err != nil {
 		klog.Fatalf("not able to migrate database %s\n", err)
 	}
 }
