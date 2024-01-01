@@ -89,6 +89,7 @@ func LogAppend(srvc *LogService) http.HandlerFunc {
 		if body == nil {
 			resp := ErrorResponse{Error: "server error", Status: http.StatusBadRequest}
 			MustWriteJSON(w, r, http.StatusBadRequest, resp)
+			klog.Errorf("POST %s missing body in request", r.URL)
 			return
 		}
 		defer func() { _ = body.Close() }()
@@ -97,6 +98,7 @@ func LogAppend(srvc *LogService) http.HandlerFunc {
 		if err := decoder.Decode(&req); err != nil {
 			resp := ErrorResponse{Error: err.Error()}
 			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+			klog.Errorf("POST (%d) %s %s", http.StatusInternalServerError, r.URL, err)
 			return
 		}
 		ctx, cancel := context.WithCancel(r.Context())
@@ -104,10 +106,11 @@ func LogAppend(srvc *LogService) http.HandlerFunc {
 		if err := srvc.Append(ctx, &req); err != nil {
 			resp := ErrorResponse{Error: err.Error()}
 			MustWriteJSON(w, r, http.StatusInternalServerError, resp)
+			klog.Errorf("POST (%d) %s %s", http.StatusInternalServerError, r.URL, err)
 			return
 		}
 		MustWriteJSON(w, r, http.StatusCreated, HealthzResponse{Status: "ok"})
-		klog.Infof("POST %s from %s in %s\n", r.URL, req.Host, time.Since(start))
+		klog.Infof("POST (%d) %s from %s in %s\n", http.StatusCreated, r.URL, req.Host, time.Since(start))
 	}
 }
 
