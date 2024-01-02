@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"k8s.io/klog/v2"
@@ -21,15 +22,28 @@ type HealthzResponse struct {
 	Status string
 }
 
-func HealthzRead(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	switch r.Method {
-	case http.MethodGet, http.MethodHead:
-		MustWriteJSON(w, r, http.StatusOK, HealthzResponse{Status: "ok"})
-	default:
-		MustWriteJSON(w, r, http.StatusMethodNotAllowed, ErrorResponse{Error: "not allowed"})
+func HealthzRead(srvc *LogService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		switch r.Method {
+		case http.MethodGet, http.MethodHead:
+			ctx, cancel := context.WithCancel(r.Context())
+			defer cancel()
+			status := http.StatusOK
+			response := HealthzResponse{Status: "ok"}
+			if err := srvc.db.PingContext(ctx); err != nil {
+				status = http.StatusInternalServerError
+				response = HealthzResponse{
+					Error:  err.Error(),
+					Status: "not ok",
+				}
+			}
+			MustWriteJSON(w, r, status, response)
+		default:
+			MustWriteJSON(w, r, http.StatusMethodNotAllowed, ErrorResponse{Error: "not allowed"})
+		}
+		klog.Infof("GET %s in %s\n", r.URL, time.Since(start))
 	}
-	klog.Infof("GET %s in %s\n", r.URL, time.Since(start))
 }
 
 func LogRead(srvc *LogService) http.HandlerFunc {
@@ -44,12 +58,30 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 		defer cancel()
 		urlQuery := r.URL.Query()
 		if !urlQuery.Has("host") {
-			err := ErrorResponse{Error: "missing host"}
+			err := ErrorResponse{
+				Status: http.StatusBadRequest,
+				Error:  "missing host",
+			}
 			MustWriteJSON(w, r, http.StatusBadRequest, err)
 			return
 		}
-		host := urlQuery.Get("host")
-		last, err := srvc.Last(ctx, host)
+		limit := urlQuery.Get("limit")
+		if limit == "" {
+			limit = "100"
+		}
+		since := uint8(0)
+		s := urlQuery.Get("since")
+		if s != "" {
+			if sinc, err := strconv.Atoi(s); err == nil {
+				since = uint8(sinc)
+			}
+		}
+		q := Query{
+			host:  urlQuery.Get("host"),
+			since: since,
+			limit: limit,
+		}
+		last, err := srvc.Read(ctx, q)
 		var (
 			status int
 			resp   HealthzResponse
@@ -68,16 +100,11 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 			resp = HealthzResponse{Status: "ok", Host: last.Host}
 		}
 		MustWriteJSON(w, r, status, resp)
-		klog.Infof("GET (%d) %s for %s in %s\n", status, r.URL, host, time.Since(start))
+		klog.Infof("GET (%d) %s for %s in %s\n", status, r.URL, q.host, time.Since(start))
 	}
 }
 
-// LogCreate is deprecated
 func LogCreate(srvc *LogService) http.HandlerFunc {
-	return LogAppend(srvc)
-}
-
-func LogAppend(srvc *LogService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			errResp := ErrorResponse{Error: "method not allowed"}
@@ -119,9 +146,8 @@ type Handler map[string]http.HandlerFunc
 func HTTPHandlers(db *sql.DB) Handler {
 	srvc := LogService{db: db}
 	return map[string]http.HandlerFunc{
-		"/healthz":    HealthzRead,
-		"/log":        LogCreate(&srvc), // deprecated
-		"/log/append": LogAppend(&srvc),
-		"/log/last":   LogRead(&srvc),
+		"/healthz":    HealthzRead(&srvc),
+		"/log/append": LogCreate(&srvc),
+		"/log/get":    LogRead(&srvc),
 	}
 }

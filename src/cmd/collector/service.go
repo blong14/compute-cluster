@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"k8s.io/klog/v2"
 	"os"
 	"time"
 
 	_ "github.com/lib/pq"
+	"k8s.io/klog/v2"
 )
 
 type LogRow struct {
@@ -52,8 +52,44 @@ values
 	return nil
 }
 
-func (l *LogService) Last(ctx context.Context, host string) (*LogRow, error) {
-	const lastSql = `
+type Query struct {
+	host  string
+	since uint8
+	limit string
+}
+
+func (l *LogService) Since(ctx context.Context, q Query) (*LogRow, error) {
+	const query = `
+select 
+  arch,
+  host,
+  kernal_version,
+  created_at 
+from
+  logs
+where 
+  host = $1 and
+  created_at > (current_timestamp - interval '1 minutes' * $2)
+order by 
+  created_at desc
+limit
+  $3;
+`
+	var logRow LogRow
+	err := l.db.QueryRowContext(ctx, query, q.host, q.since, q.limit).Scan(
+		&logRow.Arch,
+		&logRow.Host,
+		&logRow.KernalVersion,
+		&logRow.CreatedAT,
+	)
+	return &logRow, err
+}
+
+func (l *LogService) Read(ctx context.Context, q Query) (*LogRow, error) {
+	if q.since != 0 {
+		return l.Since(ctx, q)
+	}
+	const query = `
 select 
   arch,
   host,
@@ -66,10 +102,10 @@ where
 order by 
   created_at desc
 limit
-  1;
+  $2;
 `
 	var logRow LogRow
-	err := l.db.QueryRowContext(ctx, lastSql, host).Scan(
+	err := l.db.QueryRowContext(ctx, query, q.host, q.limit).Scan(
 		&logRow.Arch,
 		&logRow.Host,
 		&logRow.KernalVersion,
@@ -81,17 +117,20 @@ limit
 func MustConnectDB() *sql.DB {
 	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
-		host = "localhost"
+		host = "localhost:54321"
 	}
 	database := os.Getenv("POSTGRES_DATABASE")
 	if database == "" {
-		database = "logs"
+		database = "cluster"
 	}
 	user := os.Getenv("POSTGRES_USER")
 	if user == "" {
-		user = "postgres"
+		user = "app"
 	}
 	password := os.Getenv("POSTGRES_PASSWORD")
+	if password == "" {
+		password = "app"
+	}
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable",
 		user, password, host, database,
 	)
