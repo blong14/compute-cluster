@@ -21,16 +21,13 @@
         dest: /home/pi/compute-cluster
         single_branch: yes
         version: main
-      register: clone_status
     - name: Build agent
       become: yes
       become_method: sudo
-      when: clone_status.changed
       command: make -C compute-cluster/src build-zig
     - name: Copy agent
       become: yes
       become_method: sudo
-      when: clone_status.changed
       command: mv compute-cluster/bin/zagent /usr/local/bin
 - name: Deploy agent
   hosts: rasppi
