@@ -73,9 +73,11 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 		since := uint8(0)
 		s := urlQuery.Get("since")
 		if s != "" {
-			if sinc, err := strconv.Atoi(s); err == nil {
-				since = uint8(sinc)
+			sin, err := strconv.ParseInt(s, 10, 8)
+			if err != nil {
+				since = 255 // max number of rows we'll return
 			}
+			since = uint8(sin)
 		}
 		q := Query{
 			host:  urlQuery.Get("host"),
