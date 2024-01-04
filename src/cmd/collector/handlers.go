@@ -17,6 +17,7 @@ type ErrorResponse struct {
 }
 
 type HealthzResponse struct {
+	Data   []LogRow
 	Error  string
 	Host   string
 	Status string
@@ -81,7 +82,7 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 			since: since,
 			limit: limit,
 		}
-		last, err := srvc.Read(ctx, q)
+		items, err := srvc.Read(ctx, q)
 		var (
 			status int
 			resp   HealthzResponse
@@ -97,7 +98,7 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 			resp = HealthzResponse{Status: "not ok", Error: err.Error()}
 		default:
 			status = http.StatusOK
-			resp = HealthzResponse{Status: "ok", Host: last.Host}
+			resp = HealthzResponse{Status: "ok", Host: q.host, Data: items}
 		}
 		MustWriteJSON(w, r, status, resp)
 		klog.Infof("GET (%d) %s for %s in %s\n", status, r.URL, q.host, time.Since(start))
