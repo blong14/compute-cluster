@@ -58,15 +58,11 @@ type Query struct {
 	limit string
 }
 
-func (l *LogService) read(ctx context.Context, query string, q Query) ([]LogRow, error) {
-	rows, err := l.db.QueryContext(ctx, query, q.host, q.since, q.limit)
-	if err != nil {
-		return nil, err
-	}
+func (l *LogService) read(_ context.Context, rows *sql.Rows) ([]LogRow, error) {
 	logRows := make([]LogRow, 0)
 	for rows.Next() {
 		var logRow LogRow
-		if err = rows.Scan(
+		if err := rows.Scan(
 			&logRow.Arch,
 			&logRow.Host,
 			&logRow.KernalVersion,
@@ -79,10 +75,10 @@ func (l *LogService) read(ctx context.Context, query string, q Query) ([]LogRow,
 	if rows.Err() != nil {
 		return nil, rows.Err()
 	}
-	if err = rows.Close(); err != nil {
+	if err := rows.Close(); err != nil {
 		return nil, err
 	}
-	return logRows, err
+	return logRows, nil
 
 }
 
@@ -103,7 +99,11 @@ order by
 limit
   $3;
 `
-	return l.read(ctx, query, q)
+	rows, err := l.db.QueryContext(ctx, query, q.host, q.since, q.limit)
+	if err != nil {
+		return nil, err
+	}
+	return l.read(ctx, rows)
 }
 
 func (l *LogService) Read(ctx context.Context, q Query) ([]LogRow, error) {
@@ -125,7 +125,11 @@ order by
 limit
   $2;
 `
-	return l.read(ctx, query, q)
+	rows, err := l.db.QueryContext(ctx, query, q.host, q.limit)
+	if err != nil {
+		return nil, err
+	}
+	return l.read(ctx, rows)
 }
 
 func MustConnectDB() *sql.DB {

@@ -60,8 +60,8 @@ func LogRead(srvc *LogService) http.HandlerFunc {
 		urlQuery := r.URL.Query()
 		if !urlQuery.Has("host") {
 			err := ErrorResponse{
-				Status: http.StatusBadRequest,
 				Error:  "missing host",
+				Status: http.StatusBadRequest,
 			}
 			MustWriteJSON(w, r, http.StatusBadRequest, err)
 			return
