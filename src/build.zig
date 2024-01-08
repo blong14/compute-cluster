@@ -10,6 +10,8 @@ pub fn build(b: *std.Build) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
+    // Add custom modules so they can be referenced from our cmd directory
+    const queue = b.addModule("queue", .{ .source_file = .{ .path = "internal/ipc/queue.zig" } });
     {
         const exe = b.addExecutable(.{
             .name = "zagent",
@@ -49,6 +51,32 @@ pub fn build(b: *std.Build) void {
         // the `zig build --help` menu, providing a way for the user to request
         // running the unit tests.
         const test_step = b.step("test-zagent", "Run unit tests");
+        test_step.dependOn(&run_unit_tests.step);
+    }
+    {
+        const exe = b.addExecutable(.{
+            .name = "zpool",
+            .root_source_file = .{ .path = "cmd/pool/main.zig" },
+            .target = target,
+            .optimize = optimize,
+        });
+        exe.addModule("queue", queue);
+        exe.linkLibC();
+        b.installArtifact(exe);
+        const run_cmd = b.addRunArtifact(exe);
+        run_cmd.step.dependOn(b.getInstallStep());
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+        const run_step = b.step("run-pool", "Run the app");
+        run_step.dependOn(&run_cmd.step);
+        const unit_tests = b.addTest(.{
+            .root_source_file = .{ .path = "cmd/agent/main.zig" },
+            .target = target,
+            .optimize = optimize,
+        });
+        const run_unit_tests = b.addRunArtifact(unit_tests);
+        const test_step = b.step("test-pool", "Run unit tests");
         test_step.dependOn(&run_unit_tests.step);
     }
 }
