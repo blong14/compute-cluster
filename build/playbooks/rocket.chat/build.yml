@@ -1,0 +1,27 @@
+- name: Deploy Rocket.chat
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Add rocket.chat repository
+      become: yes
+      become_method: sudo
+      command: |
+        helm repo add rocketchat https://rocketchat.github.io/helm-charts
+    - name: Copy rocket.chat values
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/rocket.chat/values.yml
+        dest: /home/pi/rocket.chat/values.yml
+    - name: Install rocket.chat
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i rocketchat -f rocket.chat/values.yml rocketchat/rocketchat \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --set host=rocket.cluster \
+        --set ingress.enabled=true
