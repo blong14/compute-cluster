@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+    postgres:
+        image: postgres:16
+        ports:
+            - "54321:5432"
+        environment:
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD: app
+            POSTGRES_DB: cluster
+    rmq:
+        image: rabbitmq
+        ports:
+            - "56721:5672"
+
