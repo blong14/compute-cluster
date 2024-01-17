@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
     // Add custom modules so they can be referenced from our cmd directory
-    const queue = b.addModule("queue", .{ .source_file = .{ .path = "internal/ipc/queue.zig" } });
+    const queue = b.addModule("msgqueue", .{ .source_file = .{ .path = "internal/ipc/msgqueue.zig" } });
     {
         const exe = b.addExecutable(.{
             .name = "zagent",
@@ -60,7 +60,7 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
         });
-        exe.addModule("queue", queue);
+        exe.addModule("msgqueue", queue);
         exe.linkLibC();
         b.installArtifact(exe);
         const run_cmd = b.addRunArtifact(exe);

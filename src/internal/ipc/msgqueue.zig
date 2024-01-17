@@ -1,11 +1,15 @@
 const std = @import("std");
 const c = @cImport({
+    @cInclude("errno.h");
     @cInclude("stdio.h");
     @cInclude("stdlib.h");
 });
 const sys = @cImport({
+    @cInclude("sys/ipc.h");
     @cInclude("sys/msg.h");
+    @cInclude("sys/types.h");
 });
+
 const errno = std.os.errno;
 
 /// `MessageQueue` is a System V message queue wrapper.
@@ -13,15 +17,12 @@ const errno = std.os.errno;
 /// in order to send a message, and read permission to receive a message.
 pub fn MessageQueue(comptime T: type) type {
     return struct {
-        eoq: c_int,
         msgsize: usize,
         msqid: c_int,
         msqproj: c_int,
         msqtype: c_long,
 
         const Self = @This();
-
-        const EOQ = 2;
 
         const MessageQueueError = error {
             EOQ, // queue has been closed
@@ -34,10 +35,7 @@ pub fn MessageQueue(comptime T: type) type {
             mdata: T,
         };
 
-        const Done = struct {
-            mtype: c_long,
-            mdata: c_int,
-        };
+        const EOQ = 2;
 
         /// Creates a `MessageQueue` with msqid derived from the given file path.
         pub fn init(path: [*c]const u8) MessageQueueError!Self {
@@ -53,7 +51,6 @@ pub fn MessageQueue(comptime T: type) type {
                 return MessageQueueError.WriteError;
             }
             return .{
-                .eoq = 2,
                 .msgsize = @sizeOf(T),
                 .msqid = msqid,
                 .msqproj = msqproj,
@@ -72,27 +69,31 @@ pub fn MessageQueue(comptime T: type) type {
         /// Reader consumes messages off the queue.
         /// The reader is active until there is an error
         /// or the `Done` message is consumed.
-        const Reader = struct {
+        const ReadIter = struct {
             msqid: c_int,
             msgsize: usize,
 
             /// Consumes the next element from the queue and returns it.
-            pub fn consume(self: Reader) MessageQueueError!T {
+            /// returns null when done reading.
+            pub fn next(self: ReadIter) ?T {
                 var buf: Message = undefined;
-                if (sys.msgrcv(self.msqid, &buf, self.msgsize, 0, 0) == -1) {
-                    // TODO: check for EIDRM and return `MessageQueueError.EOQ`
-                    c.perror("unable to receive message");
-                    return MessageQueueError.ReadError;
+                switch (errno(sys.msgrcv(self.msqid, &buf, self.msgsize, 0, 0))) {
+                    .SUCCESS => {
+                        if (buf.mtype == EOQ) {
+                            return null;
+                        }
+                        return buf.mdata;
+                    },
+                    else => {
+                        c.perror("unable to read message");
+                        return null;
+                    }
                 }
-                if (buf.mtype == EOQ) {
-                    return MessageQueueError.EOQ;
-                }
-                return buf.mdata;
             }
         };
 
         /// Subscribe to receive messages from this message queue.
-        pub fn subscriber(self: Self) Reader {
+        pub fn subscribe(self: Self) ReadIter {
             return .{
                 .msqid = self.msqid,
                 .msgsize = self.msgsize,
@@ -110,19 +111,25 @@ pub fn MessageQueue(comptime T: type) type {
             /// Publishes a new element to the back of the queue.
             pub fn publish(self: Writer, v: T) MessageQueueError!void {
                 var mesg = Message{.mtype = self.msqtype, .mdata = v};
-                if (sys.msgsnd(self.msqid, &mesg, self.msgsize, 0) == -1) {
-                    c.perror("unable to send message");
-                    return MessageQueueError.WriteError;
+                switch (errno(sys.msgsnd(self.msqid, &mesg, self.msgsize, 0))) {
+                    .SUCCESS => return,
+                    .IDRM => return MessageQueueError.EOQ,
+                    else => {
+                        c.perror("unable to send message");
+                        return MessageQueueError.WriteError;
+                    }
                 }
             }
 
-            /// Signal to any subscribers that this message queue has finished
-            /// sending messages.
             pub fn done(self: Writer) MessageQueueError!void {
-                const eoq = Done{.mtype = 2, .mdata = 0};
-                if (sys.msgsnd(self.msqid, &eoq, @sizeOf(c_int), 0) == -1) {
-                    c.perror("unable to send message");
-                    return MessageQueueError.WriteError;
+                var end: Message = .{.mtype = EOQ, .mdata = undefined};
+                switch (errno(sys.msgsnd(self.msqid, &end, self.msgsize, 0))) {
+                    .SUCCESS => return,
+                    .IDRM => return MessageQueueError.EOQ,
+                    else => {
+                        c.perror("unable to send message");
+                        return MessageQueueError.WriteError;
+                    }
                 }
             }
         };
@@ -144,56 +151,128 @@ test MessageQueue {
         data: usize,
         const Self = @This();
     };
-    var elems = [_]Elem {.{.data = 1}, .{.data = 2}};
-    const msgq_name = ".";
+
+    const elem: Elem = .{.data = 1};
 
     // Create a mailbox to read and write messages to.
     // The main thread will be in charge of cleaning up the mailbox
-    var mailbox = try MessageQueue(Elem).init(msgq_name);
+    var mailbox = try MessageQueue(Elem).init(".");
     defer mailbox.deinit();
 
-    // One
-    var writer = try std.Thread.spawn(.{}, struct {
-        pub fn write(outbox: MessageQueue(Elem).Writer, data: Elem) !void {
+    const reader = mailbox.subscribe();
+    const writer = try std.Thread.spawn(.{}, struct {
+        pub fn publish(outbox: MessageQueue(Elem).Writer, data: Elem) !void {
             try outbox.publish(data);
-            try outbox.done();
         }
-    }.write, .{mailbox.publisher(), elems[0]});
+    }.publish, .{mailbox.publisher(), elem});
 
-    var reader = mailbox.subscriber();
-
-    var actual: Elem = undefined;
-    while (true) {
-        actual = reader.consume() catch |err| switch (err) {
-            error.EOQ => break,
-            else => unreachable,
-        };
-    }
-    try testing.expect(actual.data == elems[0].data);
+    const actual = reader.next();
+    try testing.expect(actual.?.data == elem.data);
     writer.join();
+}
+
+test "Test count" {
+    const testing = std.testing;
+    const Elem = struct {
+        data: usize,
+        const Self = @This();
+    };
+
+    var elems = [_]Elem {.{.data = 1}, .{.data = 2}};
+
+    // Create a mailbox to read and write messages to.
+    // The main thread will be in charge of cleaning up the mailbox
+    var mailbox = try MessageQueue(Elem).init(".");
+    defer mailbox.deinit();
 
     // Count all messages
-    writer = try std.Thread.spawn(.{}, struct {
-        pub fn write(outbox: MessageQueue(Elem).Writer, data: []Elem) !void {
+    const reader = mailbox.subscribe();
+    const writer = try std.Thread.spawn(.{}, struct {
+        pub fn publish(outbox: MessageQueue(Elem).Writer, data: []Elem) !void {
             defer outbox.done() catch |err| {
-                std.debug.print("{s}\n", .{@errorName(err)});
+                std.debug.print("Oops {s}\n", .{@errorName(err)});
             };
             for (data) |elem| {
                 try outbox.publish(elem);
             }
         }
-    }.write, .{mailbox.publisher(), &elems});
+    }.publish, .{mailbox.publisher(), &elems});
 
     var count: u8 = 0;
-    while (true) {
-        _ = reader.consume() catch |err| switch (err) {
-            error.EOQ => break,
-            else => unreachable,
-        };
+    while (reader.next()) |_| {
         count += 1;
     }
     try testing.expect(count == elems.len);
     writer.join();
 }
 
+test "Pool" {
+    const testing = std.testing;
+    const Timer = std.time.Timer;
+    const ThreadPool = std.Thread.Pool;
+    const WaitGroup = std.Thread.WaitGroup;
+    const Elem = struct {
+       data: usize,
+       const Self = @This();
+    };
 
+    var elems = [_]Elem {.{.data = 1}, .{.data = 2}};
+    var gpa = testing.allocator;
+    var wait_group: WaitGroup = .{};
+    var thread_pool: ThreadPool = undefined;
+    try thread_pool.init(.{ .allocator = gpa });
+    defer thread_pool.deinit();
+
+    // Create a mailbox to read and write messages to.
+    // The main thread will be in charge of cleaning up the mailbox
+    var mailbox = try MessageQueue(Elem).init(".");
+
+    var timer = try Timer.start();
+    const start = timer.read();
+
+    for (0..7) |i| {
+        std.debug.print("starting worker {d}\n", .{i});
+        wait_group.start();
+        try thread_pool.spawn(struct {
+            pub fn publish(wg: *WaitGroup, outbox: MessageQueue(Elem).Writer, data: []Elem) void {
+                defer wg.finish();
+                for (0..100_000) |_| {
+                    for (data) |elem| {
+                        outbox.publish(elem) catch |err| {
+                            std.debug.print("Ooops {s}\n", .{@errorName(err)});
+                            return;
+                        };
+                    }
+                }
+                std.debug.print("worker finished...\n", .{});
+            }
+        }.publish, .{&wait_group, mailbox.publisher(), &elems});
+    }
+
+    const reader = try std.Thread.spawn(.{}, struct {
+        pub fn consume(inbox: MessageQueue(Elem).ReadIter) void {
+            std.debug.print("starting consumer...\n", .{});
+
+            var tmr = Timer.start() catch return;
+            const strt = tmr.read();
+
+            var count: u64 = 0;
+            while (inbox.next()) |_| {
+                count += 1;
+            }
+            const nd = tmr.read();
+            const in = (nd-strt) / 1_000_000_000;
+            std.debug.print(
+                "count {d} in {d}s {d} elems/s\n", .{count, in,  (count/in)});
+        }
+    }.consume, .{mailbox.subscribe()});
+
+    thread_pool.waitAndWork(&wait_group);
+    std.debug.print("stopping consumer...\n", .{});
+    mailbox.deinit();
+    reader.join();
+
+    const end = timer.read();
+    std.debug.print("finished in {d}ms\n", .{((end-start)/1_000_000)});
+    std.time.sleep(100_000);
+}
