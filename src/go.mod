@@ -7,7 +7,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
-	k8s.io/klog/v2 v2.120.0
+	k8s.io/klog/v2 v2.120.1
 )
 
 require (
