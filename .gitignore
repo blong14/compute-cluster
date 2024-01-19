@@ -12,6 +12,7 @@ src/venv
 src/internal/c/vendor
 src/internal/c/.bin
 src/internal/c/.deps
+src/tmp
 src/zig-cache
 src/zig-out
 .venv
