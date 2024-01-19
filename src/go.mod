@@ -3,7 +3,7 @@ module cluster
 go 1.17
 
 require (
-	github.com/apenella/go-ansible v1.2.2
+	github.com/apenella/go-ansible v1.3.0
 	github.com/lib/pq v1.10.9
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
