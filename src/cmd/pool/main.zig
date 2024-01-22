@@ -1,6 +1,7 @@
 const std = @import("std");
-
 const MessageQueue = @import("msgqueue").MessageQueue;
+
+const Child = std.process.Child;
 
 const HeartBeat = struct {
     status: []const u8,
@@ -8,6 +9,8 @@ const HeartBeat = struct {
 
 pub fn main() !void {
     var mailbox = try MessageQueue(HeartBeat).init(".");
+    
+    Child.init(argv: []const []const u8, allocator: mem.Allocator)
 
     const pid = try std.os.fork();
     switch (pid) {

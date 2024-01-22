@@ -12,6 +12,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     // Add custom modules so they can be referenced from our cmd directory
     const queue = b.addModule("msgqueue", .{ .source_file = .{ .path = "internal/ipc/msgqueue.zig" } });
+    const mmap = b.addModule("mmap", .{ .source_file = .{ .path = "internal/ipc/mmap.zig" } });
     {
         const exe = b.addExecutable(.{
             .name = "zagent",
@@ -61,6 +62,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         });
         exe.addModule("msgqueue", queue);
+        exe.addModule("mmap", mmap);
         exe.linkLibC();
         b.installArtifact(exe);
         const run_cmd = b.addRunArtifact(exe);

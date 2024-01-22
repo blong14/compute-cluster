@@ -228,51 +228,44 @@ test "Pool" {
     var mailbox = try MessageQueue(Elem).init(".");
 
     var timer = try Timer.start();
-    const start = timer.read();
 
-    for (0..7) |i| {
-        std.debug.print("starting worker {d}\n", .{i});
+    for (0..1_000_000) |_| {
         wait_group.start();
         try thread_pool.spawn(struct {
             pub fn publish(wg: *WaitGroup, outbox: MessageQueue(Elem).Writer, data: []Elem) void {
                 defer wg.finish();
-                for (0..100_000) |_| {
-                    for (data) |elem| {
-                        outbox.publish(elem) catch |err| {
-                            std.debug.print("Ooops {s}\n", .{@errorName(err)});
-                            return;
-                        };
-                    }
+                for (data) |elem| {
+                    outbox.publish(elem) catch |err| {
+                        std.debug.print("Ooops {s}\n", .{@errorName(err)});
+                        return;
+                    };
                 }
-                std.debug.print("worker finished...\n", .{});
             }
         }.publish, .{&wait_group, mailbox.publisher(), &elems});
     }
 
     const reader = try std.Thread.spawn(.{}, struct {
         pub fn consume(inbox: MessageQueue(Elem).ReadIter) void {
-            std.debug.print("starting consumer...\n", .{});
-
             var tmr = Timer.start() catch return;
-            const strt = tmr.read();
-
-            var count: u64 = 0;
+            var count: f64 = 0;
             while (inbox.next()) |_| {
                 count += 1;
             }
-            const nd = tmr.read();
-            const in = (nd-strt) / 1_000_000_000;
+            const elapsed: f64 = @floatFromInt(tmr.read());
+            const in = elapsed / std.time.ns_per_ms;
+            const per: f64 = count / (in / std.time.ms_per_s);
             std.debug.print(
-                "count {d} in {d}s {d} elems/s\n", .{count, in,  (count/in)});
+                "count {d} in {d:.2}ms {d:.2}/sec\n", .{count, in, per});
         }
     }.consume, .{mailbox.subscribe()});
 
     thread_pool.waitAndWork(&wait_group);
-    std.debug.print("stopping consumer...\n", .{});
-    mailbox.deinit();
+    const stop = mailbox.publisher();
+    try stop.done();
     reader.join();
+    mailbox.deinit();
 
-    const end = timer.read();
-    std.debug.print("finished in {d}ms\n", .{((end-start)/1_000_000)});
+    const end: f64 = @floatFromInt(timer.read());
+    std.debug.print("finished in {d:.2}ms\n", .{(end/std.time.ns_per_ms)});
     std.time.sleep(100_000);
 }
