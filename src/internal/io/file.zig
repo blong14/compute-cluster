@@ -1,7 +1,8 @@
 const std = @import("std");
 
+const MMap = @import("./mmap.zig").MMap;
+
 const Allocator = std.mem.Allocator;
-const MMap = @import("mmap.zig").MMap;
 
 const SSTable = struct {
     const Row = struct {
@@ -76,7 +77,6 @@ const SSTable = struct {
         try self.data.insert(idx, Row{ .key = k, .value = value });
     }
 };
-
 
 test SSTable {
     const testing = std.testing;
