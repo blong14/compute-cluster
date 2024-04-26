@@ -9,7 +9,7 @@ COPY . /usr/local/src
 
 RUN sh build.sh arm64
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN apt-get update && \
     apt-get -y upgrade && \
