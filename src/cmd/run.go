@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/apenella/go-ansible/v2/pkg/execute"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/apenella/go-ansible/pkg/adhoc"
-	"github.com/apenella/go-ansible/pkg/playbook"
+	"github.com/apenella/go-ansible/v2/pkg/adhoc"
+	"github.com/apenella/go-ansible/v2/pkg/playbook"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
@@ -57,18 +58,21 @@ var ping = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		v := viper.GetViper()
 		opts := ansible.NewAnsibleOpts(v)
-		opts.AdhocOpts = &adhoc.AnsibleAdhocOptions{
-			Inventory:  opts.PlaybookOpts.Inventory,
-			ModuleName: "ansible.builtin.ping",
+		adhocOpts := &adhoc.AnsibleAdhocOptions{
+			AskBecomePass: opts.PlaybookOpts.AskBecomePass,
+			Become:        opts.PlaybookOpts.Become,
+			Inventory:     opts.PlaybookOpts.Inventory,
+			ModuleName:    "ansible.builtin.ping",
+			User:          opts.PlaybookOpts.User,
 		}
-		play := &adhoc.AnsibleAdhocCmd{
-			Pattern:                    "all",
-			Options:                    opts.AdhocOpts,
-			ConnectionOptions:          opts.ConnOpts,
-			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
-			StdoutCallback:             "oneline",
-		}
-		if err := play.Run(cmd.Context()); err != nil {
+		play := adhoc.NewAnsibleAdhocCmd(
+			adhoc.WithAdhocOptions(adhocOpts),
+			adhoc.WithPattern("all"),
+		)
+		exec := execute.NewDefaultExecute(
+			execute.WithCmd(play),
+		)
+		if err := exec.Execute(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
 	},
@@ -80,18 +84,19 @@ var updateNodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		v := viper.GetViper()
 		opts := ansible.NewAnsibleOpts(v)
-		play := &playbook.AnsiblePlaybookCmd{
-			Playbooks: []string{
+		play := playbook.NewAnsiblePlaybookCmd(
+			playbook.WithPlaybooks(
 				fmt.Sprintf(
 					"%s/playbooks/node/update.yml",
 					opts.BuildOpts.BuildDir,
 				),
-			},
-			ConnectionOptions:          opts.ConnOpts,
-			Options:                    opts.PlaybookOpts,
-			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
-		}
-		if err := play.Run(cmd.Context()); err != nil {
+			),
+			playbook.WithPlaybookOptions(opts.PlaybookOpts),
+		)
+		exec := execute.NewDefaultExecute(
+			execute.WithCmd(play),
+		)
+		if err := exec.Execute(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
 	},
@@ -103,18 +108,19 @@ var releaseUpgrade = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		v := viper.GetViper()
 		opts := ansible.NewAnsibleOpts(v)
-		play := &playbook.AnsiblePlaybookCmd{
-			Playbooks: []string{
+		play := playbook.NewAnsiblePlaybookCmd(
+			playbook.WithPlaybooks(
 				fmt.Sprintf(
 					"%s/playbooks/node/upgrade-release.yml",
 					opts.BuildOpts.BuildDir,
 				),
-			},
-			ConnectionOptions:          opts.ConnOpts,
-			Options:                    opts.PlaybookOpts,
-			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
-		}
-		if err := play.Run(cmd.Context()); err != nil {
+			),
+			playbook.WithPlaybookOptions(opts.PlaybookOpts),
+		)
+		exec := execute.NewDefaultExecute(
+			execute.WithCmd(play),
+		)
+		if err := exec.Execute(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
 	},

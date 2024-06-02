@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/apenella/go-ansible/pkg/playbook"
+	"github.com/apenella/go-ansible/v2/pkg/execute"
+	"github.com/apenella/go-ansible/v2/pkg/playbook"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
@@ -37,21 +38,21 @@ var deployCmd = &cobra.Command{
 				),
 			}
 		}
-		play := &playbook.AnsiblePlaybookCmd{
-			Playbooks: []string{
+		play := playbook.NewAnsiblePlaybookCmd(
+			playbook.WithPlaybooks(
 				fmt.Sprintf(
 					"%s/%s/%s/build.yml",
 					opts.BuildOpts.BuildDir,
 					opts.BuildOpts.PlaybookDir,
 					srvc,
 				),
-			},
-			ConnectionOptions:          opts.ConnOpts,
-			Options:                    opts.PlaybookOpts,
-			PrivilegeEscalationOptions: opts.PrivilegeExcalationOpts,
-			StdoutCallback:             "yaml",
-		}
-		if err := play.Run(cmd.Context()); err != nil {
+			),
+			playbook.WithPlaybookOptions(opts.PlaybookOpts),
+		)
+		exec := execute.NewDefaultExecute(
+			execute.WithCmd(play),
+		)
+		if err := exec.Execute(cmd.Context()); err != nil {
 			klog.Fatal(err)
 		}
 	},
