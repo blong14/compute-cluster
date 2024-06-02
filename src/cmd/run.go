@@ -3,13 +3,13 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/apenella/go-ansible/v2/pkg/execute"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/apenella/go-ansible/v2/pkg/adhoc"
+	"github.com/apenella/go-ansible/v2/pkg/execute"
 	"github.com/apenella/go-ansible/v2/pkg/playbook"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
