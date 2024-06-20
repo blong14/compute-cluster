@@ -38,4 +38,6 @@ return require('packer').startup(function(use)
 
   use("ziglang/zig.vim")
 
+  use("marko-cerovac/material.nvim")
+
 end)
