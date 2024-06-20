@@ -5,6 +5,12 @@ worker-02.cluster
 worker-03.cluster
 127.0.0.1
 
+[localhost]
+127.0.0.1
+
+[arm-mac]
+worker-04.cluster
+
 [controller]
 controller-02.cluster
 

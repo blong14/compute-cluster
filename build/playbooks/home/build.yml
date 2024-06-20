@@ -1,0 +1,11 @@
+---
+- name: Configure Play for home directory
+  hosts: localhost
+  tasks:
+    - name: Copy nvim
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/home/nvim
+        dest: /home/blong14/.config
+
