@@ -21,3 +21,6 @@ vim.g.netrw_liststyle = 3
 vim.g.netrw_browse_split = 0
 vim.g.netrw_sizestyle = "H"
 
+-- styles
+vim.g.material_style = "oceanic"
+vim.cmd "colorscheme material"
