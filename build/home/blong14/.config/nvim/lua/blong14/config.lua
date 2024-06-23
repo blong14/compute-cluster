@@ -1,7 +1,7 @@
-vim.api.nvim_set_option('number', true)
-vim.api.nvim_set_option('foldmethod', 'indent')
-vim.api.nvim_set_option('foldnestmax', 10)
-vim.api.nvim_set_option('foldlevel', 2)
+vim.api.nvim_set_option("number", true)
+vim.api.nvim_set_option("foldmethod", "indent")
+vim.api.nvim_set_option("foldnestmax", 10)
+vim.api.nvim_set_option("foldlevel", 2)
 
 vim.opt.guicursor = ""
 vim.opt.tabstop = 4
@@ -25,3 +25,9 @@ vim.g.netrw_preview = 1
 -- styles
 vim.g.material_style = "oceanic"
 vim.cmd "colorscheme material"
+
+require("lualine").setup({
+  options = {
+    theme = "material",
+  },
+})
