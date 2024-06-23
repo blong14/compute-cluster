@@ -15,16 +15,6 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-require('lazy').setup({
-  {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
-  {'williamboman/mason.nvim'},
-  {'williamboman/mason-lspconfig.nvim'},
-  {'neovim/nvim-lspconfig'},
-  {'hrsh7th/cmp-nvim-lsp'},
-  {'hrsh7th/nvim-cmp'},
-  {'L3MON4D3/LuaSnip'},
-})
-
 local lsp_zero = require('lsp-zero')
 
 lsp_zero.on_attach(function(client, bufnr)
@@ -33,11 +23,23 @@ lsp_zero.on_attach(function(client, bufnr)
   lsp_zero.default_keymaps({buffer = bufnr})
 end)
 
+local servers = {
+  "bashls",
+  "clangd",
+  "golangci_lint_ls",
+  "gopls",
+  "jedi_language_server",
+  "lua_ls",
+  "ruff_lsp", -- python
+  "terraformls",
+  'zls',
+}
+
+lsp_zero.setup_servers(servers)
+
 -- see :help lsp-zero-guide:integrate-with-mason-nvim
 -- to learn how to use mason.nvim with lsp-zero
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  handlers = {
-    lsp_zero.default_setup,
-  }
+  ensure_installed = servers
 })
