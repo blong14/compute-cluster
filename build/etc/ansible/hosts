@@ -8,9 +8,6 @@ worker-03.cluster
 [localhost]
 127.0.0.1
 
-[arm-mac]
-worker-04.cluster
-
 [controller]
 controller-02.cluster
 
