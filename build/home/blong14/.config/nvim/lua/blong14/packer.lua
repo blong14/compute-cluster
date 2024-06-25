@@ -45,4 +45,5 @@ return require('packer').startup(function(use)
   }
 
   use("preservim/nerdtree")
+  use("ryanoasis/vim-devicons")
 end)
