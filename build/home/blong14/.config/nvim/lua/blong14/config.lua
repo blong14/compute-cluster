@@ -14,20 +14,9 @@ vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
 -- https://github.com/doom-neovim/doom-nvim/blob/d878cd9a69eb86ad10177d3f974410317ab9f2fe/lua/doom/modules/features/netrw/init.lua
-vim.g.netrw_browse_split = 4
-vim.g.netrw_banner = 1
-vim.g.netrw_winsize = 25
-vim.g.netrw_liststyle = 3
-vim.g.netrw_browse_split = 0
-vim.g.netrw_sizestyle = "H"
-vim.g.netrw_preview = 1
+-- turning off netrw in favor of nerdtree... for now. above is examples of netrw config
 
 -- styles
 vim.g.material_style = "oceanic"
 vim.cmd "colorscheme material"
 
-require("lualine").setup({
-  options = {
-    theme = "material",
-  },
-})
