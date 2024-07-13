@@ -1,4 +1,8 @@
 ---
+- name: Update localhost 
+  hosts: localhost
+  tasks:
+    - include_tasks: install-apt-packages.yml
 - name: Update Control plane
   hosts: controller
   tasks:
