@@ -1,4 +1,4 @@
-# github.com/apenella/go-ansible/v2 v2.0.0
+# github.com/apenella/go-ansible/v2 v2.0.1
 ## explicit; go 1.22
 github.com/apenella/go-ansible/v2/internal/executable/os/exec
 github.com/apenella/go-ansible/v2/pkg/adhoc
