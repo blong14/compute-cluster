@@ -36,7 +36,7 @@ test-go: .deps/go
 
 test-zig:
 	@echo "[test] testing zig code..."
-	zig build test
+	zig build test-zagent
 
 .PHONY: test
 test: test-go test-zig
@@ -54,11 +54,15 @@ cover-pkg: .deps/go
 	go test -coverprofile cover.out $(PKG)
 	@grep -v mode: cover.out >> cover-all.out
 
+lint-zig: 
+	@echo "[lint] linting zig code..."
+	zig fmt .
+
 lint-go: .deps/go
 	@echo "[lint] linting go code..."
 	go fmt ./...
 	go vet ./...
 
 .PHONY: lint
-lint: lint-go
+lint: lint-go lint-zig
 	@echo "[lint] complete..."

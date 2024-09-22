@@ -10,7 +10,7 @@ const sys = @cImport({
     @cInclude("sys/types.h");
 });
 
-const errno = std.os.errno;
+const errno = std.posix.errno;
 
 /// `MessageQueue` is a System V message queue wrapper.
 /// The calling process must have write permission on the message queue
@@ -24,7 +24,7 @@ pub fn MessageQueue(comptime T: type) type {
 
         const Self = @This();
 
-        const MessageQueueError = error {
+        const MessageQueueError = error{
             EOQ, // queue has been closed
             ReadError,
             WriteError,
@@ -60,7 +60,7 @@ pub fn MessageQueue(comptime T: type) type {
 
         /// Remove the message queue
         pub fn deinit(self: *Self) void {
-            if(sys.msgctl(self.*.msqid, sys.IPC_RMID, null) == -1) {
+            if (sys.msgctl(self.*.msqid, sys.IPC_RMID, null) == -1) {
                 c.perror("unable to destroy message queue");
             }
             self.* = undefined;
@@ -87,7 +87,7 @@ pub fn MessageQueue(comptime T: type) type {
                     else => {
                         c.perror("unable to read message");
                         return null;
-                    }
+                    },
                 }
             }
         };
@@ -110,26 +110,26 @@ pub fn MessageQueue(comptime T: type) type {
 
             /// Publishes a new element to the back of the queue.
             pub fn publish(self: Writer, v: T) MessageQueueError!void {
-                var mesg = Message{.mtype = self.msqtype, .mdata = v};
+                var mesg = Message{ .mtype = self.msqtype, .mdata = v };
                 switch (errno(sys.msgsnd(self.msqid, &mesg, self.msgsize, 0))) {
                     .SUCCESS => return,
                     .IDRM => return MessageQueueError.EOQ,
                     else => {
                         c.perror("unable to send message");
                         return MessageQueueError.WriteError;
-                    }
+                    },
                 }
             }
 
             pub fn done(self: Writer) MessageQueueError!void {
-                var end: Message = .{.mtype = EOQ, .mdata = undefined};
+                var end: Message = .{ .mtype = EOQ, .mdata = undefined };
                 switch (errno(sys.msgsnd(self.msqid, &end, self.msgsize, 0))) {
                     .SUCCESS => return,
                     .IDRM => return MessageQueueError.EOQ,
                     else => {
                         c.perror("unable to send message");
                         return MessageQueueError.WriteError;
-                    }
+                    },
                 }
             }
         };
@@ -152,7 +152,7 @@ test MessageQueue {
         const Self = @This();
     };
 
-    const elem: Elem = .{.data = 1};
+    const elem: Elem = .{ .data = 1 };
 
     // Create a mailbox to read and write messages to.
     // The main thread will be in charge of cleaning up the mailbox
@@ -164,7 +164,7 @@ test MessageQueue {
         pub fn publish(outbox: MessageQueue(Elem).Writer, data: Elem) !void {
             try outbox.publish(data);
         }
-    }.publish, .{mailbox.publisher(), elem});
+    }.publish, .{ mailbox.publisher(), elem });
 
     const actual = reader.next();
     try testing.expect(actual.?.data == elem.data);
@@ -178,7 +178,7 @@ test "Test count" {
         const Self = @This();
     };
 
-    var elems = [_]Elem {.{.data = 1}, .{.data = 2}};
+    var elems = [_]Elem{ .{ .data = 1 }, .{ .data = 2 } };
 
     // Create a mailbox to read and write messages to.
     // The main thread will be in charge of cleaning up the mailbox
@@ -196,7 +196,7 @@ test "Test count" {
                 try outbox.publish(elem);
             }
         }
-    }.publish, .{mailbox.publisher(), &elems});
+    }.publish, .{ mailbox.publisher(), &elems });
 
     var count: u8 = 0;
     while (reader.next()) |_| {
@@ -212,12 +212,12 @@ test "Pool" {
     const ThreadPool = std.Thread.Pool;
     const WaitGroup = std.Thread.WaitGroup;
     const Elem = struct {
-       data: usize,
-       const Self = @This();
+        data: usize,
+        const Self = @This();
     };
 
-    var elems = [_]Elem {.{.data = 1}, .{.data = 2}};
-    var gpa = testing.allocator;
+    var elems = [_]Elem{ .{ .data = 1 }, .{ .data = 2 } };
+    const gpa = testing.allocator;
     var wait_group: WaitGroup = .{};
     var thread_pool: ThreadPool = undefined;
     try thread_pool.init(.{ .allocator = gpa });
@@ -246,7 +246,7 @@ test "Pool" {
                 }
                 std.debug.print("worker finished...\n", .{});
             }
-        }.publish, .{&wait_group, mailbox.publisher(), &elems});
+        }.publish, .{ &wait_group, mailbox.publisher(), &elems });
     }
 
     const reader = try std.Thread.spawn(.{}, struct {
@@ -261,9 +261,8 @@ test "Pool" {
                 count += 1;
             }
             const nd = tmr.read();
-            const in = (nd-strt) / 1_000_000_000;
-            std.debug.print(
-                "count {d} in {d}s {d} elems/s\n", .{count, in,  (count/in)});
+            const in = (nd - strt) / 1_000_000_000;
+            std.debug.print("count {d} in {d}s {d} elems/s\n", .{ count, in, (count / in) });
         }
     }.consume, .{mailbox.subscribe()});
 
@@ -273,6 +272,6 @@ test "Pool" {
     reader.join();
 
     const end = timer.read();
-    std.debug.print("finished in {d}ms\n", .{((end-start)/1_000_000)});
+    std.debug.print("finished in {d}ms\n", .{((end - start) / 1_000_000)});
     std.time.sleep(100_000);
 }

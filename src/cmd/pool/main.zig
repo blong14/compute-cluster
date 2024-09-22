@@ -9,11 +9,11 @@ const HeartBeat = struct {
 pub fn main() !void {
     var mailbox = try MessageQueue(HeartBeat).init(".");
 
-    const pid = try std.os.fork();
+    const pid = try std.posix.fork();
     switch (pid) {
         0 => { // producer
             std.debug.print("child sending heartbeat\n", .{});
-            const hb = HeartBeat{.status = "ok"};
+            const hb = HeartBeat{ .status = "ok" };
             const writer = mailbox.publisher();
             try writer.publish(hb);
             try writer.publish(hb);
@@ -28,8 +28,8 @@ pub fn main() !void {
             while (reader.next()) |data| {
                 std.debug.print("{s}\n", .{data.status});
             }
-            const result = std.os.waitpid(pid, 0);
+            const result = std.posix.waitpid(pid, 0);
             std.debug.print("child with pid {d} finished\n", .{result.pid});
-        }
+        },
     }
 }

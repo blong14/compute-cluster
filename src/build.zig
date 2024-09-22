@@ -10,12 +10,14 @@ pub fn build(b: *std.Build) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
+
     // Add custom modules so they can be referenced from our cmd directory
-    const queue = b.addModule("msgqueue", .{ .source_file = .{ .path = "internal/ipc/msgqueue.zig" } });
+    const queue = b.addModule("msgqueue", .{ .root_source_file = b.path("internal/ipc/msgqueue.zig") });
+
     {
         const exe = b.addExecutable(.{
             .name = "zagent",
-            .root_source_file = .{ .path = "cmd/agent/main.zig" },
+            .root_source_file = b.path("cmd/agent/main.zig"),
             .target = target,
             .optimize = optimize,
         });
@@ -42,7 +44,7 @@ pub fn build(b: *std.Build) void {
         // Creates a step for unit testing. This only builds the test executable
         // but does not run it.
         const unit_tests = b.addTest(.{
-            .root_source_file = .{ .path = "cmd/agent/main.zig" },
+            .root_source_file = b.path("cmd/agent/main.zig"),
             .target = target,
             .optimize = optimize,
         });
@@ -53,14 +55,15 @@ pub fn build(b: *std.Build) void {
         const test_step = b.step("test-zagent", "Run unit tests");
         test_step.dependOn(&run_unit_tests.step);
     }
+
     {
         const exe = b.addExecutable(.{
             .name = "zpool",
-            .root_source_file = .{ .path = "cmd/pool/main.zig" },
+            .root_source_file = b.path("cmd/pool/main.zig"),
             .target = target,
             .optimize = optimize,
         });
-        exe.addModule("msgqueue", queue);
+        exe.root_module.addImport("msgqueue", queue);
         exe.linkLibC();
         b.installArtifact(exe);
         const run_cmd = b.addRunArtifact(exe);
@@ -71,7 +74,7 @@ pub fn build(b: *std.Build) void {
         const run_step = b.step("run-pool", "Run the app");
         run_step.dependOn(&run_cmd.step);
         const unit_tests = b.addTest(.{
-            .root_source_file = .{ .path = "cmd/agent/main.zig" },
+            .root_source_file = b.path("cmd/agent/main.zig"),
             .target = target,
             .optimize = optimize,
         });

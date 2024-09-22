@@ -15,7 +15,7 @@ pub fn MMap(comptime T: type) type {
 
         const Self = @This();
 
-        const Error = error {
+        const Error = error{
             ReadError,
             WriteError,
         } || std.os.OpenError || std.os.MMapError;
@@ -93,7 +93,7 @@ test MMap {
     };
 
     // const expected: Entity = .{.key = "hello"};
-    const entities: [2]Entity = .{.{.key = "key1"}, .{.key = "key2"}};
+    const entities: [2]Entity = .{ .{ .key = "key1" }, .{ .key = "key2" } };
 
     var map = try MMap(Entity).init("tmp/out.dat");
     for (entities) |entity| {
