@@ -18,4 +18,4 @@
       become_method: sudo
       command: |
         helm upgrade -i uptime-kuma compute-cluster/build/charts/uptime-kuma \
-        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --kubeconfig /etc/rancher/k3s/k3s.yaml
