@@ -25,5 +25,5 @@
         --kubeconfig /etc/rancher/k3s/k3s.yaml \
         --namespace cattle-system \
         --set hostname=compute.cluster \
-        --set replicas=1 \
+        --set replicas=2 \
         --set rancherImageTag=v2.9.2
