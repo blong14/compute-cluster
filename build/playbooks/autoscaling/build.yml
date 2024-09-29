@@ -11,7 +11,7 @@
     - name: Install vertical pod autoscaler
       command: |
         helm upgrade --install vpa cowboysysop/vertical-pod-autoscaler \
-        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml
+        --kubeconfig /etc/rancher/k3s/k3s.yaml
     - name: Ensure Kubectl
       command: kubectl version
     - name: Copy autoscaling config
