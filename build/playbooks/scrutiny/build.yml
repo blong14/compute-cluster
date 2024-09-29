@@ -94,6 +94,7 @@
       command: |
         helm upgrade -i scrutiny scrutiny/charts/scrutiny \
         --kubeconfig /etc/rancher/k3s/k3s.yaml \
+        --namespace scrutiny \
         --set image.tag=arm-{{ clone_status.after }} \
         --set env.PG_HOST=postgres-cluster-rw.default \
         --set env.PG_PORT=5432 \
