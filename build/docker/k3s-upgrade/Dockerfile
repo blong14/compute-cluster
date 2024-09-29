@@ -1,1 +1,1 @@
-FROM rancher/k3s-upgrade:v1.28.3-k3s1
+FROM rancher/k3s-upgrade:v1.30.5-k3s1
