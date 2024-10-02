@@ -53,7 +53,7 @@
         helm upgrade -i collector compute-cluster/build/charts/collector \
         --kubeconfig /etc/rancher/k3s/k3s.yaml \
         --set image.tag=arm-{{ clone_status.after }} \
-        --set env.POSTGRES_HOST=postgres-cluster-rw.default:5432 \
+        --set env.POSTGRES_HOST=postgres-cluster-16-rw.default:5432 \
         --set env.POSTGRES_DATABASE="cluster" \
         --set env.POSTGRES_USER={{ postgres_user }} \
         --set env.POSTGRES_PASSWORD={{ postgres_password }}
