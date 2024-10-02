@@ -7,7 +7,7 @@
       become: yes
       become_method: sudo
       ansible.builtin.copy:
-        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/postgres/pg.yml
+        src: /home/blong14/Developer/git/compute-cluster/build/playbooks/postgres/pg_16.yml
         dest: /home/pi/postgres/pg.yml
     - name: Apply pg to k8s cluster
       command: "kubectl apply -f /home/pi/postgres/pg.yml"

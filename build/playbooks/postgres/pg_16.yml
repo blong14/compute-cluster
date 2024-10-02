@@ -1,0 +1,69 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster-16
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+  instances: 2
+  startDelay: 300
+  stopDelay: 300
+  primaryUpdateStrategy: unsupervised
+  primaryUpdateMethod: switchover
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '10s'
+    pg_hba:
+      - host all all 10.244.0.0/16 md5
+
+  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - cluster
+          - scrutiny
+        source:
+          externalCluster: postgres-cluster 
+        #postImportApplicationSQL:
+        #- |
+        #  INSERT YOUR SQL QUERIES HERE
+  
+  storage:
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: local-path
+      volumeMode: Filesystem
+
+  externalClusters:
+    - name: postgres-cluster 
+      connectionParameters:
+        host: postgres-cluster-rw.default 
+        user: postgres
+        dbname: postgres
+      password:
+        name: postgres-cluster-superuser
+        key: password
+
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1"
+
