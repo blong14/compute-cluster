@@ -1,10 +1,10 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: postgres-cluster-16
+  name: postgres-cluster-17
 spec:
   enableSuperuserAccess: true
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.0
   instances: 2
   startDelay: 300
   stopDelay: 300
@@ -30,6 +30,21 @@ spec:
     pg_hba:
       - host all all 10.244.0.0/16 md5
 
+  bootstrap:
+    initdb:
+      import:
+        type: monolith
+        databases:
+          - cluster
+          - scrutiny
+        roles:
+          - "*"
+        source:
+          externalCluster: postgres-cluster-16 
+        #postImportApplicationSQL:
+        #- |
+        #  INSERT YOUR SQL QUERIES HERE
+  
   storage:
     pvcTemplate:
       accessModes:
@@ -39,6 +54,16 @@ spec:
           storage: 10Gi
       storageClassName: local-path
       volumeMode: Filesystem
+
+  externalClusters:
+    - name: postgres-cluster-16 
+      connectionParameters:
+        host: postgres-cluster-16-rw.default 
+        user: postgres
+        dbname: postgres
+      password:
+        name: postgres-cluster-16-superuser
+        key: password
 
   resources:
     requests:
