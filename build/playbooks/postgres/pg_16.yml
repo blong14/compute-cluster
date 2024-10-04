@@ -29,19 +29,6 @@ spec:
     pg_hba:
       - host all all 10.244.0.0/16 md5
 
-  bootstrap:
-    initdb:
-      import:
-        type: monolith
-        databases:
-          - cluster
-          - scrutiny
-        source:
-          externalCluster: postgres-cluster 
-        #postImportApplicationSQL:
-        #- |
-        #  INSERT YOUR SQL QUERIES HERE
-  
   storage:
     pvcTemplate:
       accessModes:
@@ -51,16 +38,6 @@ spec:
           storage: 10Gi
       storageClassName: local-path
       volumeMode: Filesystem
-
-  externalClusters:
-    - name: postgres-cluster 
-      connectionParameters:
-        host: postgres-cluster-rw.default 
-        user: postgres
-        dbname: postgres
-      password:
-        name: postgres-cluster-superuser
-        key: password
 
   resources:
     requests:
