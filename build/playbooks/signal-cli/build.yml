@@ -18,4 +18,5 @@
       become_method: sudo
       command: |
         helm upgrade -i signal-cli compute-cluster/build/charts/signal-cli \
-        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
+        --kubeconfig /etc/rancher/k3s/k3s.yaml \
+        --namespace signal
