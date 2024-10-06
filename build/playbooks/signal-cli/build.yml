@@ -19,4 +19,4 @@
       command: |
         helm upgrade -i signal-cli compute-cluster/build/charts/signal-cli \
         --kubeconfig /etc/rancher/k3s/k3s.yaml \
-        --namespace signal
+        --namespace signal-cli
