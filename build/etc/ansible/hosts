@@ -6,15 +6,15 @@ worker-03.cluster
 127.0.0.1
 
 [localhost]
-127.0.0.1
+127.0.0.1 ansible_python_interpreter=/usr/bin/python3.13
 
 [controller]
-controller-02.cluster
+controller-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 
 [rasppi]
-worker-01.cluster
-worker-02.cluster
-worker-03.cluster
+worker-01.cluster ansible_python_interpreter=/usr/bin/python3.10
+worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
+worker-03.cluster ansible_python_interpreter=/usr/bin/python3.10
 
 [arm-build]
 worker-02.cluster
