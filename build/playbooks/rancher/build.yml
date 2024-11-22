@@ -21,9 +21,9 @@
       become_method: sudo
       command: |
         helm upgrade -i rancher rancher-stable/rancher \
-        --version 2.9.2 \
+        --version 2.10.0 \
         --kubeconfig /etc/rancher/k3s/k3s.yaml \
         --namespace cattle-system \
         --set hostname=compute.cluster \
         --set replicas=2 \
-        --set rancherImageTag=v2.9.2
+        --set rancherImageTag=v2.10.0
