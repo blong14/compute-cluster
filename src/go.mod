@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.23.3
 
 require (
-	github.com/apenella/go-ansible/v2 v2.0.1
+	github.com/apenella/go-ansible/v2 v2.1.0
 	github.com/lib/pq v1.10.9
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0

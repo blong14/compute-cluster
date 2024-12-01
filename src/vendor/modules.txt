@@ -1,8 +1,8 @@
-# github.com/apenella/go-ansible/v2 v2.0.1
+# github.com/apenella/go-ansible/v2 v2.1.0
 ## explicit; go 1.22
-github.com/apenella/go-ansible/v2/internal/executable/os/exec
 github.com/apenella/go-ansible/v2/pkg/adhoc
 github.com/apenella/go-ansible/v2/pkg/execute
+github.com/apenella/go-ansible/v2/pkg/execute/exec
 github.com/apenella/go-ansible/v2/pkg/execute/result
 github.com/apenella/go-ansible/v2/pkg/execute/result/default
 github.com/apenella/go-ansible/v2/pkg/execute/result/transformer
