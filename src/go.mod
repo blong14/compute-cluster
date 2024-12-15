@@ -2,7 +2,7 @@ module cluster
 
 go 1.22
 
-toolchain go1.23.3
+toolchain go1.23.4
 
 require (
 	github.com/apenella/go-ansible/v2 v2.1.0
