@@ -6,7 +6,7 @@ worker-03.cluster
 127.0.0.1
 
 [localhost]
-127.0.0.1 ansible_python_interpreter=/usr/bin/python3.13
+127.0.0.1 ansible_python_interpreter=/usr/bin/python3.11
 
 [controller]
 controller-02.cluster ansible_python_interpreter=/usr/bin/python3.10
