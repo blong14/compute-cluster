@@ -1,6 +1,6 @@
 ---
 - name: Install Play for ARM Based Nodes
-  hosts: rasppi
+  hosts: rasppi 
   remote_user: pi
   tasks:
     - name: Update all installed packages
@@ -11,13 +11,13 @@
         state: latest
         update_cache: yes
         only_upgrade: yes
-    - include_tasks: install-extra-raspi.yml
+        # - include_tasks: install-extra-raspi.yml
     - include_tasks: install-openiscsi.yml
     - include_tasks: install-docker.yml
     - include_tasks: install-build-essentials.yml
     - include_tasks: install-zig.yml
 - name: Configure Play for ARM Based Nodes
-  hosts: rasppi
+  hosts: rasppi 
   remote_user: pi
   tasks:
     - include_tasks: configure-network.yml

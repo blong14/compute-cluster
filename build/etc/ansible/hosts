@@ -3,6 +3,7 @@ controller-02.cluster
 worker-01.cluster
 worker-02.cluster
 worker-03.cluster
+worker-04.cluster
 127.0.0.1
 
 [localhost]
@@ -15,9 +16,10 @@ controller-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 worker-01.cluster ansible_python_interpreter=/usr/bin/python3.10
 worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 worker-03.cluster ansible_python_interpreter=/usr/bin/python3.10
+worker-04.cluster ansible_python_interpreter=/usr/bin/python3.12
 
 [arm-build]
-worker-02.cluster
+worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 
 [amd-build]
 controller-02.cluster

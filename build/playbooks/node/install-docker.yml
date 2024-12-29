@@ -17,7 +17,7 @@
     state: present
 - name: Add Docker repository to apt
   apt_repository:
-    repo: deb https://download.docker.com/linux/ubuntu jammy stable
+    repo: deb https://download.docker.com/linux/ubuntu noble stable
     state: present
 - name: Install Docker
   apt:
