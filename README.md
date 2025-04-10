@@ -15,3 +15,8 @@ Flags:
 
 Use "cluster [command] --help" for more information about a command.
 ```
+
+```bash
+source venv/bin/activate
+pip install -r requirements.txt -c constraints.txt
+```

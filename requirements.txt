@@ -1,1 +1,21 @@
-ansible==11.4.0
+aider-chat
+ansible
+# Terminal enhancements
+powerline-status
+powerline-gitstatus
+thefuck
+httpie
+glances
+# Python development
+black
+flake8
+mypy
+pytest
+ipython
+# C/Go development helpers
+cmake-language-server
+clang-format
+
+# Note: The following packages should be installed via system package manager (apt):
+# neofetch, ranger, fzf, bat, gopls, tmux, htop
+
