@@ -185,6 +185,11 @@ alias gor='go run'
 alias got='go test ./...'
 alias goc='go clean'
 alias gof='go fmt ./...'
+alias gom='go mod tidy'
+alias goi='go install'
+alias gov='go version'
+alias goget='go get'
+alias govet='go vet'
 
 # Python development
 alias py='python3'
@@ -209,6 +214,7 @@ extract() {
     case $1 in
       *.tar.bz2)   tar xjf $1     ;;
       *.tar.gz)    tar xzf $1     ;;
+      *.tar.xz)    tar xvf $1     ;;
       *.bz2)       bunzip2 $1     ;;
       *.rar)       unrar e $1     ;;
       *.gz)        gunzip $1      ;;
@@ -237,7 +243,7 @@ ff() { find . -type f -name "*$1*"; }
 fd() { find . -type d -name "*$1*"; }
 
 # Show system info
-sysinfo() {
+xsysinfo() {
   echo -e "\nSystem Information:"
   echo -e "-------------------"
   echo -e "Hostname: $(hostname)"
@@ -282,7 +288,7 @@ bashapi() {
 
   # System Functions
   echo -e "${bold}${purple}┌─ SYSTEM UTILITIES ${reset}"
-  echo -e "${green}├─ sysinfo${reset}          Display system information"
+  echo -e "${green}├─ xsysinfo${reset}          Display system information"
   echo -e "${green}├─ welcome${reset}          Show welcome screen with system stats"
   echo -e "${green}├─ extract <file>${reset}   Extract compressed archives of various types"
   echo -e "${green}├─ mkcd <dir>${reset}       Create a directory and cd into it"
@@ -469,7 +475,7 @@ syspkg() {
         return 1
       fi
       echo "Installing $package to ~"
-      sudo cp "$package" ~
+      sudo cp -r "$package" ~
       ;;
     install-script)
       if [ -z "$package" ]; then
@@ -497,3 +503,15 @@ syspkg() {
   esac
 }
 
+if [ -f ~/.bash_secrets ]; then
+    . ~/.bash_secrets
+fi
+
+# Go environment variables
+export GOPATH=$HOME/go
+export GOROOT=$HOME/sdk/go1.24.2
+
+# Zig environment variables
+export ZIGROOT=$HOME/sdk/zig0.13.0
+
+export PATH=$GOPATH/bin:$GOROOT/bin:$ZIGROOT:$PATH

@@ -34,4 +34,6 @@ alias ping='ping -c 5'
 alias update='sudo apt update && sudo apt upgrade -y'
 alias install='sudo apt install'
 alias remove='sudo apt remove'
-alias sysinfo='echo -e "CPU: $(grep "model name" /proc/cpuinfo | head -1 | cut -d ":" -f2)\nMemory: $(free -h | grep Mem | awk "{print \$3\" / \"\$2}")\nDisk: $(df -h / | tail -1 | awk "{print \$3\" / \"\$2\" (\"\$5\")\"})"'
+
+# Docker aliases
+alias ollama='docker run -it -v ollama:/root/.ollama --add-host ollama.cluster:100.91.72.78 -e OLLAMA_HOST=http://ollama.cluster ollama/ollama'

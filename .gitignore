@@ -19,6 +19,9 @@ src/zig-out
 .venv
 venv
 
+# env secrets
+*.bash_secrets
+
 # binaries
 bin/z*
 
@@ -38,3 +41,4 @@ build/etc/rancher/k3s/k3s.yaml
 
 # Cluster configuration
 config.yml
+.aider*
