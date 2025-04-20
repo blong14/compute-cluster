@@ -11,15 +11,14 @@
         state: latest
         update_cache: yes
         only_upgrade: yes
-        # - include_tasks: install-extra-raspi.yml
     - include_tasks: install-openiscsi.yml
     - include_tasks: install-docker.yml
     - include_tasks: install-build-essentials.yml
-    - include_tasks: install-zig.yml
 - name: Configure Play for ARM Based Nodes
   hosts: rasppi 
   remote_user: pi
   tasks:
+    - include_tasks: configure-home.yml
     - include_tasks: configure-network.yml
     - include_tasks: configure-k8s.yml
 - name: Configure Play for Controller Based Nodes

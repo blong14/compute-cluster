@@ -3,7 +3,7 @@
 
 echo "Installing system packages..."
 sudo apt update
-sudo apt install -y neofetch ranger fzf bat tmux golang-go htop bash-completion
+sudo apt install -y neofetch ranger fzf bat tmux golang-go htop bash-completion silversearcher-ag
 
 # Install Go packages
 echo "Installing Go packages..."

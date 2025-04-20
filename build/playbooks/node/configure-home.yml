@@ -1,0 +1,36 @@
+- name: Copy bash config 
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/{{item}}
+    dest: /home/pi/{{item}}
+  loop:
+    - .bashrc
+    - .bash_aliases
+    - .bash_logout
+- name: Copy install scripts
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/bin/{{item}}
+    dest: /usr/local/bin/{{item}}
+  loop:
+    - go.sh
+    - syspkg.sh
+    - zig.sh
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /usr/local/bin/{{item}}
+    owner: pi
+    group: pi
+    mode: '0755'
+  loop:
+    - go.sh
+    - syspkg.sh
+    - zig.sh
+- name: Copy config 
+  become: yes
+  become_method: sudo
+  ansible.builtin.copy:
+    src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/.config
+    dest: /home/pi/
