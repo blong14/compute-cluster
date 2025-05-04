@@ -23,3 +23,10 @@ worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 
 [amd-build]
 controller-02.cluster
+
+[slurm-primary]
+worker-02.cluster
+
+[slurm-workers]
+worker-01.cluster
+worker-03.cluster
