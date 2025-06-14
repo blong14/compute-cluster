@@ -8,4 +8,34 @@
       ansible.builtin.copy:
         src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/.config/nvim
         dest: /home/blong14/.config
+    - name: Copy bash config 
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/{{item}}
+        dest: /home/blong14/{{item}}
+      loop:
+        - .bashrc
+        - .bash_aliases
+        - .bash_logout
+    - name: Copy install scripts
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/bin/{{item}}
+        dest: /home/blong14/bin/{{item}}
+      loop:
+        - go.sh
+        - syspkg.sh
+        - zig.sh
+    - name: Change file ownership, group and permissions
+      ansible.builtin.file:
+        path: /home/blong14/bin/{{item}}
+        owner: blong14
+        group: blong14
+        mode: '0755'
+      loop:
+        - go.sh
+        - syspkg.sh
+        - zig.sh
 

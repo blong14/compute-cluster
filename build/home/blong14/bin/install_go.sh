@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GO_VERSION="1.24.2"
+export GO_VERSION="1.24.4"
 
 if [ "$TARGETARCH" = "arm64" ]; then
     echo "Building for ARM64 architecture";
