@@ -1,6 +1,6 @@
 ---
 - name: Build slurm cluster
-  hosts: arm-build
+  hosts: slurm-primary
   remote_user: pi
   tasks:
     - name: Install slurm
@@ -10,13 +10,93 @@
         name: 'slurm-wlm'
         state: latest
         update_cache: yes
-    - name: Start slurm
+    - name: Copy munge config
       become: yes
       become_method: sudo
-      command: |
-        systemctl enable munge
-        systemctl start munge
-        systemctl enable slurmd
-        systemctl start slurmd
-        systemctl enable slurmctld
-        systemctl start slurmctld
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/etc/munge/{{item}}
+        dest: /etc/munge/{{item}}
+      loop:
+        - munge.key
+    - name: Copy slurm config
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/etc/slurm-llnl/{{item}}
+        dest: /etc/slurm/{{item}}
+      loop:
+        - cgroup.conf
+        - cgroup_allowed_devices_file.conf
+        - plugstack.conf
+        - slurm.conf
+    - name: Start munge
+      become: yes
+      become_method: sudo
+      ansible.builtin.systemd:
+        name: munge
+        state: started
+        enabled: true
+    - name: Start slurmd
+      become: yes
+      become_method: sudo
+      ansible.builtin.systemd:
+        name: slurmd
+        state: started
+        enabled: true
+    - name: Start slurmctld
+      become: yes
+      become_method: sudo
+      ansible.builtin.systemd:
+        name: slurmctld
+        state: started
+        enabled: true
+- name: Build slurm workers
+  hosts: slurm-workers
+  remote_user: pi
+  tasks:
+    - name: Install slurm
+      become: yes
+      become_method: sudo
+      apt:
+        name: 'slurmd'
+        state: latest
+        update_cache: yes
+    - name: Install slurm-client
+      become: yes
+      become_method: sudo
+      apt:
+        name: 'slurm-client'
+        state: latest
+        update_cache: yes
+    - name: Copy munge config
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/etc/munge/{{item}}
+        dest: /etc/munge/{{item}}
+      loop:
+        - munge.key
+    - name: Copy slurm config
+      become: yes
+      become_method: sudo
+      ansible.builtin.copy:
+        src: /home/blong14/Developer/git/compute-cluster/build/etc/slurm-llnl/{{item}}
+        dest: /etc/slurm/{{item}}
+      loop:
+        - cgroup.conf
+        - cgroup_allowed_devices_file.conf
+        - slurm.conf
+    - name: Start munge
+      become: yes
+      become_method: sudo
+      ansible.builtin.systemd:
+        name: munge
+        state: started
+        enabled: true
+    - name: Start slurmd
+      become: yes
+      become_method: sudo
+      ansible.builtin.systemd:
+        name: slurmd
+        state: started
+        enabled: true
