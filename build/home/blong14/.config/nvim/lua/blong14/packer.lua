@@ -46,4 +46,21 @@ return require('packer').startup(function(use)
 
   use("preservim/nerdtree")
   use("ryanoasis/vim-devicons")
+
+  -- AI related tools
+  -- use("github/copilot.vim")
+
+  use{
+      "yetone/avante.nvim",
+      branch = "main",
+      run = "make",
+      requires = {
+          "stevearc/dressing.nvim",
+          "MunifTanjim/nui.nvim",
+          "nvim-lua/plenary.nvim",
+          "MeanderingProgrammer/render-markdown.nvim",
+          "github/copilot.vim",
+      },
+  }
+
 end)

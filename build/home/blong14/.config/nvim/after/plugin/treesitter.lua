@@ -3,6 +3,7 @@ require'nvim-treesitter.configs'.setup {
   ensure_installed = {
         "c",
         "go",
+        "java",
         "javascript",
         "typescript",
         "lua",
