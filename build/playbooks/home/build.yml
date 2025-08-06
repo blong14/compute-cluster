@@ -25,9 +25,9 @@
         src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/bin/{{item}}
         dest: /home/blong14/bin/{{item}}
       loop:
-        - go.sh
+        - install_go.sh
         - syspkg.sh
-        - zig.sh
+        - install_zig.sh
     - name: Change file ownership, group and permissions
       ansible.builtin.file:
         path: /home/blong14/bin/{{item}}
@@ -35,7 +35,7 @@
         group: blong14
         mode: '0755'
       loop:
-        - go.sh
+        - install_go.sh
         - syspkg.sh
-        - zig.sh
+        - install_zig.sh
 
