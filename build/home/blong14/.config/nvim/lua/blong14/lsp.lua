@@ -30,8 +30,10 @@ local servers = {
   "gopls",
   "jedi_language_server",
   "lua_ls",
-  "ruff", -- python
+  "ruff",
   "terraformls",
+  "ts_ls",
+  "vimls",
   'zls',
 }
 
