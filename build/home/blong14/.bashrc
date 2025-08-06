@@ -511,6 +511,9 @@ fi
 export GOPATH=$HOME/go
 export GOROOT=$HOME/sdk/go1.24.2
 
+# // https://nnethercote.github.io/perf-book/build-configuration.html
+export MALLOC_CONF=thp:always,metadata_thp:always
+
 # Zig environment variables
 export ZIGROOT=$HOME/sdk/zig0.13.0
 
