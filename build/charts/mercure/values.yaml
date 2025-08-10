@@ -8,7 +8,7 @@ image:
   repository: dunglas/mercure
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: v0.19
+  tag: v0.20
 
 env:
   - name: SERVER_NAME
