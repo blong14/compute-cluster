@@ -8,6 +8,10 @@
       ansible.builtin.copy:
         src: /home/blong14/Developer/git/compute-cluster/build/home/blong14/.config/nvim
         dest: /home/blong14/.config
+        group: blong14
+        owner: blong14
+        directory_mode: '0755'
+        mode: '0644'
     - name: Copy bash config 
       become: yes
       become_method: sudo
