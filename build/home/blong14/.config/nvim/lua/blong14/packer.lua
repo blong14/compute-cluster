@@ -1,7 +1,16 @@
 -- This file can be loaded by calling `lua require('plugins')` from your init.vim
+local ensure_packer = function()
+  local fn = vim.fn
+  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    vim.cmd [[packadd packer.nvim]]
+    return true
+  end
+  return false
+end
 
--- Only required if you have packer configured as `opt`
-vim.cmd [[packadd packer.nvim]]
+local packer_bootstrap = ensure_packer()
 
 return require('packer').startup(function(use)
   -- Packer can manage itself
@@ -39,27 +48,27 @@ return require('packer').startup(function(use)
 
   use("marko-cerovac/material.nvim")
 
-  use {
-      'nvim-lualine/lualine.nvim',
-      requires = { 'nvim-tree/nvim-web-devicons', opt = true }
-  }
-
-  use("preservim/nerdtree")
-  use("ryanoasis/vim-devicons")
+  use("nvim-lualine/lualine.nvim")
 
   -- AI related tools
-  -- use("github/copilot.vim")
 
+  -- avante __
+  use("nvim-lua/plenary.nvim")
+  use("MunifTanjim/nui.nvim")
+  use("MeanderingProgrammer/render-markdown.nvim")
+  use("stevearc/dressing.nvim")
+  use("preservim/nerdtree")
+  use("ryanoasis/vim-devicons")
+  -- use("github/copilot.vim")
   use{
       "yetone/avante.nvim",
-      branch = "main",
-      run = "make",
+      tag = "v0.0.9",              -- Use specific stable version instead of main
+      opt = true,                  -- Don't auto-load for security
       requires = {
-          "stevearc/dressing.nvim",
-          "MunifTanjim/nui.nvim",
-          "nvim-lua/plenary.nvim",
-          "MeanderingProgrammer/render-markdown.nvim",
-          "github/copilot.vim",
+        {'nvim-lua/plenary.nvim'},
+        {'MunifTanjim/nui.nvim'},
+        {'MeanderingProgrammer/render-markdown.nvim'},
+        {'stevearc/dressing.nvim'},
       },
   }
 

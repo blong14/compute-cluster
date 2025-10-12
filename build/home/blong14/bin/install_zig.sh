@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ZIG_VERSION="0.13.0";
+export ZIG_VERSION="0.14.1";
 
 if [ "$TARGETARCH" = "arm64" ]; then
     echo "Building for ARM64 architecture";
@@ -15,7 +15,8 @@ echo "ZIG_VERSION=$ZIG_VERSION";
 mkdir -p "$HOME/sdk/zig${ZIG_VERSION}"
 
 echo "Downloading zig ${ZIG_VERSION} for ${ZIG_ARCH}...";
-wget -O zig${ZIG_VERSION}.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz";
+wget -O zig${ZIG_VERSION}.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-${ZIG_ARCH}-linux-${ZIG_VERSION}.tar.xz";
+https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz
 tar -xf zig${ZIG_VERSION}.tar.xz -C $HOME/sdk/zig${ZIG_VERSION} --strip-components=1;
 rm zig${ZIG_VERSION}.tar.xz;
 
