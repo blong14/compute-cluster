@@ -16,6 +16,7 @@ src/tmp
 src/zig-cache
 src/.zig-cache
 src/zig-out
+.env
 .venv
 venv
 
