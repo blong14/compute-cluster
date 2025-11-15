@@ -1,1 +1,1 @@
-FROM rancher/rancher:v2.12.0
+FROM rancher/rancher:v2.12.3
