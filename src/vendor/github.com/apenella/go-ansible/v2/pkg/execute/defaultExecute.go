@@ -7,13 +7,13 @@ import (
 	"os"
 	osexec "os/exec"
 	"strings"
-	"sync"
 
 	"github.com/apenella/go-ansible/v2/pkg/execute/exec"
 	"github.com/apenella/go-ansible/v2/pkg/execute/result"
 	defaultresults "github.com/apenella/go-ansible/v2/pkg/execute/result/default"
 	"github.com/apenella/go-ansible/v2/pkg/execute/result/transformer"
 	errors "github.com/apenella/go-common-utils/error"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -160,13 +160,9 @@ func (e *DefaultExecute) Execute(ctx context.Context) (err error) {
 
 	var errCmd error
 	var cmdStderr, cmdStdout io.ReadCloser
-	var wg sync.WaitGroup
-
 	errContext := "(execute::DefaultExecute::Execute)"
 
 	defer e.checkCompatibility()
-
-	execErrChan := make(chan error)
 
 	// default stdout and stderr for the main process
 	if e.Write == nil {
@@ -245,31 +241,20 @@ func (e *DefaultExecute) Execute(ctx context.Context) (err error) {
 		return errors.New(errContext, "Error starting command", err)
 	}
 
-	// Waig for stdout and stderr
-	wg.Add(2)
+	goroutine, groupCtx := errgroup.WithContext(ctx)
 
-	// stdout management
-	go func() {
-		defer close(execErrChan)
+	// handling command's stdout
+	goroutine.Go(func() error {
+		return e.Output.Print(groupCtx, cmdStdout, e.Write)
+	})
+	// handling command's stderr
+	goroutine.Go(func() error {
+		return e.Output.Print(groupCtx, cmdStderr, e.WriterError)
+	})
 
-		// when using the default results func DefaultStdoutCallbackResults,
-		// reads from ansible's stdout and writes to main process' stdout
-		e.Output.Print(ctx, cmdStdout, e.Write)
-
-		wg.Done()
-		execErrChan <- err
-	}()
-
-	// stderr management
-	go func() {
-		// show stderr messages using default stdout callback results
-		e.Output.Print(ctx, cmdStderr, e.WriterError)
-		wg.Done()
-	}()
-
-	wg.Wait()
-
-	if err := <-execErrChan; err != nil {
+	// waiting for the completion or failure of one of the previously initialised goroutines. It does not waits for both routines.
+	err = goroutine.Wait()
+	if err != nil {
 		return errors.New(errContext, "Error managing results output", err)
 	}
 
@@ -277,27 +262,27 @@ func (e *DefaultExecute) Execute(ctx context.Context) (err error) {
 	if err != nil {
 
 		if ctx.Err() != nil {
-			fmt.Fprintf(e.Write, "%s\n", fmt.Sprintf("\nWhoops! %s\n", ctx.Err()))
-		} else {
-
-			if e.ErrorEnrich != nil {
-				errCmd = e.ErrorEnrich.Enrich(err)
-			} else {
-				errCmd = err
-			}
-
-			errorMessage := fmt.Sprintf(" Command executed: %s\n", e.Cmd.String())
-			if len(e.EnvVars) > 0 {
-				errorMessage = fmt.Sprintf("%s\n Environment variables:\n%s\n", errorMessage, strings.Join(e.EnvVars.Environ(), "\n"))
-			}
-
-			stderrErrorMessage := string(err.(*osexec.ExitError).Stderr)
-			if len(stderrErrorMessage) > 0 {
-				errorMessage = fmt.Sprintf("%s\n'%s'\n", errorMessage, stderrErrorMessage)
-			}
-
-			return errors.New(errContext, fmt.Sprintf("Error during command execution.\n%s", errorMessage), errCmd)
+			_, _ = fmt.Fprintf(e.Write, "%s\n", fmt.Sprintf("\nWhoops! %s\n", ctx.Err()))
+			return errors.New(errContext, "Command execution canceled", ctx.Err())
 		}
+
+		if e.ErrorEnrich != nil {
+			errCmd = e.ErrorEnrich.Enrich(err)
+		} else {
+			errCmd = err
+		}
+
+		errorMessage := fmt.Sprintf(" Command executed: %s\n", e.Cmd.String())
+		if len(e.EnvVars) > 0 {
+			errorMessage = fmt.Sprintf("%s\n Environment variables:\n%s\n", errorMessage, strings.Join(e.EnvVars.Environ(), "\n"))
+		}
+
+		stderrErrorMessage := string(err.(*osexec.ExitError).Stderr)
+		if len(stderrErrorMessage) > 0 {
+			errorMessage = fmt.Sprintf("%s\n'%s'\n", errorMessage, stderrErrorMessage)
+		}
+
+		return errors.New(errContext, fmt.Sprintf("Error during command execution.\n%s", errorMessage), errCmd)
 	}
 
 	return nil
