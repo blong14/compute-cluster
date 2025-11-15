@@ -24,7 +24,7 @@ RUN make .deps
 COPY . /app
 RUN ARCH=${ARCH} make ${SRVC}
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 WORKDIR app
 
