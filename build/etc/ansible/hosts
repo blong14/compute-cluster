@@ -7,19 +7,19 @@ worker-04.cluster
 127.0.0.1
 
 [localhost]
-127.0.0.1 ansible_python_interpreter=/usr/bin/python3.11
+127.0.0.1 ansible_python_interpreter=/usr/bin/python3
 
 [controller]
 controller-02.cluster ansible_python_interpreter=/usr/bin/python3.10
 
 [rasppi]
-worker-01.cluster ansible_python_interpreter=/usr/bin/python3.10
-worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
-worker-03.cluster ansible_python_interpreter=/usr/bin/python3.10
-worker-04.cluster ansible_python_interpreter=/usr/bin/python3.12
+worker-01.cluster ansible_python_interpreter=/usr/bin/python3
+worker-02.cluster ansible_python_interpreter=/usr/bin/python3
+worker-03.cluster ansible_python_interpreter=/usr/bin/python3
+worker-04.cluster ansible_python_interpreter=/usr/bin/python3
 
 [arm-build]
-worker-02.cluster ansible_python_interpreter=/usr/bin/python3.10
+worker-02.cluster ansible_python_interpreter=/usr/bin/python3
 
 [amd-build]
 controller-02.cluster
