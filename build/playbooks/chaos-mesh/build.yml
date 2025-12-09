@@ -1,0 +1,21 @@
+---
+- name: Deploy chaos-mesh
+  hosts: amd-build
+  remote_user: pi
+  tasks:
+    - name: Ensure Helm
+      become: yes
+      become_method: sudo
+      command: helm version
+    - name: Copy src
+      ansible.builtin.git:
+        repo: https://github.com/blong14/compute-cluster.git
+        dest: /home/pi/compute-cluster
+        single_branch: yes
+        version: main
+    - name: Install chaos-mesh
+      become: yes
+      become_method: sudo
+      command: |
+        helm upgrade -i chaos-mesh -n chaos-mesh compute-cluster/build/charts/chaos-mesh \
+        --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
