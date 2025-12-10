@@ -17,6 +17,6 @@
       become: yes
       become_method: sudo
       command: |
-        helm upgrade -i chaos-mesh -n chaos-mesh compute-cluster/build/charts/chaos-mesh \
+        helm upgrade -i chaos-mesh compute-cluster/build/charts/chaos-mesh \
         --set dashboard.securityMode=false \
         --kubeconfig /etc/rancher/k3s/k3s.yaml

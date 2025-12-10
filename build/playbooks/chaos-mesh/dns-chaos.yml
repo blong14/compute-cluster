@@ -1,0 +1,17 @@
+kind: DNSChaos
+apiVersion: chaos-mesh.org/v1alpha1
+metadata:
+  namespace: default
+  name: dns-chaos
+spec:
+  action: error
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      app.kubernetes.io/component: dnsutils
+  mode: all
+  duration: 5m
+  patterns:
+    - rabbitmq-server-0.rabbitmq-nodes.default
+    - google.com
