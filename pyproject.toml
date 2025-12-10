@@ -20,7 +20,7 @@ dependencies = [
     "black==25.1.0",
     "flake8==7.2.0",
     "mypy==1.15.0",
-    "pytest==8.3.5",
+    "pytest==8.4.2",
     "ipython==9.1.0",
     # C/Go development helpers
     "cmake-language-server==0.1.11",
