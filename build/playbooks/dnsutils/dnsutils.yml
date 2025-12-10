@@ -9,12 +9,10 @@ spec:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-              - key: kubernetes.io/hostname
+              - key: kubernetes.io/arch
                 operator: In
                 values:
-                  - worker-01
-                  - worker-02
-                  - worker-03
+                  - arm64
   containers:
     - name: dnsutils
       image: gcr.io/kubernetes-e2e-test-images/dnsutils:1.3
