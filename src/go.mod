@@ -7,7 +7,7 @@ toolchain go1.24.6
 require (
 	github.com/apenella/go-ansible/v2 v2.4.1
 	github.com/lib/pq v1.10.9
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	k8s.io/klog/v2 v2.130.1
 )
