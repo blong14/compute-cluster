@@ -37,13 +37,7 @@
 - name: Deploy logconsumer
   hosts: amd-build
   remote_user: pi
-  vars:
-    node_architecture: "arm64"
-    metrics_port: "8080"
   tasks:
-    - name: Include common templates
-      ansible.builtin.include_vars:
-        file: ../common/templates.yml
     - name: Ensure Helm
       become: yes
       become_method: sudo
@@ -64,13 +58,5 @@
         --set image.tag=arm-{{ clone_status.after }} \
         --set env.RMQ_HOST=rabbitmq.default.svc.cluster.local \
         --set env.RMQ_USER={{ rmq_user }} \
-        --set env.RMQ_PASSWORD={{ rmq_password }} \
-        --set resources.requests.cpu=100m \
-        --set resources.requests.memory=128Mi \
-        --set resources.limits.cpu=500m \
-        --set resources.limits.memory=512Mi \
-        --set nodeSelector."kubernetes\.io/arch"={{ node_architecture }} \
-        --set podAnnotations."prometheus\.io/scrape"=true \
-        --set podAnnotations."prometheus\.io/port"={{ metrics_port }} \
-        --set podAnnotations."prometheus\.io/path"=/metrics
+        --set env.RMQ_PASSWORD={{ rmq_password }}
       when: clone_status.changed

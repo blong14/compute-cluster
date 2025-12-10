@@ -34,13 +34,7 @@
 - name: Deploy collector
   hosts: amd-build
   remote_user: pi
-  vars:
-    node_architecture: "arm64"
-    metrics_port: "8080"
   tasks:
-    - name: Include common templates
-      ansible.builtin.include_vars:
-        file: ../common/templates.yml
     - name: Ensure Helm
       become: yes
       become_method: sudo
@@ -62,13 +56,5 @@
         --set env.POSTGRES_HOST=postgres-cluster-17-rw.default:5432 \
         --set env.POSTGRES_DATABASE="cluster" \
         --set env.POSTGRES_USER={{ postgres_user }} \
-        --set env.POSTGRES_PASSWORD={{ postgres_password }} \
-        --set resources.requests.cpu=100m \
-        --set resources.requests.memory=128Mi \
-        --set resources.limits.cpu=500m \
-        --set resources.limits.memory=512Mi \
-        --set nodeSelector."kubernetes\.io/arch"={{ node_architecture }} \
-        --set podAnnotations."prometheus\.io/scrape"=true \
-        --set podAnnotations."prometheus\.io/port"={{ metrics_port }} \
-        --set podAnnotations."prometheus\.io/path"=/metrics
+        --set env.POSTGRES_PASSWORD={{ postgres_password }}
       when: clone_status.changed
