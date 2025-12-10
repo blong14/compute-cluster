@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dev-environment"
+version = "0.1.0"
+description = "Development environment dependencies"
+requires-python = ">=3.8"
+dependencies = [
+    "aider-chat==0.81.1",
+    "ansible==11.4.0",
+    # Terminal enhancements
+    "powerline-status==2.7",
+    "powerline-gitstatus==1.3.3", 
+    "thefuck==3.32",
+    "httpie==3.2.4",
+    "Glances==4.3.1",
+    # Python development
+    "black==25.1.0",
+    "flake8==7.2.0",
+    "mypy==1.15.0",
+    "pytest==8.3.5",
+    "ipython==9.1.0",
+    # C/Go development helpers
+    "cmake-language-server==0.1.11",
+    "clang-format==20.1.0",
+]
+
+# Note: The following packages should be installed via system package manager (apt):
+# neofetch, ranger, fzf, bat, gopls, tmux, htop
