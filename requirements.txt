@@ -1,6 +1,1 @@
-# Install with: pip install -e .
-# This file is kept for backwards compatibility
-# All dependencies are now managed in pyproject.toml
-
--e .
 
