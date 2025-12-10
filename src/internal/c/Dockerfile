@@ -1,4 +1,4 @@
-FROM debian:bookworm as build
+FROM debian:trixie as build
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -24,7 +24,7 @@ RUN make .deps
 COPY . /app
 RUN ARCH=${ARCH} make ${SRVC}
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 WORKDIR app
 
