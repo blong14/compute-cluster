@@ -1,7 +1,15 @@
+---
 - name: Deploy Rocket.chat
   hosts: amd-build
   remote_user: pi
+  vars:
+    node_architecture: "amd64"
+    metrics_port: "3000"
+    metrics_path: "/metrics"
   tasks:
+    - name: Include common templates
+      ansible.builtin.include_vars:
+        file: ../common/templates.yml
     - name: Ensure Helm
       become: yes
       become_method: sudo
@@ -24,4 +32,12 @@
         helm upgrade -i rocketchat -f rocket.chat/values.yml rocketchat/rocketchat \
         --kubeconfig /home/blong14/Developer/compute-cluster/build/etc/rancher/k3s/k3s.yaml \
         --set host=rocket.cluster \
-        --set ingress.enabled=true
+        --set ingress.enabled=true \
+        --set resources.requests.cpu=100m \
+        --set resources.requests.memory=128Mi \
+        --set resources.limits.cpu=500m \
+        --set resources.limits.memory=512Mi \
+        --set nodeSelector."kubernetes\.io/arch"={{ node_architecture }} \
+        --set podAnnotations."prometheus\.io/scrape"=true \
+        --set podAnnotations."prometheus\.io/port"={{ metrics_port }} \
+        --set podAnnotations."prometheus\.io/path"={{ metrics_path }}

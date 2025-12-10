@@ -2,7 +2,14 @@
 - name: Deploy excalidraw
   hosts: amd-build
   remote_user: pi
+  vars:
+    node_architecture: "amd64"
+    metrics_port: "80"
+    metrics_path: "/metrics"
   tasks:
+    - name: Include common templates
+      ansible.builtin.include_vars:
+        file: ../common/templates.yml
     - name: Ensure Helm
       become: yes
       become_method: sudo
@@ -18,4 +25,12 @@
       become_method: sudo
       command: |
         helm upgrade -i excalidraw compute-cluster/build/charts/excalidraw \
-        --kubeconfig /etc/rancher/k3s/k3s.yaml
+        --kubeconfig /etc/rancher/k3s/k3s.yaml \
+        --set resources.requests.cpu=100m \
+        --set resources.requests.memory=128Mi \
+        --set resources.limits.cpu=500m \
+        --set resources.limits.memory=512Mi \
+        --set nodeSelector."kubernetes\.io/arch"={{ node_architecture }} \
+        --set podAnnotations."prometheus\.io/scrape"=true \
+        --set podAnnotations."prometheus\.io/port"={{ metrics_port }} \
+        --set podAnnotations."prometheus\.io/path"={{ metrics_path }}
