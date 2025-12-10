@@ -5,5 +5,5 @@ all: install
 install: pyproject.toml
 	@echo "Installing dependencies from pyproject.toml..."
 	python -m pip install --upgrade setuptools wheel
-	python -m pip install --progress-bar on --require-hashes --use-pep517 .
+	python -m pip install --progress-bar on --use-pep517 .
 
