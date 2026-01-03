@@ -6,6 +6,7 @@
 *.dylib
 *.idea
 *.pem
+*.egg-info
 __pycache__
 src/.deps/*
 src/venv
@@ -38,6 +39,7 @@ cover.html
 # Dependency directories (remove the comment below to include it)
 # vendor/
 build/etc/rancher/k3s/k3s.yaml
+build/lib
 
 # Cluster configuration
 config.yml

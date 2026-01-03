@@ -30,8 +30,9 @@
         dest: /home/blong14/bin/{{item}}
       loop:
         - install_go.sh
-        - syspkg.sh
+        - install_node.sh
         - install_zig.sh
+        - syspkg.sh
     - name: Change file ownership, group and permissions
       ansible.builtin.file:
         path: /home/blong14/bin/{{item}}
@@ -40,6 +41,7 @@
         mode: '0755'
       loop:
         - install_go.sh
-        - syspkg.sh
+        - install_node.sh
         - install_zig.sh
+        - syspkg.sh
 
