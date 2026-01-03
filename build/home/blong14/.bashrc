@@ -507,6 +507,9 @@ if [ -f ~/.bash_secrets ]; then
     . ~/.bash_secrets
 fi
 
+# Node environment variables
+export NODEROOT=$HOME/sdk/node24.12.0
+
 # Go environment variables
 export GOPATH=$HOME/go
 export GOROOT=$HOME/sdk/go1.24.2
@@ -515,6 +518,6 @@ export GOROOT=$HOME/sdk/go1.24.2
 export MALLOC_CONF=thp:always,metadata_thp:always
 
 # Zig environment variables
-export ZIGROOT=$HOME/sdk/zig0.13.0
+export ZIGROOT=$HOME/sdk/zig0.15.2
 
-export PATH=$GOPATH/bin:$GOROOT/bin:$ZIGROOT:$PATH
+export PATH=$NODEROOT/bin:$GOPATH/bin:$GOROOT/bin:$ZIGROOT:$PATH
