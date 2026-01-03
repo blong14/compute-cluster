@@ -26,7 +26,6 @@ end)
 local servers = {
   "bashls",
   "clangd",
-  "golangci_lint_ls",
   "gopls",
   "jedi_language_server",
   "lua_ls",
