@@ -21,7 +21,7 @@ dependencies = [
     "flake8==7.3.0",
     "mypy==1.15.0",
     "pytest==8.3.5",
-    "ipython==9.1.0",
+    "ipython==9.8.0",
     # C/Go development helpers
     "cmake-language-server==0.1.11",
     "clang-format==20.1.8",
