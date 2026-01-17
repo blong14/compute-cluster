@@ -13,13 +13,14 @@ function pr
     
     set diff (git diff origin/$branch)
     
-    set message \
-        "You are a senior software engineer, please help " \
-        "me write a concise summary of the following code changes for " \
-        "a pull request.\n" \
-        "The summary should explain what is being added in this feature.\n" \
-        "$diff"
-    
+    set message " \
+You are a senior software engineer, please help me write a concise summary of the 
+following code changes for a pull request.
+
+The summary should explain what is being added in this feature.
+
+$diff
+"
     aider \ 
         --no-auto-commits \
         --no-auto-lint \

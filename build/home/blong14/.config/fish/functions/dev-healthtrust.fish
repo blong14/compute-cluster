@@ -1,3 +1,3 @@
 function dev-healthtrust
-    gcloud compute ssh dev-bastion-host --project dev-tenant-healthtrust-e4cc
+    gcloud compute ssh dev-bastion-host --project $HWS_DEV_PROJECT 
 end
