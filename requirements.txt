@@ -31,6 +31,7 @@ diff-match-patch==20241021
 diskcache==5.6.3
 distro==1.9.0
 executing==2.2.1
+fastapi==0.104.1
 filelock==3.18.0
 flake8==7.3.0
 frozenlist==1.7.0
@@ -95,6 +96,7 @@ paginate==0.5.7
 parso==0.8.5
 pathspec==0.12.1
 pexpect==4.9.0
+pgvector==0.2.4
 pillow==11.3.0
 platformdirs==4.5.1
 pluggy==1.6.0
@@ -106,6 +108,7 @@ propcache==0.3.2
 proto-plus==1.26.1
 protobuf==5.29.5
 psutil==7.0.0
+psycopg2-binary==2.9.9
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pyasn1==0.6.1
@@ -161,6 +164,7 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 uritemplate==4.2.0
 urllib3==2.5.0
+uvicorn==0.24.0
 watchdog==6.0.0
 watchfiles==1.1.0
 wcwidth==0.2.13
