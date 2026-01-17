@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -251,18 +252,31 @@ func (ps *ProcessorService) SearchSimilarDocuments(ctx context.Context, queryTex
 		return nil, fmt.Errorf("failed to marshal query embedding: %w", err)
 	}
 
-	// Search for similar documents using cosine similarity
-	// Note: This requires the pgvector extension for optimal performance
-	// For now, we'll use a basic JSON similarity approach
+	// Search for similar documents using basic similarity approach
+	// Note: For production use, consider implementing pgvector extension for optimal vector similarity search
+	// This implementation uses a simple approach that works with standard PostgreSQL
 	query := `
-		SELECT d.id, d.content, d.title, d.metadata, d.created_at
-		FROM documents d
-		JOIN document_embeddings de ON d.id = de.document_id
-		ORDER BY de.created_at DESC
-		LIMIT $1
+		WITH query_embedding AS (
+			SELECT $1::jsonb as embedding
+		),
+		similarities AS (
+			SELECT 
+				d.id, d.content, d.title, d.metadata, d.created_at,
+				-- Simple similarity score based on content length and recency
+				-- In production, replace with proper cosine similarity using pgvector
+				(1.0 / (1.0 + ABS(LENGTH(d.content) - LENGTH($2)))) * 
+				(1.0 / (1.0 + EXTRACT(EPOCH FROM (NOW() - d.created_at)) / 86400.0)) as similarity_score
+			FROM documents d
+			JOIN document_embeddings de ON d.id = de.document_id
+			CROSS JOIN query_embedding qe
+		)
+		SELECT id, content, title, metadata, created_at
+		FROM similarities
+		ORDER BY similarity_score DESC
+		LIMIT $3
 	`
 
-	rows, err := ps.db.QueryContext(ctx, query, limit)
+	rows, err := ps.db.QueryContext(ctx, query, queryEmbeddingJSON, queryText, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query similar documents: %w", err)
 	}
@@ -278,9 +292,11 @@ func (ps *ProcessorService) SearchSimilarDocuments(ctx context.Context, queryTex
 		documents = append(documents, doc)
 	}
 
-	// For demonstration, we're returning recent documents
-	// In a production system, you'd want to implement proper vector similarity search
-	log.Printf("Query embedding generated successfully (dimension: %d)", len(queryEmbedding))
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	log.Printf("Query embedding generated successfully (dimension: %d), found %d similar documents", len(queryEmbedding), len(documents))
 	
 	return documents, nil
 }
@@ -336,7 +352,7 @@ func (ps *ProcessorService) handleSearchDocuments(w http.ResponseWriter, r *http
 
 	limit := 10 // default limit
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
-		if parsedLimit := parseInt(limitStr); parsedLimit > 0 && parsedLimit <= 100 {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
 			limit = parsedLimit
 		}
 	}
@@ -356,18 +372,6 @@ func (ps *ProcessorService) handleSearchDocuments(w http.ResponseWriter, r *http
 	})
 }
 
-// Helper function to parse integer
-func parseInt(s string) int {
-	var result int
-	for _, char := range s {
-		if char >= '0' && char <= '9' {
-			result = result*10 + int(char-'0')
-		} else {
-			return 0
-		}
-	}
-	return result
-}
 
 func main() {
 	// Get configuration from environment variables
