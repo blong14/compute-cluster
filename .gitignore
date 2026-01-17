@@ -17,6 +17,7 @@ src/tmp
 src/zig-cache
 src/.zig-cache
 src/zig-out
+.env
 .venv
 venv
 
@@ -44,3 +45,7 @@ build/lib
 # Cluster configuration
 config.yml
 .aider*
+
+# MkDocs
+/site/
+/.cache/

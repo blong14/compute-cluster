@@ -22,6 +22,8 @@ dependencies = [
     "mypy==1.15.0",
     "pytest==8.3.5",
     "ipython==9.8.0",
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.1",
     # C/Go development helpers
     "cmake-language-server==0.1.11",
     "clang-format==20.1.8",
