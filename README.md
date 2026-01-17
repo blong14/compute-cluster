@@ -16,7 +16,14 @@ Flags:
 Use "cluster [command] --help" for more information about a command.
 ```
 
-```bash
-source venv/bin/activate
-pip install -r requirements.txt -c constraints.txt
-```
+## Dependency Management
+
+### Setup
+
+1. **Create virtual environment with dependencies:**
+   ```bash
+   cluster run install
+   ```
+
+   ```
+
