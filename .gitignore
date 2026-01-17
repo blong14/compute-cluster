@@ -43,6 +43,7 @@ build/etc/rancher/k3s/k3s.yaml
 build/lib
 
 # Cluster configuration
+.memory-store-state
 config.yml
 .aider*
 

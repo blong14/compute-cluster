@@ -203,13 +203,15 @@ Add to your Neovim config:
 ```lua
 -- Ansible-specific Avante configuration
 require("avante").setup({
-  provider = "claude",
+  provider = "openai",
   behaviour = {
     auto_apply_diff_after_generation = true,
   },
   providers = {
-    claude = {
-      model = "claude-sonnet-4-20250514",
+    openai = {
+      endpoint = "https://api.anthropic.com",
+      model = "claude-3-5-sonnet-20241218",
+      api_key_name = "ANTHROPIC_API_KEY",
       extra_request_body = {
         temperature = 0.3,  -- Lower for infrastructure code
         max_tokens = 4096,
