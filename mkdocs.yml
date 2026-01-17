@@ -1,0 +1,27 @@
+site_name: Compute Cluster Documentation
+site_description: Documentation for the Compute Cluster CLI and its infrastructure.
+
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+    - search.share
+
+nav:
+  - Home: 'INDEX.md'
+  - Getting Started: 'GETTING_STARTED.md'
+  - AI Integration:
+    - 'Ansible AI Guide': 'ANSIBLE_AI_INTEGRATION_GUIDE.md'
+    - 'Aider + Avante Guide': 'AIDER_AVANTE_INTEGRATION_GUIDE.md'
+    - 'Workflow Examples': 'WORKFLOW_EXAMPLES.md'
+  - Tool Guides:
+    - 'Aider Terminal Guide': 'AIDER_TERMINAL_GUIDE.md'
+    - 'Avante nvim Guide': 'AVANTE_NVIM_COMMANDS.md'
+  - Security:
+    - 'Avante Security Alternatives': 'AVANTE_SECURITY_ALTERNATIVES.md'

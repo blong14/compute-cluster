@@ -45,3 +45,7 @@ build/lib
 # Cluster configuration
 config.yml
 .aider*
+
+# MkDocs
+/site/
+/.cache/
