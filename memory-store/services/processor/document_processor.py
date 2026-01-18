@@ -11,9 +11,14 @@ import markdown
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import logging
+import re
+from datetime import datetime
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 class DocumentProcessor:
@@ -56,102 +61,204 @@ class DocumentProcessor:
         logger.info("Database schema verified successfully")
     
     def generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding using Voyage AI API"""
+        """Generate embedding using Voyage AI API with retry logic"""
         url = "https://api.voyageai.com/v1/embeddings"
         headers = {
             "Authorization": f"Bearer {self.voyage_api_key}",
             "Content-Type": "application/json"
         }
         
+        # Clean and truncate text if necessary
+        cleaned_text = self._clean_text_for_embedding(text)
+        
         payload = {
-            "input": [text],
-            "model": self.voyage_model
+            "input": [cleaned_text],
+            "model": self.voyage_model,
+            "input_type": "document"  # Optimize for document search
         }
         
-        try:
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
-            
-            data = response.json()
-            if not data.get("data") or len(data["data"]) == 0:
-                raise Exception("No embeddings returned from API")
-            
-            return data["data"][0]["embedding"]
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error calling Voyage AI API: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error processing embedding response: {e}")
-            raise
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                response.raise_for_status()
+                
+                data = response.json()
+                if not data.get("data") or len(data["data"]) == 0:
+                    raise Exception("No embeddings returned from API")
+                
+                embedding = data["data"][0]["embedding"]
+                logger.debug(f"Generated embedding with {len(embedding)} dimensions")
+                return embedding
+                
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    logger.warning(f"API request failed (attempt {attempt + 1}), retrying in {wait_time}s: {e}")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"Error calling Voyage AI API after {max_retries} attempts: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"Error processing embedding response: {e}")
+                raise
+    
+    def _clean_text_for_embedding(self, text: str) -> str:
+        """Clean and prepare text for embedding generation"""
+        # Remove excessive whitespace
+        text = re.sub(r'\s+', ' ', text.strip())
+        
+        # Truncate if too long (Voyage AI has token limits)
+        max_chars = 8000  # Conservative limit
+        if len(text) > max_chars:
+            text = text[:max_chars] + "..."
+            logger.warning(f"Text truncated to {max_chars} characters for embedding")
+        
+        return text
     
     def chunk_markdown(self, content: str, file_path: str) -> List[Dict[str, Any]]:
-        """Intelligently chunk markdown content"""
+        """Intelligently chunk markdown content preserving structure"""
         # Parse markdown to extract structure
-        md = markdown.Markdown(extensions=['meta', 'toc'])
+        md = markdown.Markdown(extensions=['meta', 'toc', 'fenced_code', 'tables'])
         html = md.convert(content)
         
-        # Split by double newlines (paragraphs) and headers
-        sections = []
-        current_section = []
-        current_size = 0
+        # Extract metadata if available
+        metadata = getattr(md, 'Meta', {})
         
+        # Split content into logical sections
+        sections = self._split_by_headers(content)
+        
+        # Further chunk large sections while preserving code blocks and tables
+        chunks = []
+        for section in sections:
+            section_chunks = self._chunk_section(section, file_path)
+            chunks.extend(section_chunks)
+        
+        # Add global metadata to all chunks
+        for i, chunk in enumerate(chunks):
+            chunk['metadata'].update({
+                'file_path': str(file_path),
+                'chunk_index': i,
+                'total_chunks': len(chunks),
+                'document_metadata': metadata,
+                'processed_at': datetime.now().isoformat()
+            })
+        
+        return chunks
+    
+    def _split_by_headers(self, content: str) -> List[Dict[str, Any]]:
+        """Split content by markdown headers"""
+        sections = []
         lines = content.split('\n')
+        current_section = []
         current_header = ""
+        current_level = 0
         
         for line in lines:
             line_stripped = line.strip()
             
-            # Check if this is a header
-            if line_stripped.startswith('#'):
-                # If we have accumulated content, save it as a section
-                if current_section and current_size > 0:
+            # Check for header
+            header_match = re.match(r'^(#{1,6})\s+(.+)', line_stripped)
+            if header_match:
+                # Save previous section if it exists
+                if current_section:
                     sections.append({
                         'content': '\n'.join(current_section),
                         'header': current_header,
-                        'size': current_size
+                        'level': current_level,
+                        'size': sum(len(l) + 1 for l in current_section)
                     })
                 
                 # Start new section
-                current_header = line_stripped
+                current_level = len(header_match.group(1))
+                current_header = header_match.group(2).strip()
                 current_section = [line]
-                current_size = len(line)
             else:
                 current_section.append(line)
-                current_size += len(line) + 1  # +1 for newline
-                
-                # If section is getting too large, split it
-                if current_size > self.chunk_size:
-                    sections.append({
-                        'content': '\n'.join(current_section),
-                        'header': current_header,
-                        'size': current_size
-                    })
-                    
-                    # Start overlap for next chunk
-                    overlap_lines = current_section[-self.chunk_overlap:] if len(current_section) > self.chunk_overlap else current_section
-                    current_section = overlap_lines
-                    current_size = sum(len(l) + 1 for l in overlap_lines)
         
         # Add final section
-        if current_section and current_size > 0:
+        if current_section:
             sections.append({
                 'content': '\n'.join(current_section),
                 'header': current_header,
-                'size': current_size
+                'level': current_level,
+                'size': sum(len(l) + 1 for l in current_section)
             })
         
-        # Convert to chunks with metadata
-        chunks = []
-        for i, section in enumerate(sections):
-            chunks.append({
-                'content': section['content'].strip(),
+        return sections
+    
+    def _chunk_section(self, section: Dict[str, Any], file_path: str) -> List[Dict[str, Any]]:
+        """Chunk a section while preserving code blocks and tables"""
+        content = section['content']
+        
+        # If section is small enough, return as single chunk
+        if section['size'] <= self.chunk_size:
+            return [{
+                'content': content.strip(),
                 'metadata': {
-                    'file_path': str(file_path),
-                    'chunk_index': i,
                     'header': section['header'],
+                    'header_level': section['level'],
                     'size': section['size'],
-                    'total_chunks': len(sections)
+                    'chunk_type': 'complete_section'
+                }
+            }]
+        
+        # Split large sections intelligently
+        chunks = []
+        lines = content.split('\n')
+        current_chunk = []
+        current_size = 0
+        in_code_block = False
+        in_table = False
+        code_fence_pattern = re.compile(r'^```')
+        table_pattern = re.compile(r'^\|.*\|$')
+        
+        for line in lines:
+            line_stripped = line.strip()
+            
+            # Track code blocks
+            if code_fence_pattern.match(line_stripped):
+                in_code_block = not in_code_block
+            
+            # Track tables
+            if table_pattern.match(line_stripped):
+                in_table = True
+            elif in_table and not line_stripped:
+                in_table = False
+            
+            current_chunk.append(line)
+            current_size += len(line) + 1
+            
+            # Check if we should split (but not in code blocks or tables)
+            if (current_size > self.chunk_size and 
+                not in_code_block and 
+                not in_table and
+                line_stripped == ''):  # Split on empty lines
+                
+                chunks.append({
+                    'content': '\n'.join(current_chunk).strip(),
+                    'metadata': {
+                        'header': section['header'],
+                        'header_level': section['level'],
+                        'size': current_size,
+                        'chunk_type': 'section_part'
+                    }
+                })
+                
+                # Start new chunk with overlap
+                overlap_lines = current_chunk[-self.chunk_overlap:] if len(current_chunk) > self.chunk_overlap else []
+                current_chunk = overlap_lines
+                current_size = sum(len(l) + 1 for l in overlap_lines)
+        
+        # Add final chunk
+        if current_chunk:
+            chunks.append({
+                'content': '\n'.join(current_chunk).strip(),
+                'metadata': {
+                    'header': section['header'],
+                    'header_level': section['level'],
+                    'size': current_size,
+                    'chunk_type': 'section_part'
                 }
             })
         
@@ -297,14 +404,53 @@ class DocumentProcessor:
         
         processed = 0
         failed = 0
+        skipped = 0
         
-        for file_path in markdown_files:
-            if self.process_document(file_path):
-                processed += 1
-            else:
+        # Sort files for consistent processing order
+        markdown_files.sort()
+        
+        for i, file_path in enumerate(markdown_files, 1):
+            logger.info(f"Processing file {i}/{len(markdown_files)}: {file_path.name}")
+            
+            try:
+                if self.is_file_processed(file_path):
+                    logger.info(f"File {file_path} is up to date, skipping")
+                    skipped += 1
+                    continue
+                
+                if self.process_document(file_path):
+                    processed += 1
+                    logger.info(f"✅ Successfully processed: {file_path.name}")
+                else:
+                    failed += 1
+                    logger.error(f"❌ Failed to process: {file_path.name}")
+                    
+            except Exception as e:
                 failed += 1
+                logger.error(f"❌ Error processing {file_path.name}: {e}")
         
-        logger.info(f"Processing complete: {processed} processed, {failed} failed")
+        logger.info(f"Processing complete: {processed} processed, {skipped} skipped, {failed} failed")
+        
+        # Log summary statistics
+        self._log_processing_stats()
+    
+    def _log_processing_stats(self):
+        """Log processing statistics"""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM documents")
+                doc_count = cur.fetchone()[0]
+                
+                cur.execute("SELECT COUNT(*) FROM document_chunks")
+                chunk_count = cur.fetchone()[0]
+                
+                cur.execute("SELECT AVG(array_length(string_to_array(content, ' '), 1)) FROM document_chunks")
+                avg_words = cur.fetchone()[0] or 0
+                
+                logger.info(f"Database statistics: {doc_count} documents, {chunk_count} chunks, avg {avg_words:.1f} words per chunk")
+                
+        except Exception as e:
+            logger.warning(f"Could not retrieve processing stats: {e}")
     
     def search_similar(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Search for similar documents using vector similarity"""
@@ -356,6 +502,7 @@ def main():
     db_url = os.getenv("DATABASE_URL", "postgresql://memory_user:memory_pass@localhost:5432/memory_store")
     voyage_api_key = os.getenv("VOYAGE_API_KEY")
     docs_path = os.getenv("DOCS_PATH", "/app/docs")
+    enable_http_server = os.getenv("ENABLE_HTTP_SERVER", "true").lower() == "true"
     
     if not voyage_api_key:
         logger.error("VOYAGE_API_KEY environment variable is required")
@@ -364,7 +511,18 @@ def main():
     # Initialize processor
     processor = DocumentProcessor(db_url, voyage_api_key, docs_path)
     
+    # Start health server if enabled
+    health_server = None
+    if enable_http_server:
+        try:
+            from http_server import HealthServer
+            health_server = HealthServer(port=int(os.getenv("HEALTH_PORT", "8080")))
+            health_server.start()
+        except Exception as e:
+            logger.warning(f"Could not start health server: {e}")
+    
     # Process all documents initially
+    logger.info("Starting initial document processing...")
     processor.process_all_documents()
     
     # Set up file monitoring
@@ -373,16 +531,19 @@ def main():
     observer.schedule(event_handler, docs_path, recursive=True)
     observer.start()
     
-    logger.info(f"Monitoring {docs_path} for changes...")
+    logger.info(f"Document processor ready. Monitoring {docs_path} for changes...")
     
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        logger.info("Shutting down document processor...")
         observer.stop()
-        logger.info("Stopping document processor...")
+        if health_server:
+            health_server.stop()
     
     observer.join()
+    logger.info("Document processor stopped")
 
 if __name__ == "__main__":
     main()
