@@ -29,6 +29,7 @@ local servers = {
   "gopls",
   "jedi_language_server",
   "lua_ls",
+  "postgres_lsp",
   "ruff",
   "terraformls",
   "ts_ls",
