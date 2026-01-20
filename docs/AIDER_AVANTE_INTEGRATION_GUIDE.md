@@ -99,13 +99,13 @@ Add these enhancements to your current setup:
 
 ```lua
 require("avante").setup({
-  provider = "claude",
+  provider = "openai",
   behaviour = {
     auto_apply_diff_after_generation = true,
     auto_set_highlight_group = true,
     auto_set_keymaps = true,
   },
-  auto_suggestions_provider = "claude",
+  auto_suggestions_provider = "openai",
   suggestion = {
     debounce = 1200,
     throttle = 1200,
@@ -122,9 +122,10 @@ require("avante").setup({
     },
   },
   providers = {
-    claude = {
+    openai = {
       endpoint = "https://api.anthropic.com",
-      model = "claude-sonnet-4-20250514",
+      model = "claude-3-5-sonnet-20241218",
+      api_key_name = "ANTHROPIC_API_KEY",
       extra_request_body = {
         temperature = 0.75,
         max_tokens = 4096,
@@ -138,8 +139,8 @@ require("avante").setup({
 Create `~/.aider.conf.yml`:
 
 ```yaml
-# Use Claude for consistency with Avante
-model: claude-3-5-sonnet-20241022
+# Use Anthropic API directly
+model: claude-3-5-sonnet-20241218
 
 # Git integration
 auto-commits: true
@@ -189,7 +190,8 @@ alias aid-test="aider --message 'Add comprehensive tests'"
 - Return to Aider for integration and review
 
 ### 3. Model Consistency
-- Use the same model (Claude Sonnet) in both tools for consistent behavior
+- Use the same model (claude-3-5-sonnet-20241218) in both tools for consistent behavior
+- Configure both tools to use the Anthropic API
 - Adjust temperature based on task (lower for precise code, higher for creative solutions)
 
 ### 4. Git Workflow Integration

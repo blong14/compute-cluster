@@ -1,0 +1,20 @@
+
+code-theme: dracula
+
+# Auto-read context files when starting
+read:
+  - docs/MEMORY_STORE_IMPLEMENTATION_GUIDE.md
+
+# Git integration
+auto-commits: false
+commit-prompt: false
+gitignore: false
+
+# Enable code quality checks
+test: false
+lint: false
+pretty: true
+
+# Streaming for better responsiveness
+stream: true
+

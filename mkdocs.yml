@@ -17,6 +17,7 @@ nav:
   - Home: 'INDEX.md'
   - Getting Started: 'GETTING_STARTED.md'
   - AI Integration:
+    - 'Memory Store Guide': 'MEMORY_STORE_IMPLEMENTATION_GUIDE.md'
     - 'Ansible AI Guide': 'ANSIBLE_AI_INTEGRATION_GUIDE.md'
     - 'Aider + Avante Guide': 'AIDER_AVANTE_INTEGRATION_GUIDE.md'
     - 'Workflow Examples': 'WORKFLOW_EXAMPLES.md'

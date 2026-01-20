@@ -48,6 +48,14 @@ use{
     config = function()
         -- Configure to use pre-built binaries
         require('avante').setup({
+            provider = "openai",
+            providers = {
+                openai = {
+                    endpoint = "https://api.anthropic.com",
+                    model = "claude-3-5-sonnet-20241218",
+                    api_key_name = "ANTHROPIC_API_KEY",
+                },
+            },
             -- Use pre-built binary path
             binary_path = vim.fn.expand("~/.local/bin/avante-binary")
         })
@@ -188,9 +196,16 @@ use{
         vim.api.nvim_create_user_command('AvanteLoad', function()
             vim.cmd('packadd avante.nvim')
             require('avante').setup({
-                provider = "claude",
+                provider = "openai",
                 behaviour = {
                     auto_apply_diff_after_generation = true,
+                },
+                providers = {
+                    openai = {
+                        endpoint = "https://api.anthropic.com",
+                        model = "claude-3-5-sonnet-20241218",
+                        api_key_name = "ANTHROPIC_API_KEY",
+                    },
                 },
                 -- Your existing config...
             })

@@ -23,7 +23,6 @@ return require('packer').startup(function(use)
   }
 
   use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
-  use('nvim-treesitter/playground')
 
   use('theprimeagen/harpoon')
   use {
@@ -52,23 +51,54 @@ return require('packer').startup(function(use)
 
   -- AI related tools
 
-  -- avante __
+  -- avante dependencies
   use("nvim-lua/plenary.nvim")
   use("MunifTanjim/nui.nvim")
-  use("MeanderingProgrammer/render-markdown.nvim")
   use("stevearc/dressing.nvim")
   use("preservim/nerdtree")
   use("ryanoasis/vim-devicons")
-  -- use("github/copilot.vim")
+  
+  -- Enhanced markdown rendering for avante
+  use{
+    "MeanderingProgrammer/render-markdown.nvim",
+    config = function()
+      require('render-markdown').setup({
+        file_types = { "markdown", "Avante" },
+      })
+    end,
+    ft = { "markdown", "Avante" },
+  }
+  
+  -- Image clipboard support for avante
+  use{
+    "HakonHarnes/img-clip.nvim",
+    config = function()
+      require('img-clip').setup({
+        default = {
+          embed_image_as_base64 = false,
+          prompt_for_file_name = false,
+          drag_and_drop = {
+            insert_mode = true,
+          },
+          use_absolute_path = true,
+        },
+      })
+    end,
+  }
+
+  -- Main avante plugin
   use{
       "yetone/avante.nvim",
-      tag = "v0.0.9",              -- Use specific stable version instead of main
-      opt = true,                  -- Don't auto-load for security
+      commit = "a45acbf56a3129dcf35249783330a463c076a546",
+      config = function()
+        -- Configuration is handled in after/plugin/avante.lua
+      end,
       requires = {
         {'nvim-lua/plenary.nvim'},
         {'MunifTanjim/nui.nvim'},
         {'MeanderingProgrammer/render-markdown.nvim'},
         {'stevearc/dressing.nvim'},
+        {'HakonHarnes/img-clip.nvim'},
       },
   }
 

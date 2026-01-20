@@ -6,9 +6,12 @@ annotated-types==0.7.0
 ansible==12.3.0
 ansible-core==2.19.5
 anyio==4.10.0
+asyncpg==0.29.0
 asttokens==3.0.1
 attrs==25.3.0
+babel==2.17.0
 backoff==2.2.1
+backrefs==6.1
 beautifulsoup4==4.13.4
 black==25.1.0
 cachetools==5.5.2
@@ -20,7 +23,7 @@ clang-format==20.1.8
 click==8.2.1
 cmake-language-server==0.1.11
 colorama==0.4.6
--e git+ssh://git@github.com/blong14/compute-cluster.git@93adf145736eb2159dd644e6ffb1850e6c2d92ae#egg=compute_cluster
+-e git+ssh://git@github.com/blong14/compute-cluster.git@f65a50dac700e871c2d1f678db45ff9225962f0d#egg=compute_cluster
 ConfigArgParse==1.7.1
 cryptography==46.0.0
 decorator==5.2.1
@@ -29,10 +32,12 @@ diff-match-patch==20241021
 diskcache==5.6.3
 distro==1.9.0
 executing==2.2.1
+fastapi==0.104.1
 filelock==3.18.0
 flake8==7.3.0
 frozenlist==1.7.0
 fsspec==2025.7.0
+ghp-import==2.1.0
 gitdb==4.0.12
 GitPython==3.1.45
 Glances==4.3.1
@@ -67,12 +72,18 @@ jsonschema==4.25.0
 jsonschema-specifications==2025.4.1
 litellm==1.75.0
 lsprotocol==2025.0.0
+Markdown==3.10
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 matplotlib-inline==0.2.1
 mccabe==0.7.0
 mdurl==0.1.2
+mergedeep==1.3.4
 mixpanel==4.10.1
+mkdocs==1.6.1
+mkdocs-get-deps==0.2.0
+mkdocs-material==9.7.1
+mkdocs-material-extensions==1.3.1
 mslex==1.3.0
 multidict==6.6.3
 mypy==1.15.0
@@ -82,9 +93,11 @@ numpy==1.26.4
 openai==1.99.1
 oslex==0.1.3
 packaging==25.0
+paginate==0.5.7
 parso==0.8.5
 pathspec==0.12.1
 pexpect==4.9.0
+pgvector==0.2.4
 pillow==11.3.0
 platformdirs==4.5.1
 pluggy==1.6.0
@@ -96,6 +109,8 @@ propcache==0.3.2
 proto-plus==1.26.1
 protobuf==5.29.5
 psutil==7.0.0
+psycopg2-binary==2.9.9
+python-multipart==0.0.6
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pyasn1==0.6.1
@@ -108,6 +123,7 @@ pydub==0.25.1
 pyflakes==3.4.0
 pygls==2.0.0
 Pygments==2.19.2
+pymdown-extensions==10.20
 pypandoc==1.15
 pyparsing==3.2.3
 pyperclip==1.9.0
@@ -117,6 +133,7 @@ pytest==8.3.5
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 PyYAML==6.0.2
+pyyaml_env_tag==1.1
 referencing==0.36.2
 regex==2025.7.34
 requests==2.32.4
@@ -149,6 +166,8 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 uritemplate==4.2.0
 urllib3==2.5.0
+uvicorn==0.24.0
+watchdog==6.0.0
 watchfiles==1.1.0
 wcwidth==0.2.13
 yarl==1.20.1
