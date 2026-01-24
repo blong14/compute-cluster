@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: memory_pass
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5432:5432"
+      - "54321:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -28,75 +28,98 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  document-processor:
-    build:
-      context: ./processor
-      dockerfile: Dockerfile
-    container_name: memory-store-processor
-    depends_on:
-      postgres-vector:
-        condition: service_healthy
+  embedding-service:
+    build: embedding-service/Dockerfile
+    container_name: embedding-service
+    ports:
+      - "8001:8001"
     environment:
-      - DATABASE_URL=postgresql://memory_user:memory_pass@postgres-vector:5432/memory_store
-      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
-      - DOCS_PATH=/app/docs
-      - LOG_LEVEL=INFO
-      - PYTHONUNBUFFERED=1
+      - EMBEDDING_MODEL=all-MiniLM-L6-v2  # Lightweight, fast model
+      - HOST=0.0.0.0
+      - PORT=8001
     volumes:
-      - ../docs:/app/docs:ro
-      - ./processor:/app
-      - processor_logs:/app/logs
-    networks:
-      - memory-store-network
+      - embedding_cache:/root/.cache/huggingface  # Cache downloaded models
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  search-api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: memory-store-api
-    depends_on:
-      postgres-vector:
-        condition: service_healthy
-      document-processor:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL=postgresql://memory_user:memory_pass@postgres-vector:5432/memory_store
-      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
-      - LOG_LEVEL=INFO
-      - PYTHONUNBUFFERED=1
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./api:/app
-      - api_logs:/app/logs
     networks:
       - memory-store-network
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+
+  #document-processor:
+  #  build:
+  #    context: ./services/processor
+  #    dockerfile: Dockerfile
+  #  container_name: memory-store-processor
+  #  depends_on:
+  #    postgres-vector:
+  #      condition: service_healthy
+  #  environment:
+  #    - DATABASE_URL=postgresql://memory_user:memory_pass@postgres-vector:5432/memory_store
+  #    - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+  #    - DOCS_PATH=/app/docs
+  #    - LOG_LEVEL=INFO
+  #    - PYTHONUNBUFFERED=1
+  #  volumes:
+  #    - ../docs:/app/docs:ro
+  #    - ./services/processor:/app
+  #    - processor_logs:/app/logs
+  #  networks:
+  #    - memory-store-network
+  #  healthcheck:
+  #    test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 3
+  #    start_period: 60s
+  #  restart: unless-stopped
+  #  logging:
+  #    driver: "json-file"
+  #    options:
+  #      max-size: "10m"
+  #      max-file: "3"
+
+  #search-api:
+  #  build:
+  #    context: ./services/api
+  #    dockerfile: Dockerfile
+  #  container_name: memory-store-api
+  #  depends_on:
+  #    postgres-vector:
+  #      condition: service_healthy
+  #    document-processor:
+  #      condition: service_healthy
+  #  environment:
+  #    - DATABASE_URL=postgresql://memory_user:memory_pass@postgres-vector:5432/memory_store
+  #    - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+  #    - LOG_LEVEL=INFO
+  #    - PYTHONUNBUFFERED=1
+  #  ports:
+  #    - "8000:8000"
+  #  volumes:
+  #    - ./services/api:/app
+  #    - api_logs:/app/logs
+  #  networks:
+  #    - memory-store-network
+  #  healthcheck:
+  #    test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 3
+  #    start_period: 30s
+  #  restart: unless-stopped
+  #  logging:
+  #    driver: "json-file"
+  #    options:
+  #      max-size: "10m"
+  #      max-file: "3"
 
 volumes:
+  embedding_cache:
+    driver: local
   postgres_data:
     driver: local
   processor_logs:

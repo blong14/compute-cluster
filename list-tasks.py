@@ -82,6 +82,7 @@ class TaskTracker:
                         "command": "aider memory-store/docker-compose.yml --config .aider.memory-store.yml --message 'Update docker-compose.yml to include processor and API services with proper dependencies and networking'",                                                                                                                           
                         "validation": ["All services defined", "Dependencies configured", "Health checks included"],                                                          
                         "dependencies": [
+                            "phase2_services.embedding_service",
                             "phase2_services.document_processor",
                             "phase2_services.search_api",
                         ],                                                                                                 

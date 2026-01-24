@@ -1,0 +1,14 @@
+# Core FastAPI dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# ML dependencies - pinned for compatibility
+# torch>=2.0.0,<3.0.0
+sentence-transformers==2.2.2
+transformers==4.35.2
+huggingface_hub==0.17.3
+
+# Additional dependencies
+numpy>=1.21.0
+requests>=2.28.0

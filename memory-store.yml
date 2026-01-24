@@ -14,6 +14,7 @@ file:
 auto-commits: false
 commit-prompt: false
 gitignore: false
+watch-files: true
 
 # Enable code quality checks
 test: false
