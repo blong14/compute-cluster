@@ -237,7 +237,6 @@ check_processor() {
 # Check search API
 check_search_api() {
     log_info "Checking search API service..."
-    return 0
     
     # Wait for API health endpoint
     if ! wait_for_service "Search API" "http://localhost:8000/health" $MAX_WAIT_TIME; then

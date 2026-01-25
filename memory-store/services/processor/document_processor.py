@@ -21,74 +21,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class DocumentProcessor:
-    def __init__(self, db_url: str, voyage_api_key: str, docs_path: str):
+    def __init__(self, db_url: str, embeddings_url: str, docs_path: str):
         self.db_url = db_url
-        self.voyage_api_key = voyage_api_key
+        self.embeddings_url = embeddings_url
         self.docs_path = Path(docs_path)
-        self.voyage_model = os.getenv("VOYAGE_MODEL", "voyage-large-2-instruct")
         self.chunk_size = int(os.getenv("CHUNK_SIZE", "512"))
         self.chunk_overlap = int(os.getenv("CHUNK_OVERLAP", "50"))
         self.batch_size = int(os.getenv("BATCH_SIZE", "10"))
         
-        # Initialize database connection
         self.conn = psycopg2.connect(db_url)
         self.conn.autocommit = True
-        
-        # Verify pgvector extension
-        self._verify_database()
-    
-    def _verify_database(self):
-        """Verify database schema and pgvector extension"""
-        with self.conn.cursor() as cur:
-            # Check pgvector extension
-            cur.execute("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector')")
-            if not cur.fetchone()[0]:
-                logger.warning("pgvector extension not found. Make sure it's installed.")
-            
-            # Check required tables
-            tables = ['documents', 'document_chunks']
-            for table in tables:
-                cur.execute("""
-                    SELECT EXISTS(
-                        SELECT 1 FROM information_schema.tables 
-                        WHERE table_name = %s
-                    )
-                """, (table,))
-                if not cur.fetchone()[0]:
-                    raise Exception(f"Required table '{table}' not found")
-        
-        logger.info("Database schema verified successfully")
     
     def generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding using Voyage AI API with retry logic"""
-        url = "https://api.voyageai.com/v1/embeddings"
-        headers = {
-            "Authorization": f"Bearer {self.voyage_api_key}",
-            "Content-Type": "application/json"
-        }
+        """Generate embedding using with retry logic"""
         
         # Clean and truncate text if necessary
         cleaned_text = self._clean_text_for_embedding(text)
-        
+
         payload = {
-            "input": [cleaned_text],
-            "model": self.voyage_model,
-            "input_type": "document"  # Optimize for document search
+            "texts": [cleaned_text],
+            "model_name": "all-MiniLM-L6-v2", 
         }
         
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                response = requests.post(f"{self.embeddings_url}/embeddings", json=payload, timeout=30)
                 response.raise_for_status()
                 
                 data = response.json()
-                if not data.get("data") or len(data["data"]) == 0:
+
+                if not data.get("embeddings") or len(data["embeddings"]) == 0:
                     raise Exception("No embeddings returned from API")
                 
-                embedding = data["data"][0]["embedding"]
-                logger.debug(f"Generated embedding with {len(embedding)} dimensions")
+                embedding = data["embeddings"][0]
+                
+                logger.info(f"Generated embedding with {data['dimensions']} dimensions")
+                
                 return embedding
                 
             except requests.exceptions.RequestException as e:
@@ -108,7 +79,6 @@ class DocumentProcessor:
         # Remove excessive whitespace
         text = re.sub(r'\s+', ' ', text.strip())
         
-        # Truncate if too long (Voyage AI has token limits)
         max_chars = 8000  # Conservative limit
         if len(text) > max_chars:
             text = text[:max_chars] + "..."
@@ -120,7 +90,6 @@ class DocumentProcessor:
         """Intelligently chunk markdown content preserving structure"""
         # Parse markdown to extract structure
         md = markdown.Markdown(extensions=['meta', 'toc', 'fenced_code', 'tables'])
-        html = md.convert(content)
         
         # Extract metadata if available
         metadata = getattr(md, 'Meta', {})
@@ -499,30 +468,25 @@ class DocumentWatcher(FileSystemEventHandler):
 
 def main():
     # Get configuration from environment
-    db_url = os.getenv("DATABASE_URL", "postgresql://memory_user:memory_pass@localhost:5432/memory_store")
-    voyage_api_key = os.getenv("VOYAGE_API_KEY")
-    docs_path = os.getenv("DOCS_PATH", "/app/docs")
-    enable_http_server = os.getenv("ENABLE_HTTP_SERVER", "true").lower() == "true"
+    db_url = os.getenv(
+        "DATABASE_URL",
+        "postgresql://memory_user:memory_pass@0.0.0.0:54321/memory_store",
+    )
+    embeddings_url = os.getenv(
+        "EMBEDDINGS_URL",
+        "http://localhost:8001",
+    )
+    docs_path = os.getenv("DOCS_PATH", "/home/blong14/Developer/git/compute-cluster/docs")
     
-    if not voyage_api_key:
-        logger.error("VOYAGE_API_KEY environment variable is required")
-        return
+    logger.info(
+        "Starting document processing %s %s %s",
+        db_url, embeddings_url, docs_path,
+    )
     
     # Initialize processor
-    processor = DocumentProcessor(db_url, voyage_api_key, docs_path)
-    
-    # Start health server if enabled
-    health_server = None
-    if enable_http_server:
-        try:
-            from http_server import HealthServer
-            health_server = HealthServer(port=int(os.getenv("HEALTH_PORT", "8080")))
-            health_server.start()
-        except Exception as e:
-            logger.warning(f"Could not start health server: {e}")
+    processor = DocumentProcessor(db_url, embeddings_url, docs_path)
     
     # Process all documents initially
-    logger.info("Starting initial document processing...")
     processor.process_all_documents()
     
     # Set up file monitoring
@@ -539,11 +503,11 @@ def main():
     except KeyboardInterrupt:
         logger.info("Shutting down document processor...")
         observer.stop()
-        if health_server:
-            health_server.stop()
     
     observer.join()
     logger.info("Document processor stopped")
 
+
 if __name__ == "__main__":
     main()
+

@@ -38,14 +38,12 @@ class SearchResponse(BaseModel):
 
 class SearchAPI:
     def __init__(self):
-        self.db_url = os.getenv("DATABASE_URL", "postgresql://memory_user:memory_pass@localhost:5432/memory_store")
-        self.voyage_api_key = os.getenv("VOYAGE_API_KEY")
-        self.voyage_model = os.getenv("VOYAGE_MODEL", "voyage-large-2-instruct")
+        self.db_url = os.getenv(
+            "DATABASE_URL",
+            "postgresql://memory_user:memory_pass@localhost:54321/memory_store",
+        )
         self.max_results = int(os.getenv("MAX_RESULTS", "20"))
         self.similarity_threshold = float(os.getenv("SIMILARITY_THRESHOLD", "0.7"))
-        
-        if not self.voyage_api_key:
-            raise ValueError("VOYAGE_API_KEY environment variable is required")
         
         # Initialize database connection
         self.conn = psycopg2.connect(self.db_url)
@@ -78,29 +76,25 @@ class SearchAPI:
     
     def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding using Voyage AI API"""
-        url = "https://api.voyageai.com/v1/embeddings"
-        headers = {
-            "Authorization": f"Bearer {self.voyage_api_key}",
-            "Content-Type": "application/json"
-        }
-        
+        url = "http://localhost:8001/embeddings"
+
         payload = {
-            "input": [text],
-            "model": self.voyage_model
+            "texts": [text],
+            "model_name": "all-MiniLM-L6-v2", 
         }
         
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            response = requests.post(url,json=payload, timeout=30)
             response.raise_for_status()
             
             data = response.json()
-            if not data.get("data") or len(data["data"]) == 0:
+            if not data.get("embeddings") or len(data["embeddings"]) == 0:
                 raise Exception("No embeddings returned from API")
             
-            return data["data"][0]["embedding"]
+            return data["embeddings"][0]
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error calling Voyage AI API: {e}")
+            logger.error(f"Error callingAPI: {e}")
             raise HTTPException(status_code=500, detail="Failed to generate embedding")
         except Exception as e:
             logger.error(f"Error processing embedding response: {e}")
@@ -215,13 +209,15 @@ class SearchAPI:
             logger.error(f"Error in hybrid search: {e}")
             raise HTTPException(status_code=500, detail="Search failed")
 
-# Initialize search API
+
 search_api = SearchAPI()
+
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "memory-store-search-api"}
+
 
 @app.get("/search/semantic", response_model=SearchResponse)
 async def semantic_search_endpoint(
@@ -236,6 +232,7 @@ async def semantic_search_endpoint(
         count=len(results),
         query=query
     )
+
 
 @app.get("/search/fulltext", response_model=SearchResponse)
 async def fulltext_search_endpoint(
@@ -255,6 +252,7 @@ async def fulltext_search_endpoint(
         query=query
     )
 
+
 @app.get("/search/hybrid", response_model=SearchResponse)
 async def hybrid_search_endpoint(
     query: str = Query(..., description="Search query"),
@@ -272,6 +270,7 @@ async def hybrid_search_endpoint(
         count=len(results),
         query=query
     )
+
 
 @app.get("/stats")
 async def get_stats():
@@ -299,9 +298,11 @@ async def get_stats():
         logger.error(f"Error getting stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to get statistics")
 
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("API_PORT", "8000"))
     host = os.getenv("API_HOST", "0.0.0.0")
     
     uvicorn.run(app, host=host, port=port)
+

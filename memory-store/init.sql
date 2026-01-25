@@ -18,7 +18,7 @@ CREATE TABLE document_chunks (
     document_id INTEGER REFERENCES documents(id) ON DELETE CASCADE,
     chunk_index INTEGER NOT NULL,
     content TEXT NOT NULL,
-    embedding vector(1024), -- voyage-large-2-instruct produces 1024-dimensional vectors
+    embedding vector(384), 
     metadata JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -83,7 +83,7 @@ GROUP BY d.id, d.file_path, d.title, d.content, d.metadata, d.created_at, d.upda
 
 -- Create function for semantic search with similarity threshold
 CREATE OR REPLACE FUNCTION semantic_search(
-    query_embedding vector(1024),
+    query_embedding vector(384),
     similarity_threshold float DEFAULT 0.7,
     result_limit int DEFAULT 10
 )
@@ -117,7 +117,7 @@ $$ LANGUAGE plpgsql;
 -- Create function for hybrid search combining semantic and full-text
 CREATE OR REPLACE FUNCTION hybrid_search(
     query_text text,
-    query_embedding vector(1024),
+    query_embedding vector(384),
     semantic_weight float DEFAULT 0.7,
     fulltext_weight float DEFAULT 0.3,
     result_limit int DEFAULT 10

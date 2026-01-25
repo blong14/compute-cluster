@@ -1,9 +1,5 @@
 version: '3.8'
 
-networks:
-  memory-store-network:
-    driver: bridge
-
 services:
   postgres-vector:
     image: pgvector/pgvector:pg16
@@ -18,8 +14,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - memory-store-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U memory_user -d memory_store"]
       interval: 10s
@@ -28,26 +22,24 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  embedding-service:
-    build: embedding-service/Dockerfile
-    container_name: embedding-service
-    ports:
-      - "8001:8001"
-    environment:
-      - EMBEDDING_MODEL=all-MiniLM-L6-v2  # Lightweight, fast model
-      - HOST=0.0.0.0
-      - PORT=8001
-    volumes:
-      - embedding_cache:/root/.cache/huggingface  # Cache downloaded models
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    networks:
-      - memory-store-network
+ # embedding-service:
+ #   build: services/embedding-service/Dockerfile
+ #   container_name: embedding-service
+ #   ports:
+ #     - "8001:8001"
+ #   environment:
+ #     - EMBEDDING_MODEL=all-MiniLM-L6-v2  # Lightweight, fast model
+ #     - HOST=0.0.0.0
+ #     - PORT=8001
+ #   volumes:
+ #     - embedding_cache:/root/.cache/huggingface  # Cache downloaded models
+ #   restart: unless-stopped
+ #   healthcheck:
+ #     test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+ #     interval: 30s
+ #     timeout: 10s
+ #     retries: 3
+ #     start_period: 60s
 
   #document-processor:
   #  build:

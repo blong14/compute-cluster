@@ -28,7 +28,7 @@ type SearchResponse struct {
 var (
 	searchLimit  int
 	searchHybrid bool
-	memoryStoreURL = "http://memory-store.cluster"
+	memoryStoreURL = "http://localhost:8000"
 )
 
 var searchCmd = &cobra.Command{
@@ -167,7 +167,7 @@ func displayResults(results []SearchResult) {
 }
 
 func getMemoryStoreStatus() (string, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/status", memoryStoreURL))
+	resp, err := http.Get(fmt.Sprintf("%s/stats", memoryStoreURL))
 	if err != nil {
 		return "", fmt.Errorf("failed to get status: %w", err)
 	}
