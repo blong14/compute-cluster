@@ -17,12 +17,18 @@ return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
   use {
-	  'nvim-telescope/telescope.nvim', tag = '0.1.4',
-	  -- or                            , branch = '0.1.x',
+	  'nvim-telescope/telescope.nvim', version = '*',
 	  requires = { {'nvim-lua/plenary.nvim'} }
   }
 
-  use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
+  use {'nvim-treesitter/nvim-treesitter',
+    lazy = true,
+    build = ':TSUpdate',
+    config = function ()
+      local treesitter = require("nvim-treesitter")
+      treesitter.setup()
+    end
+ }
 
   use('theprimeagen/harpoon')
   use {
@@ -57,6 +63,7 @@ return require('packer').startup(function(use)
   use("stevearc/dressing.nvim")
   use("preservim/nerdtree")
   use("ryanoasis/vim-devicons")
+  use("github/copilot.vim")
   
   -- Enhanced markdown rendering for avante
   use{
@@ -90,6 +97,8 @@ return require('packer').startup(function(use)
   use{
       "yetone/avante.nvim",
       commit = "a45acbf56a3129dcf35249783330a463c076a546",
+      --branch = "main",
+      run = "build",
       config = function()
         -- Configuration is handled in after/plugin/avante.lua
       end,
@@ -99,6 +108,7 @@ return require('packer').startup(function(use)
         {'MeanderingProgrammer/render-markdown.nvim'},
         {'stevearc/dressing.nvim'},
         {'HakonHarnes/img-clip.nvim'},
+        {'github/copilot.vim'},
       },
   }
 
