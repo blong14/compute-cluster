@@ -129,7 +129,7 @@ pyparsing==3.2.3
 pyperclip==1.9.0
 PySocks==1.7.1
 pyte==0.8.2
-pytest==8.3.5
+pytest==8.4.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 PyYAML==6.0.2

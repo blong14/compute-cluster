@@ -20,7 +20,7 @@ dependencies = [
     "black==25.1.0",
     "flake8==7.3.0",
     "mypy==1.15.0",
-    "pytest==8.3.5",
+    "pytest==8.4.2",
     "ipython==9.8.0",
     "mkdocs==1.6.1",
     "mkdocs-material==9.7.1",
