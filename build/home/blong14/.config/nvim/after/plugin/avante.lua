@@ -1,9 +1,21 @@
-vim.cmd('packadd avante.nvim')
-require('avante_lib').load()
+--vim.cmd('packadd avante.nvim')
+-- require('avante_lib').load()
+
+local provider
+local auto_suggestions_provider
+
+if vim.loop.os_uname().sysname == "Darwin" then
+  provider = "gemini"
+  auto_suggestions_provider = "copilot"
+else
+  provider = "claude"
+  auto_suggestions_provider = "claude"
+end
+
 require('avante').setup({
   build = ":AvanteBuild",
-  provider = "claude",
-  auto_suggestions_provider = "claude",
+  provider = provider,
+  auto_suggestions_provider = auto_suggestions_provider,
 
   providers = {
     claude = {
@@ -11,8 +23,17 @@ require('avante').setup({
       model = "claude-sonnet-4-20250514",
       --model = "claude-4-5-sonnet-20250922",
       timeout = 60000,
-      max_tokens = 8192,
-      temperature = 0.1,
+      extra_request_body = {
+        max_tokens = 8192,
+        temperature = 0.1,
+      },
+    },
+    gemini = {
+      model = "gemini-2.5-pro",
+      extra_request_body = {
+        temperature = 0.75,
+        max_tokens = 4096,
+      },
     },
   },
 
@@ -79,7 +100,6 @@ require('avante').setup({
       close = { "<Esc>", "q" },
     },
   },
-  
   -- Window configuration
   windows = {
     position = "right",
@@ -158,6 +178,12 @@ require('avante').setup({
       description = "Add documentation and comments",
       details = "Add comprehensive documentation, comments, and type annotations",
       prompt = "Please add comprehensive documentation, comments, and type annotations to this code. Include a todo list of additional documentation tasks."
+    },
+    {
+      name = "review",
+      description = "Review git diff vs main branch",
+      details = "Reviews the git diff of the current branch against the main branch and provides suggestions for improvement without editing the code.",
+      prompt = "Please review the git diff of the current branch against the main branch. Provide suggestions for improvement on code quality, potential bugs, and adherence to best practices. DO NOT provide any code edits or diffs, only written suggestions in a list format.\n\n```diff\n{{!git diff main...HEAD}}\n```"
     },
   },
 })

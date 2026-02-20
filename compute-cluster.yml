@@ -3,7 +3,9 @@ code-theme: dracula
 
 # Auto-read context files when starting
 read:
-  - docs/MEMORY_STORE_IMPLEMENTATION_GUIDE.md
+  - ~/Developer/git/compute-cluster/docs/AIDER_AVANTE_INTEGRATION_GUIDE.md
+  - ~/Developer/git/compute-cluster/docs/AIDER_TERMINAL_GUIDE.md
+  - ~/Developer/git/compute-cluster/docs/WORKFLOW_EXAMPLES.md
 
 # Git integration
 auto-commits: false
