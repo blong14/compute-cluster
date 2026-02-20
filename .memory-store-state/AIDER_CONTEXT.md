@@ -51,7 +51,6 @@ This is a compute cluster management project with:
 - **Files**: `search_api.py`, `Dockerfile`, `requirements.txt`
 - FastAPI with semantic, full-text, and hybrid search endpoints
 - PostgreSQL pgvector integration
-- Voyage AI embeddings support
 - Health checks and statistics endpoint
 - Comprehensive error handling
 - Containerized with Python 3.11
@@ -161,12 +160,6 @@ This is a compute cluster management project with:
 - **Embedding Service**: `http://localhost:8001`
   - `/health` - Health check
   - `/embed` - Generate embeddings
-
-### Environment Variables
-- `VOYAGE_API_KEY` - Voyage AI API key (optional with self-hosted embeddings)
-- `POSTGRES_*` - Database connection settings
-- `EMBEDDING_MODEL` - Model selection for embeddings
-- Various service-specific configurations
 
 ## Next Steps for Completion
 1. **Create Helm chart** following existing patterns in `build/charts/`

@@ -5,6 +5,7 @@ Usage:
   cluster [command]
 
 Available Commands:
+  ai           Run aider with knowledge base context
   completion   Generate the autocompletion script for the specified shell
   deploy       Deploy a service to the cluster
   help         Help about any command

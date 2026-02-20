@@ -153,10 +153,9 @@ class SearchAPI:
                         1 - (dc.embedding <=> $1::vector) as similarity
                     FROM document_chunks dc
                     JOIN documents d ON dc.document_id = d.id
-                    WHERE 1 - (dc.embedding <=> $1::vector) >= $2
                     ORDER BY dc.embedding <=> $1::vector
-                    LIMIT $3
-                """, embedding_str, self.similarity_threshold, limit)
+                    LIMIT $2
+                """, embedding_str, limit)
                 
                 return [dict(row) for row in rows]
                 
