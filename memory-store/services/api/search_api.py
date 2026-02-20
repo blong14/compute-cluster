@@ -110,15 +110,17 @@ class SearchAPI:
     
     async def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding using embedding service API"""
-        url = "http://localhost:8001/embeddings"
-
+        url = os.getenv(
+            "EMBEDDINGS_URL",
+            "http://localhost:8001",
+        )
         payload = {
             "texts": [text],
             "model_name": "all-MiniLM-L6-v2", 
         }
         
         try:
-            response = await self.http_client.post(url, json=payload)
+            response = await self.http_client.post(f"{url}/embeddings", json=payload)
             response.raise_for_status()
             
             data = response.json()
@@ -274,6 +276,7 @@ def get_search_api() -> SearchAPI:
     """Dependency to get search API instance"""
     return search_api
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -324,7 +327,6 @@ async def hybrid_search_endpoint(
 ):
     """Hybrid search combining semantic and full-text search"""
     results = await api.hybrid_search(query, limit)
-    print(results)
     
     # Convert combined_score to similarity for consistent response format
     for result in results:

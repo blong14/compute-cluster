@@ -13,6 +13,9 @@ from watchdog.events import FileSystemEventHandler
 import logging
 import re
 from datetime import datetime
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import socketserver
 
 # Configure logging
 logging.basicConfig(
@@ -20,6 +23,186 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    """HTTP handler for health check endpoint"""
+    
+    def __init__(self, processor, *args, **kwargs):
+        self.processor = processor
+        super().__init__(*args, **kwargs)
+    
+    def do_GET(self):
+        """Handle GET requests"""
+        if self.path == '/health':
+            self.send_health_response()
+        elif self.path == '/stats':
+            self.send_stats_response()
+        elif self.path == '/process':
+            self.trigger_processing()
+        else:
+            self.send_error(404, "Not Found")
+    
+    def do_POST(self):
+        """Handle POST requests"""
+        if self.path == '/process':
+            self.trigger_processing()
+        else:
+            self.send_error(404, "Not Found")
+    
+    def send_health_response(self):
+        """Send health check response"""
+        try:
+            # Check database connectivity
+            with self.processor.conn.cursor() as cur:
+                cur.execute("SELECT 1")
+            
+            # Check embeddings service
+            embeddings_healthy = False
+            try:
+                response = requests.get(f"{self.processor.embeddings_url}/health", timeout=5)
+                embeddings_healthy = response.status_code == 200
+            except:
+                pass
+            
+            health_data = {
+                "status": "healthy",
+                "timestamp": datetime.now().isoformat(),
+                "database": "connected",
+                "embeddings_service": "connected" if embeddings_healthy else "disconnected",
+                "docs_path": str(self.processor.docs_path),
+                "docs_path_exists": self.processor.docs_path.exists()
+            }
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(health_data).encode())
+            
+        except Exception as e:
+            error_data = {
+                "status": "unhealthy",
+                "timestamp": datetime.now().isoformat(),
+                "error": str(e)
+            }
+            
+            self.send_response(503)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(error_data).encode())
+    
+    def send_stats_response(self):
+        """Send processing statistics"""
+        try:
+            with self.processor.conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM documents")
+                doc_count = cur.fetchone()[0]
+                
+                cur.execute("SELECT COUNT(*) FROM document_chunks")
+                chunk_count = cur.fetchone()[0]
+                
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_files,
+                        COUNT(CASE WHEN metadata->>'file_hash' IS NOT NULL THEN 1 END) as processed_files
+                    FROM documents
+                """)
+                file_stats = cur.fetchone()
+            
+            stats_data = {
+                "documents": doc_count,
+                "chunks": chunk_count,
+                "total_files": file_stats[0] if file_stats else 0,
+                "processed_files": file_stats[1] if file_stats else 0,
+                "docs_path": str(self.processor.docs_path),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(stats_data).encode())
+            
+        except Exception as e:
+            error_data = {
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(error_data).encode())
+    
+    def trigger_processing(self):
+        """Trigger document processing"""
+        try:
+            # Start processing in background thread
+            processing_thread = threading.Thread(target=self.processor.process_all_documents)
+            processing_thread.daemon = True
+            processing_thread.start()
+            
+            response_data = {
+                "status": "processing_started",
+                "message": "Document processing started in background",
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            self.send_response(202)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(response_data).encode())
+            
+        except Exception as e:
+            error_data = {
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(error_data).encode())
+    
+    def log_message(self, format, *args):
+        """Override to use our logger"""
+        logger.info(f"HTTP {format % args}")
+
+
+class HealthCheckServer:
+    """HTTP server for health checks and processing triggers"""
+    
+    def __init__(self, processor, port=8080):
+        self.processor = processor
+        self.port = port
+        self.server = None
+        self.server_thread = None
+    
+    def start(self):
+        """Start the health check server"""
+        try:
+            # Create handler class with processor reference
+            handler_class = lambda *args, **kwargs: HealthCheckHandler(self.processor, *args, **kwargs)
+            
+            self.server = HTTPServer(('0.0.0.0', self.port), handler_class)
+            self.server_thread = threading.Thread(target=self.server.serve_forever)
+            self.server_thread.daemon = True
+            self.server_thread.start()
+            
+            logger.info(f"Health check server started on port {self.port}")
+            logger.info(f"Health endpoint: http://localhost:{self.port}/health")
+            logger.info(f"Stats endpoint: http://localhost:{self.port}/stats")
+            logger.info(f"Process endpoint: http://localhost:{self.port}/process")
+            
+        except Exception as e:
+            logger.error(f"Failed to start health check server: {e}")
+    
+    def stop(self):
+        """Stop the health check server"""
+        if self.server:
+            self.server.shutdown()
+            self.server.server_close()
+            logger.info("Health check server stopped")
 
 
 class DocumentProcessor:
@@ -467,47 +650,182 @@ class DocumentWatcher(FileSystemEventHandler):
             self.processor.process_document(Path(event.src_path))
 
 def main():
+    import sys
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Memory Store Document Processor')
+    parser.add_argument('--mode', choices=['daemon', 'process', 'search'], default='daemon',
+                       help='Run mode: daemon (default), process (one-time), or search')
+    parser.add_argument('--docs-path', help='Path to documents directory (overrides DOCS_PATH env var)')
+    parser.add_argument('--query', help='Search query (for search mode)')
+    parser.add_argument('--limit', type=int, default=10, help='Number of search results (for search mode)')
+    parser.add_argument('--force', action='store_true', help='Force reprocessing of all documents')
+    
+    args = parser.parse_args()
+    
     # Get configuration from environment
     db_url = os.getenv(
         "DATABASE_URL",
-        "postgresql://memory_user:memory_pass@0.0.0.0:54321/memory_store",
+        "postgresql://memory_user:memory_pass@postgres-vector:5432/memory_store",
     )
     embeddings_url = os.getenv(
         "EMBEDDINGS_URL",
-        "http://localhost:8001",
+        "http://embedding-service:8001",
     )
-    docs_path = os.getenv("DOCS_PATH", "/home/blong14/Developer/git/compute-cluster/docs")
+    docs_path = args.docs_path or os.getenv("DOCS_PATH", "/app/docs")
+    health_port = int(os.getenv("HEALTH_PORT", "8080"))
     
     logger.info(
-        "Starting document processing %s %s %s",
-        db_url, embeddings_url, docs_path,
+        "Starting document processor - Mode: %s, DB: %s, Embeddings: %s, Docs: %s",
+        args.mode, db_url, embeddings_url, docs_path
     )
     
     # Initialize processor
     processor = DocumentProcessor(db_url, embeddings_url, docs_path)
     
-    # Process all documents initially
-    processor.process_all_documents()
+    # Wait for database to be ready
+    logger.info("Waiting for database connection...")
+    max_retries = 30
+    for attempt in range(max_retries):
+        try:
+            with processor.conn.cursor() as cur:
+                cur.execute("SELECT 1")
+            logger.info("Database connection established")
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.info(f"Database not ready (attempt {attempt + 1}/{max_retries}), waiting...")
+                time.sleep(2)
+            else:
+                logger.error(f"Failed to connect to database after {max_retries} attempts: {e}")
+                return 1
     
-    # Set up file monitoring
-    event_handler = DocumentWatcher(processor)
-    observer = Observer()
-    observer.schedule(event_handler, docs_path, recursive=True)
-    observer.start()
+    # Handle different modes
+    if args.mode == 'search':
+        if not args.query:
+            logger.error("Search mode requires --query parameter")
+            return 1
+        
+        logger.info(f"Searching for: {args.query}")
+        results = processor.search_similar(args.query, args.limit)
+        
+        if results:
+            logger.info(f"Found {len(results)} results:")
+            for i, result in enumerate(results, 1):
+                print(f"\n--- Result {i} (similarity: {result['similarity']:.3f}) ---")
+                print(f"File: {result['file_path']}")
+                print(f"Title: {result['title']}")
+                print(f"Content: {result['content'][:200]}...")
+        else:
+            logger.info("No results found")
+        
+        return 0
     
-    logger.info(f"Document processor ready. Monitoring {docs_path} for changes...")
+    elif args.mode == 'process':
+        # Wait for embeddings service to be ready
+        logger.info("Waiting for embeddings service...")
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(f"{embeddings_url}/health", timeout=5)
+                if response.status_code == 200:
+                    logger.info("Embeddings service is ready")
+                    break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.info(f"Embeddings service not ready (attempt {attempt + 1}/{max_retries}), waiting...")
+                    time.sleep(2)
+                else:
+                    logger.error(f"Embeddings service not available after {max_retries} attempts: {e}")
+                    return 1
+        
+        # Force reprocessing if requested
+        if args.force:
+            logger.info("Force mode: clearing existing documents...")
+            with processor.conn.cursor() as cur:
+                cur.execute("DELETE FROM document_chunks")
+                cur.execute("DELETE FROM documents")
+            logger.info("Existing documents cleared")
+        
+        # Process all documents
+        if processor.docs_path.exists():
+            markdown_files = list(processor.docs_path.rglob("*.md"))
+            if markdown_files:
+                logger.info(f"Found {len(markdown_files)} markdown files, starting processing...")
+                processor.process_all_documents()
+                logger.info("Document processing completed")
+            else:
+                logger.info("No markdown files found in docs directory")
+        else:
+            logger.error(f"Docs directory {processor.docs_path} does not exist")
+            return 1
+        
+        return 0
     
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        logger.info("Shutting down document processor...")
-        observer.stop()
-    
-    observer.join()
-    logger.info("Document processor stopped")
+    else:  # daemon mode
+        # Start health check server
+        health_server = HealthCheckServer(processor, health_port)
+        health_server.start()
+        
+        # Wait for embeddings service to be ready
+        logger.info("Waiting for embeddings service...")
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(f"{embeddings_url}/health", timeout=5)
+                if response.status_code == 200:
+                    logger.info("Embeddings service is ready")
+                    break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.info(f"Embeddings service not ready (attempt {attempt + 1}/{max_retries}), waiting...")
+                    time.sleep(2)
+                else:
+                    logger.warning(f"Embeddings service not available after {max_retries} attempts: {e}")
+                    logger.warning("Continuing without embeddings service - processing will fail until it's available")
+                    break
+        
+        # Process all documents initially if docs directory exists and has content
+        if processor.docs_path.exists():
+            markdown_files = list(processor.docs_path.rglob("*.md"))
+            if markdown_files:
+                logger.info(f"Found {len(markdown_files)} markdown files, starting initial processing...")
+                processor.process_all_documents()
+            else:
+                logger.info("No markdown files found in docs directory")
+        else:
+            logger.info(f"Docs directory {processor.docs_path} does not exist, creating it...")
+            processor.docs_path.mkdir(parents=True, exist_ok=True)
+        
+        # Set up file monitoring
+        event_handler = DocumentWatcher(processor)
+        observer = Observer()
+        
+        # Only start monitoring if docs path exists
+        if processor.docs_path.exists():
+            observer.schedule(event_handler, processor.docs_path, recursive=True)
+            observer.start()
+            logger.info(f"Document processor ready. Monitoring {processor.docs_path} for changes...")
+        else:
+            logger.warning(f"Cannot monitor {processor.docs_path} - directory does not exist")
+        
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("Shutting down document processor...")
+            if observer.is_alive():
+                observer.stop()
+            health_server.stop()
+        
+        if observer.is_alive():
+            observer.join()
+        logger.info("Document processor stopped")
+        
+        return 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    sys.exit(main())
 

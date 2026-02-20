@@ -158,9 +158,9 @@ func displayResults(results []SearchResult) {
 		
 		// Show content preview (first 200 chars)
 		content := result.Content
-		if len(content) > 200 {
-			content = content[:200] + "..."
-		}
+		// if len(content) > 200 {
+			// content = content[:200] + "..."
+		// }
 		fmt.Printf("   Content: %s\n", content)
 		fmt.Println()
 	}
