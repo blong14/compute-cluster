@@ -1,6 +1,6 @@
 aider-chat==0.86.1
 aiohappyeyeballs==2.6.1
-aiohttp==3.12.15
+aiohttp==3.13.3
 aiosignal==1.4.0
 annotated-types==0.7.0
 ansible==12.3.0
