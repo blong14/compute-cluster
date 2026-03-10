@@ -168,15 +168,6 @@ var install = &cobra.Command{
 		if err := installCmd.Run(); err != nil {
 			klog.Fatalf("Failed to install package: %v", err)
 		}
-		klog.Info("Generating requirements.txt...")
-		freezeCmd := exec.Command(pipPath, "freeze")
-		freezeOutput, err := freezeCmd.Output()
-		if err != nil {
-			klog.Fatalf("Failed to freeze requirements: %v", err)
-		}
-		if err := os.WriteFile("requirements.txt", freezeOutput, 0644); err != nil {
-			klog.Fatalf("Failed to write requirements.txt: %v", err)
-		}
 		klog.Info("Installation completed successfully!")
 	},
 }

@@ -3,7 +3,6 @@ version: '3.8'
 services:
   postgres-vector:
     image: pgvector/pgvector:pg16
-    container_name: memory-store-postgres
     environment:
       POSTGRES_DB: memory_store
       POSTGRES_USER: memory_user
@@ -26,7 +25,6 @@ services:
     build:
       context: ./services/embedding-service
       dockerfile: Dockerfile
-    container_name: embedding-service
     ports:
       - "8001:8001"
     environment:
@@ -47,7 +45,6 @@ services:
     build:
       context: ./services/processor
       dockerfile: Dockerfile
-    container_name: memory-store-processor
     depends_on:
       postgres-vector:
         condition: service_healthy
@@ -58,7 +55,7 @@ services:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
     volumes:
-      - ../docs:/app/docs:ro
+      - ../../docs:/app/docs:ro
       - ./services/processor:/app
       - processor_logs:/app/logs
     restart: unless-stopped
@@ -67,7 +64,6 @@ services:
     build:
       context: ./services/api
       dockerfile: Dockerfile
-    container_name: memory-store-api
     depends_on:
       postgres-vector:
         condition: service_healthy
