@@ -25,7 +25,7 @@ cmake-language-server==0.1.11
 colorama==0.4.6
 -e git+ssh://git@github.com/blong14/compute-cluster.git@f65a50dac700e871c2d1f678db45ff9225962f0d#egg=compute_cluster
 ConfigArgParse==1.7.1
-cryptography==46.0.0
+cryptography==46.0.5
 decorator==5.2.1
 defusedxml==0.7.1
 diff-match-patch==20241021
