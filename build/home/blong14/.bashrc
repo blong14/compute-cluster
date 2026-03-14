@@ -196,7 +196,6 @@ alias py='python3'
 alias pyv='python3 -m venv venv'
 alias pya='source venv/bin/activate'
 alias pyi='pip install'
-alias pyr='pip install -r requirements.txt'
 
 # Zig development
 alias zb='zig build'
@@ -316,7 +315,6 @@ bashapi() {
   echo -e "${green}├─ pyv${reset}              Create virtual environment"
   echo -e "${green}├─ pya${reset}              Activate virtual environment"
   echo -e "${green}├─ pyi <package>${reset}    Install Python package"
-  echo -e "${green}└─ pyr${reset}              Install from requirements.txt"
   echo
   
   echo -e "${bold}${purple}┌─ ZIG DEVELOPMENT ${reset}"
