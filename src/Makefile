@@ -16,7 +16,7 @@ clean:
 
 build-go: .deps/go
 	@echo "[build] building go code..."
-	go install cluster
+	go install -buildvcs=false cluster
 
 build-zig:
 	@echo "[build] building zig code..."
