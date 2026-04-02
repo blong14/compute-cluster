@@ -37,3 +37,7 @@ alias remove='sudo apt remove'
 
 # Docker aliases
 alias ollama='docker run -it -v ollama:/root/.ollama --add-host ollama.cluster:100.91.72.78 -e OLLAMA_HOST=http://ollama.cluster ollama/ollama'
+
+# Aider AI agent - autonomous mode with gvisor isolation
+alias ai='docker-compose -f ~/Developer/git/compute-cluster/compose.ai.yml run --rm aider aider --watch --yes-always'
+

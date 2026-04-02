@@ -1,0 +1,23 @@
+
+code-theme: dracula
+
+# Auto-read context files when starting
+read:
+  - ./docs/AIDER_AVANTE_INTEGRATION_GUIDE.md
+  - ./docs/AIDER_TERMINAL_GUIDE.md
+  - ./docs/WORKFLOW_EXAMPLES.md
+
+# Git integration
+auto-commits: false
+commit-prompt: false
+gitignore: false
+watch-files: true
+
+# Enable code quality checks
+test: false
+lint: false
+pretty: true
+
+# Streaming for better responsiveness
+stream: true
+

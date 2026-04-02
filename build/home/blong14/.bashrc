@@ -510,7 +510,7 @@ export NODEROOT=$HOME/sdk/node24.12.0
 
 # Go environment variables
 export GOPATH=$HOME/go
-export GOROOT=$HOME/sdk/go1.24.2
+export GOROOT=$HOME/sdk/go1.24.4
 
 # // https://nnethercote.github.io/perf-book/build-configuration.html
 export MALLOC_CONF=thp:always,metadata_thp:always

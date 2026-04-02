@@ -1,0 +1,194 @@
+---
+- name: Install and configure gVisor
+  hosts: localhost
+  become: yes
+  
+  vars:
+    # gVisor Configuration
+    gvisor_version: "latest"
+    gvisor_platform: "systrap"  # or "kvm" for better performance
+    docker_daemon_config_path: "/etc/docker/daemon.json"
+    
+  tasks:
+    - name: Detect system architecture
+      set_fact:
+        gvisor_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else 'aarch64' if ansible_architecture == 'aarch64' else 'unsupported' }}"
+
+    - name: Fail if architecture is not supported
+      fail:
+        msg: "Unsupported architecture: {{ ansible_architecture }}. gVisor supports x86_64 and aarch64 only."
+      when: gvisor_arch == 'unsupported'
+
+    - name: Set gVisor download URLs
+      set_fact:
+        gvisor_base_url: "https://storage.googleapis.com/gvisor/releases/release/latest/{{ gvisor_arch }}"
+        runsc_binary: "runsc"
+        containerd_shim_binary: "containerd-shim-runsc-v1"
+
+    - name: Create temporary download directory
+      tempfile:
+        state: directory
+        suffix: gvisor
+      register: gvisor_temp_dir
+
+    - name: Download runsc binary
+      get_url:
+        url: "{{ gvisor_base_url }}/{{ runsc_binary }}"
+        dest: "{{ gvisor_temp_dir.path }}/{{ runsc_binary }}"
+        mode: '0755'
+        timeout: 300
+      register: runsc_download
+
+    - name: Download containerd-shim-runsc-v1 binary
+      get_url:
+        url: "{{ gvisor_base_url }}/{{ containerd_shim_binary }}"
+        dest: "{{ gvisor_temp_dir.path }}/{{ containerd_shim_binary }}"
+        mode: '0755'
+        timeout: 300
+      register: shim_download
+
+    - name: Download runsc SHA512 checksum
+      get_url:
+        url: "{{ gvisor_base_url }}/{{ runsc_binary }}.sha512"
+        dest: "{{ gvisor_temp_dir.path }}/{{ runsc_binary }}.sha512"
+        timeout: 60
+
+    - name: Download containerd-shim SHA512 checksum
+      get_url:
+        url: "{{ gvisor_base_url }}/{{ containerd_shim_binary }}.sha512"
+        dest: "{{ gvisor_temp_dir.path }}/{{ containerd_shim_binary }}.sha512"
+        timeout: 60
+
+    - name: Verify runsc checksum
+      shell: |
+        cd {{ gvisor_temp_dir.path }} && sha512sum -c {{ runsc_binary }}.sha512
+      register: runsc_verify
+      failed_when: runsc_verify.rc != 0
+      changed_when: false
+
+    - name: Verify containerd-shim checksum
+      shell: |
+        cd {{ gvisor_temp_dir.path }} && sha512sum -c {{ containerd_shim_binary }}.sha512
+      register: shim_verify
+      failed_when: shim_verify.rc != 0
+      changed_when: false
+
+    - name: Install runsc binary
+      copy:
+        src: "{{ gvisor_temp_dir.path }}/{{ runsc_binary }}"
+        dest: "/usr/local/bin/{{ runsc_binary }}"
+        mode: '0755'
+        remote_src: yes
+
+    - name: Install containerd-shim-runsc-v1 binary
+      copy:
+        src: "{{ gvisor_temp_dir.path }}/{{ containerd_shim_binary }}"
+        dest: "/usr/local/bin/{{ containerd_shim_binary }}"
+        mode: '0755'
+        remote_src: yes
+
+    - name: Check if Docker daemon.json exists
+      stat:
+        path: "{{ docker_daemon_config_path }}"
+      register: daemon_json_stat
+
+    - name: Read existing Docker daemon.json
+      slurp:
+        src: "{{ docker_daemon_config_path }}"
+      register: existing_daemon_json
+      when: daemon_json_stat.stat.exists
+
+    - name: Parse existing Docker configuration
+      set_fact:
+        existing_docker_config: "{{ existing_daemon_json.content | b64decode | from_json }}"
+      when: daemon_json_stat.stat.exists
+
+    - name: Set empty config if daemon.json doesn't exist
+      set_fact:
+        existing_docker_config: {}
+      when: not daemon_json_stat.stat.exists
+
+    - name: Backup existing daemon.json
+      copy:
+        src: "{{ docker_daemon_config_path }}"
+        dest: "{{ docker_daemon_config_path }}.backup.{{ ansible_date_time.epoch }}"
+        remote_src: yes
+      when: daemon_json_stat.stat.exists
+
+    - name: Ensure /etc/docker directory exists
+      file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+
+    - name: Configure Docker daemon with gVisor runtime
+      copy:
+        content: |
+          {
+            "runtimes": {
+              "runsc": {
+                "path": "/usr/local/bin/runsc",
+                "runtimeArgs": [
+                  "--platform={{ gvisor_platform }}"
+                ]
+              }
+            }
+          }
+        dest: "{{ docker_daemon_config_path }}"
+        mode: '0644'
+      notify: restart docker
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Flush handlers to restart Docker
+      meta: flush_handlers
+
+    - name: Wait for Docker to be ready
+      wait_for:
+        timeout: 10
+
+    - name: Verify runsc installation
+      command: runsc --version
+      register: runsc_version_output
+      changed_when: false
+
+    - name: Display runsc version
+      debug:
+        msg: "gVisor runsc installed: {{ runsc_version_output.stdout }}"
+
+    - name: Verify Docker recognizes gVisor runtime
+      shell: docker info 2>/dev/null | grep -i runsc || echo "Runtime not found"
+      register: docker_runtime_check
+      changed_when: false
+
+    - name: Run test container with gVisor
+      command: docker run --rm --runtime=runsc hello-world
+      register: gvisor_test
+      changed_when: false
+      failed_when: false
+
+    - name: Display test results
+      debug:
+        msg: "gVisor test container {{ 'succeeded' if gvisor_test.rc == 0 else 'failed' }}"
+
+    - name: Clean up temporary directory
+      file:
+        path: "{{ gvisor_temp_dir.path }}"
+        state: absent
+
+    - name: Set gVisor installation facts
+      set_fact:
+        gvisor_installed: true
+        gvisor_version_installed: "{{ runsc_version_output.stdout }}"
+        gvisor_platform_configured: "{{ gvisor_platform }}"
+        
+  handlers:
+    - name: restart docker
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  aider:
+    build:
+      context: .
+      dockerfile: Dockerfile.aider
+    container_name: aider-gvisor
+    runtime: runsc
+    volumes:
+      - .:/app
+      # SSH keys for GitHub authentication (optional)
+      # Create ./ssh-keys directory and add your GitHub SSH key
+      # - ./ssh-keys:/home/agent/.ssh:ro
+      # Aider configuration file (optional)
+      - ./.config/aider.yml:/home/agent/.aider.conf.yml:ro
+    network_mode: "bridge"
+    dns:
+      - 8.8.8.8
+    working_dir: /app    
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - AIDER_MODEL=claude-sonnet-4-20250514
+      - AIDER_DARK_MODE=true
+      - AIDER_AUTO_COMMITS=false
+    ports:
+      # Aider's Streamlit browser interface
+      - "8501:8501"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    restart: unless-stopped
+
+# Network definition
+networks:
+  aider-network:
+    driver: bridge

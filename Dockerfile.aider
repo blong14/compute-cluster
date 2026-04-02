@@ -1,0 +1,57 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    xz-utils \
+    bsdmainutils \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash agent
+
+# Configure sudo access with guardrails
+# Allow agent to run apt-get and apt without password
+RUN echo 'agent ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt, /usr/bin/apt-cache' >> /etc/sudoers.d/agent && \
+    echo 'agent ALL=(ALL) !NOPASSWD: /bin/rm -rf /, /bin/chmod 000 /, /usr/bin/systemctl' >> /etc/sudoers.d/agent && \
+    chmod 0440 /etc/sudoers.d/agent
+
+# Copy bin directory with installation scripts BEFORE switching users
+COPY build/home/blong14/bin /tmp/agent-setup/bin
+RUN chmod +x /tmp/agent-setup/bin/*.sh
+
+# Run syspkg.sh as root during build (it needs apt without sudo)
+RUN /tmp/agent-setup/bin/syspkg.sh
+
+# Now switch to agent user for remaining setup
+USER agent
+WORKDIR /home/agent
+
+COPY --chown=agent:agent build/home/blong14/.bashrc /home/agent/.bashrc
+COPY --chown=agent:agent build/home/blong14/.bash_aliases /home/agent/.bash_aliases
+COPY --chown=agent:agent build/home/blong14/.bash_logout /home/agent/.bash_logout
+
+COPY --chown=agent:agent build/home/blong14/bin /home/agent/bin
+RUN chmod +x /home/agent/bin/*.sh
+
+# Run language installation scripts as agent user (they install to $HOME)
+RUN /home/agent/bin/install_go.sh
+RUN /home/agent/bin/install_zig.sh
+RUN /home/agent/bin/install_node.sh
+
+# Set environment variables (matching .bashrc)
+ENV GOPATH=/home/agent/go
+ENV GOROOT=/home/agent/sdk/go1.24.4
+ENV ZIGROOT=/home/agent/sdk/zig0.15.2
+ENV NODEROOT=/home/agent/sdk/node24.12.0
+ENV PATH="${NODEROOT}/bin:${GOPATH}/bin:${GOROOT}/bin:${ZIGROOT}:${PATH}"
+
+RUN pip install --no-cache-dir --user aider-chat
+
+ENV PATH="/home/agent/.local/bin:${PATH}"
+
+RUN mkdir -p /home/agent/.aider
+
+# Default command
+CMD ["/bin/bash"]

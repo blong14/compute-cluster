@@ -1,8 +1,26 @@
-.git/*
-.deps/*
+# STRATEGY: Exclude everything by default, then explicitly include only what we need
 
-bin/*
-etc/*
+# Exclude everything first
+*
 
-src/zig-cache
-src/internal/c
+# Then explicitly include only what the Dockerfile needs
+!build/
+!build/home/
+!build/home/blong14/
+!build/home/blong14/.bashrc
+!build/home/blong14/.bash_aliases
+!build/home/blong14/.bash_logout
+!build/home/blong14/bin/
+!build/home/blong14/bin/*.sh
+
+# Explicitly exclude everything else in build/ directory
+build/*
+!build/home/
+
+# Exclude secrets even if they're in the included paths
+**/*.bash_secrets
+**/*.pem
+**/.env
+
+# Keep the Dockerfile itself
+!Dockerfile.aider
