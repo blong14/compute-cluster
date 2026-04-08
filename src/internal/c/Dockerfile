@@ -1,4 +1,4 @@
-FROM debian:trixie as build
+FROM debian:trixie-20260406 as build
 
 RUN apt-get update && apt-get install -y \
     build-essential \
