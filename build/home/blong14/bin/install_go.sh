@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GO_VERSION="1.24.4"
+export GO_VERSION="1.25.5"
 
 if [ "$TARGETARCH" = "arm64" ]; then
     echo "Building for ARM64 architecture";
@@ -16,7 +16,7 @@ mkdir -p "$HOME/go"
 mkdir -p "$HOME/go/bin"
 mkdir -p "$HOME/go/pkg"
 mkdir -p "$HOME/go/src"
-mkdir -p "$HOME/sdk/go${GO_VERSION}"
+mkdir -p "$HOME/sdk/go"
 
 echo "Downloading Go ${GO_VERSION} for ${GO_ARCH}..."
 curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-${GO_ARCH}.tar.gz | tar -C "$HOME/sdk" -xz 

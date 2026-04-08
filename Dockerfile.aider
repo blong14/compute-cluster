@@ -36,23 +36,24 @@ COPY --chown=agent:agent build/home/blong14/.bash_logout /home/agent/.bash_logou
 COPY --chown=agent:agent build/home/blong14/bin /home/agent/bin
 RUN chmod +x /home/agent/bin/*.sh
 
+COPY --chown=agent:agent src /home/agent/src
+RUN mkdir -p /home/agent/go 
+
 # Run language installation scripts as agent user (they install to $HOME)
 RUN /home/agent/bin/install_go.sh
 RUN /home/agent/bin/install_zig.sh
 RUN /home/agent/bin/install_node.sh
 
-# Set environment variables (matching .bashrc)
 ENV GOPATH=/home/agent/go
-ENV GOROOT=/home/agent/sdk/go1.24.4/go
+ENV GOROOT=/home/agent/sdk/go1.25.5
 ENV ZIGROOT=/home/agent/sdk/zig0.15.2
 ENV NODEROOT=/home/agent/sdk/node24.12.0
-ENV PATH="${NODEROOT}/bin:${GOPATH}/bin:${GOROOT}/bin:${ZIGROOT}:${PATH}"
+ENV PATH="${NODEROOT}/bin:${GOPATH}/bin:${GOROOT}/bin:${ZIGROOT}:/home/agent/.local/bin:${PATH}"
 
-RUN pip install --no-cache-dir --user aider-chat
+RUN mkdir -p /home/agent/.aider 
 
-ENV PATH="/home/agent/.local/bin:${PATH}"
-
-RUN mkdir -p /home/agent/.aider
+RUN cd src && make build-go
+RUN /home/agent/go/bin/cluster run install
 
 # Default command
 CMD ["/bin/bash"]

@@ -1,0 +1,254 @@
+---
+- name: Build and Setup Aider Development Environment
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  vars:
+    python_dependencies:
+      - aider-chat==0.86.1
+      - ansible==12.3.0
+      - powerline-status==2.7
+      - powerline-gitstatus==1.3.3
+      - thefuck==3.32
+      - httpie==3.2.4
+      - Glances==4.3.1
+      - black==25.1.0
+      - flake8==7.3.0
+      - mypy==1.15.0
+      - pytest==8.3.5
+      - ipython==9.8.0
+      - mkdocs==1.6.1
+      - mkdocs-material==9.7.1
+      - cmake-language-server==0.1.11
+      - clang-format==20.1.8
+      - anthropic
+      - openai
+    
+    docker_image_name: "aider-sandbox:latest"
+    
+  tasks:
+    - name: Check if we're in a git repository
+      stat:
+        path: "{{ ansible_env.PWD }}/.git"
+      register: git_check
+      
+    - name: Fail if not in git repository
+      fail:
+        msg: "Must be run from within a git repository"
+      when: not git_check.stat.exists
+      
+    - name: Get git repository root
+      command: git rev-parse --show-toplevel
+      register: git_root
+      changed_when: false
+      
+    - name: Set git root fact
+      set_fact:
+        git_repository_root: "{{ git_root.stdout }}"
+        
+    - name: Generate container name
+      set_fact:
+        container_name: "aider-sandbox-{{ git_repository_root | basename }}-{{ git_repository_root | hash('md5') | truncate(8, True, '') }}"
+        
+    - name: Check if Docker is running
+      command: docker info
+      register: docker_check
+      failed_when: docker_check.rc != 0
+      changed_when: false
+      
+    - name: Check if aider image exists
+      command: docker image inspect {{ docker_image_name }}
+      register: image_check
+      failed_when: false
+      changed_when: false
+      
+    - name: Create temporary build directory
+      tempfile:
+        state: directory
+        suffix: aider-build
+      register: build_dir
+      when: image_check.rc != 0
+      
+    - name: Create Dockerfile
+      copy:
+        dest: "{{ build_dir.path }}/Dockerfile"
+        content: |
+          FROM python:3.11-slim
+
+          # Install system dependencies
+          RUN apt-get update && apt-get install -y \
+              git \
+              curl \
+              wget \
+              vim \
+              nano \
+              bash-completion \
+              tree \
+              htop \
+              procps \
+              build-essential \
+              && rm -rf /var/lib/apt/lists/*
+
+          # Create sandbox user
+          RUN useradd -m -s /bin/bash sandbox && \
+              echo 'sandbox ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+          # Copy requirements and install Python dependencies
+          COPY requirements.txt /tmp/requirements.txt
+          RUN pip install --no-cache-dir --upgrade pip && \
+              pip install --no-cache-dir -r /tmp/requirements.txt
+
+          # Set up bash completion and prompt
+          RUN echo 'source /etc/bash_completion' >> /home/sandbox/.bashrc && \
+              echo 'export PS1="\[\033[1;32m\][sandbox:\w]\[\033[0m\]$ "' >> /home/sandbox/.bashrc
+
+          # Add helpful aliases
+          RUN echo 'alias ll="ls -la"' >> /home/sandbox/.bashrc && \
+              echo 'alias la="ls -A"' >> /home/sandbox/.bashrc && \
+              echo 'alias l="ls -CF"' >> /home/sandbox/.bashrc && \
+              echo 'alias aid="aider"' >> /home/sandbox/.bashrc && \
+              echo 'alias aid-watch="aider --watch-files"' >> /home/sandbox/.bashrc && \
+              echo 'alias aid-arch="aider --architect"' >> /home/sandbox/.bashrc
+
+          # Set up workspace directory
+          RUN mkdir -p /workspace && chown sandbox:sandbox /workspace
+
+          # Switch to sandbox user
+          USER sandbox
+          WORKDIR /workspace
+
+          # Set default command
+          CMD ["/bin/bash"]
+
+          # Label for cleanup
+          LABEL aider-sandbox=true
+      when: image_check.rc != 0
+      
+    - name: Create requirements.txt
+      copy:
+        dest: "{{ build_dir.path }}/requirements.txt"
+        content: |
+          {% for dep in python_dependencies %}
+          {{ dep }}
+          {% endfor %}
+      when: image_check.rc != 0
+      
+    - name: Build aider Docker image
+      command: docker build -t {{ docker_image_name }} {{ build_dir.path }}
+      when: image_check.rc != 0
+      
+    - name: Clean up build directory
+      file:
+        path: "{{ build_dir.path }}"
+        state: absent
+      when: image_check.rc != 0 and build_dir is defined
+      
+    - name: Check if container is running
+      command: docker ps -q -f name={{ container_name }}
+      register: running_container
+      changed_when: false
+      
+    - name: Check if container exists (stopped)
+      command: docker ps -aq -f name={{ container_name }}
+      register: existing_container
+      changed_when: false
+      
+    - name: Start existing container if stopped
+      command: docker start {{ container_name }}
+      when: 
+        - running_container.stdout == ""
+        - existing_container.stdout != ""
+        
+    - name: Check if gVisor is available
+      command: docker info --format "{{json .Runtimes}}"
+      register: docker_runtimes
+      changed_when: false
+      failed_when: false
+      
+    - name: Set gVisor runtime flag
+      set_fact:
+        use_gvisor: "{{ 'runsc' in docker_runtimes.stdout }}"
+      when: docker_runtimes.rc == 0
+      
+    - name: Set gVisor runtime flag (fallback)
+      set_fact:
+        use_gvisor: false
+      when: docker_runtimes.rc != 0
+      
+    - name: Build Docker run command arguments
+      set_fact:
+        docker_args:
+          - "run"
+          - "-it"
+          - "--name"
+          - "{{ container_name }}"
+          - "--security-opt"
+          - "seccomp=unconfined"
+          - "--security-opt" 
+          - "apparmor=unconfined"
+          - "-v"
+          - "{{ git_repository_root }}:/workspace"
+          - "-w"
+          - "/workspace"
+          
+    - name: Add gVisor runtime if available
+      set_fact:
+        docker_args: "{{ docker_args + ['--runtime=runsc'] }}"
+      when: use_gvisor
+      
+    - name: Add Anthropic API key if set
+      set_fact:
+        docker_args: "{{ docker_args + ['-e', 'ANTHROPIC_API_KEY=' + ansible_env.ANTHROPIC_API_KEY] }}"
+      when: ansible_env.ANTHROPIC_API_KEY is defined
+      
+    - name: Add OpenAI API key if set
+      set_fact:
+        docker_args: "{{ docker_args + ['-e', 'OPENAI_API_KEY=' + ansible_env.OPENAI_API_KEY] }}"
+      when: ansible_env.OPENAI_API_KEY is defined
+      
+    - name: Check if .gitconfig exists
+      stat:
+        path: "{{ ansible_env.HOME }}/.gitconfig"
+      register: gitconfig_check
+      
+    - name: Add git config volume if exists
+      set_fact:
+        docker_args: "{{ docker_args + ['-v', ansible_env.HOME + '/.gitconfig:/home/sandbox/.gitconfig:ro'] }}"
+      when: gitconfig_check.stat.exists
+      
+    - name: Check if .ssh directory exists
+      stat:
+        path: "{{ ansible_env.HOME }}/.ssh"
+      register: ssh_check
+      
+    - name: Add SSH keys volume if exists
+      set_fact:
+        docker_args: "{{ docker_args + ['-v', ansible_env.HOME + '/.ssh:/home/sandbox/.ssh:ro'] }}"
+      when: ssh_check.stat.exists and ssh_check.stat.isdir
+      
+    - name: Add image name to docker args
+      set_fact:
+        docker_args: "{{ docker_args + [docker_image_name] }}"
+        
+    - name: Add bash command to docker args
+      set_fact:
+        docker_args: "{{ docker_args + ['bash'] }}"
+      
+    - name: Create new container and attach (if not exists)
+      command: "docker {{ docker_args | join(' ') }}"
+      when: 
+        - running_container.stdout == ""
+        - existing_container.stdout == ""
+      
+    - name: Attach to existing running container
+      command: docker exec -it {{ container_name }} bash
+      when: running_container.stdout != ""
+      
+    - name: Display container information
+      debug:
+        msg: |
+          Aider sandbox ready!
+          Container: {{ container_name }}
+          Repository: {{ git_repository_root }}
+          Image: {{ docker_image_name }}
+          gVisor enabled: {{ use_gvisor }}

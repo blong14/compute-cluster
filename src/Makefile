@@ -5,8 +5,8 @@ PACKAGES := . ./cmd/... ./internal/...
 
 $(shell mkdir -p .deps)
 
-.deps/go: go.mod go.sum vendor/modules.txt
-	go mod vendor
+.deps/go: go.mod go.sum 
+	go mod init
 	@touch $@
 
 .PHONY: clean

@@ -12,6 +12,7 @@
 !build/home/blong14/.bash_logout
 !build/home/blong14/bin/
 !build/home/blong14/bin/*.sh
+!src
 
 # Explicitly exclude everything else in build/ directory
 build/*
