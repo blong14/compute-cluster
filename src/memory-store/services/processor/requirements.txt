@@ -1,4 +1,4 @@
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.12
 pgvector==0.2.4
 requests==2.31.0
 markdown==3.5.2
