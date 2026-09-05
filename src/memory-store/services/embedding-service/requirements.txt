@@ -7,7 +7,7 @@ pydantic==2.5.0
 # torch>=2.0.0,<3.0.0
 sentence-transformers==2.2.2
 transformers==4.35.2
-huggingface_hub==0.17.3
+huggingface_hub==0.36.2
 
 # Additional dependencies
 numpy>=1.21.0
